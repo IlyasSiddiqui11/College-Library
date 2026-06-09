@@ -70,20 +70,18 @@ export default function StudentLogin() {
       <div className="relative flex w-full max-w-[460px] flex-col gap-6">
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-              <BookOpen className="size-5" />
-            </div>
-            <p className="text-2xl font-bold tracking-tight text-slate-800">
-              Digital <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Sanctuary</span>
+            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <p className="text-2xl font-bold tracking-tight text-white">
+              BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
             </p>
           </div>
-          <p className="text-center text-sm text-slate-500">
+          <p className="text-center text-sm text-blue-200">
             Smart Library Management System
           </p>
         </div>
 
-        <div className="w-full rounded-2xl border border-white/60 bg-white/70 p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
-          <div className="mb-8 grid grid-cols-2 rounded-lg bg-slate-100 p-1">
+        <div className="w-full rounded-2xl border border-white/20 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
+          <div className="mb-8 grid grid-cols-2 rounded-lg glass-panel p-1">
             <button
               type="button"
               onClick={() => {
@@ -92,7 +90,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                !isRegister ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                !isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-blue-200 hover:text-white'
               }`}
             >
               Sign In
@@ -105,7 +103,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                isRegister ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-blue-200 hover:text-white'
               }`}
             >
               Register
@@ -128,43 +126,43 @@ export default function StudentLogin() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {isRegister && (
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                   Full Name
                 </label>
                 <div className="relative mt-1.5">
-                  <User className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                  <User className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full rounded-xl border border-slate-200 bg-white/50 py-3.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:bg-white"
+                    className="w-full rounded-xl border border-white/20 glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-blue-600 focus:glass-panel"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                 Email Address
               </label>
               <div className="relative mt-1.5">
-                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@university.edu"
-                  className="w-full rounded-xl border border-slate-200 bg-white/50 py-3.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:bg-white"
+                  className="w-full rounded-xl border border-white/20 glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-blue-600 focus:glass-panel"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                   Password
                 </label>
                 {!isRegister && (
@@ -174,14 +172,14 @@ export default function StudentLogin() {
                 )}
               </div>
               <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 bg-white/50 py-3.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:bg-white"
+                  className="w-full rounded-xl border border-white/20 glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-blue-600 focus:glass-panel"
                 />
               </div>
             </div>
@@ -202,14 +200,14 @@ export default function StudentLogin() {
               ) : isRegister ? (
                 'Create Account'
               ) : (
-                'Sign In to Sanctuary'
+                'Sign In to BCOE-lib'
               )}
             </button>
           </form>
 
-          <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs">
-            <span className="text-slate-500">
-              {isRegister ? 'Already have an account? ' : 'New to the library sanctuary? '}
+          <div className="mt-8 border-t border-white/20 pt-6 text-center text-xs">
+            <span className="text-blue-200">
+              {isRegister ? 'Already have an account? ' : 'New to BCOE-lib? '}
             </span>
             <button
               type="button"
@@ -225,8 +223,8 @@ export default function StudentLogin() {
           </div>
         </div>
 
-        <p className="text-center text-[10px] tracking-wide text-slate-400">
-          © 2026 Digital Sanctuary. Built on secure REST Architecture.
+        <p className="text-center text-[10px] tracking-wide text-blue-200">
+          © 2026 BCOE-lib. Built on secure REST Architecture.
         </p>
       </div>
     </div>

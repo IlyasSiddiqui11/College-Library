@@ -1,13 +1,19 @@
 package com.example.library.dto.response;
 
-import com.example.library.enums.Role;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-@Getter
-@AllArgsConstructor
+
+import lombok.Data;
+
+
+import com.example.library.enums.Role;
+
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponse {
 
     private Long id;

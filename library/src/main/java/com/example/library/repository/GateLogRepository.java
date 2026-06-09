@@ -12,4 +12,5 @@ public interface GateLogRepository extends JpaRepository<GateLog, Long> {
     List<GateLog> findAllByOrderByEntryTimeDesc();
     List<GateLog> findByUserId(Long userId);
     Optional<GateLog> findTopByUserIdAndExitTimeIsNullOrderByEntryTimeDesc(Long userId);
+    List<GateLog> findAllByExitTimeIsNull();
 }

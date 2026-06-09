@@ -1,11 +1,21 @@
 package com.example.library.dto.request;
 
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+
+import lombok.Data;
+
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BookCreateRequest {
 
     @NotBlank(message = "ISBN is required")

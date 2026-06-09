@@ -1,11 +1,13 @@
 package com.example.library.controller;
 
+import lombok.RequiredArgsConstructor;
+
+
 import com.example.library.dto.request.GateScanRequest;
 import com.example.library.dto.response.GateLogResponse;
 import com.example.library.dto.response.GateStatusResponse;
 import com.example.library.service.GateLogService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

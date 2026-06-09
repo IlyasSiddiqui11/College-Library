@@ -1,17 +1,21 @@
 package com.example.library.dto.response;
 
-import com.example.library.enums.Role;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+
+import lombok.Data;
+
+
+import com.example.library.enums.Role;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserResponse {
     private Long id;
     private String name;

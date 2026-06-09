@@ -1,17 +1,21 @@
 package com.example.library.dto.response;
 
-import com.example.library.enums.BorrowStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+
+import lombok.Data;
+
+
+import com.example.library.enums.BorrowStatus;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BorrowResponse {
     private Long id;
     private Long userId;

@@ -53,7 +53,7 @@ export default function LibrarianLogin() {
       <div className="relative flex w-full max-w-[460px] flex-col gap-6">
         <Link
           to="/"
-          className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+          className="flex items-center gap-2 text-sm font-medium text-blue-100 hover:text-white transition"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
@@ -61,19 +61,17 @@ export default function LibrarianLogin() {
 
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-600/20">
-              <Shield className="size-5" />
-            </div>
-            <p className="text-2xl font-bold tracking-tight text-slate-800">
-              Librarian <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">Portal</span>
+            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <p className="text-2xl font-bold tracking-tight text-white">
+              BCOE<span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">-lib</span> Admin
             </p>
           </div>
-          <p className="text-center text-sm text-slate-500">
-            Digital Sanctuary Admin Access
+          <p className="text-center text-sm text-blue-200">
+            BCOE-lib Admin Access
           </p>
         </div>
 
-        <div className="w-full rounded-2xl border border-white/60 bg-white/70 p-8 shadow-[0_20px_50px_rgba(139,92,246,0.04)] backdrop-blur-xl">
+        <div className="w-full rounded-2xl border border-white/20 glass-panel p-8 shadow-[0_20px_50px_rgba(139,92,246,0.04)] backdrop-blur-xl">
           <div className="mb-6 flex items-center gap-2 rounded-lg bg-violet-50 border border-violet-100 px-4 py-2.5">
             <Shield className="h-4 w-4 text-violet-600" />
             <span className="text-xs font-semibold text-violet-700">LIBRARIAN ACCESS REQUIRED</span>
@@ -88,25 +86,25 @@ export default function LibrarianLogin() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                 Email Address
               </label>
               <div className="relative mt-1.5">
-                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="librarian@university.edu"
-                  className="w-full rounded-xl border border-slate-200 bg-white/50 py-3.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition focus:border-violet-600 focus:bg-white"
+                  className="w-full rounded-xl border border-white/20 glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-violet-600 focus:glass-panel"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                   Password
                 </label>
                 <button type="button" className="text-[11px] text-violet-600 hover:underline">
@@ -114,14 +112,14 @@ export default function LibrarianLogin() {
                 </button>
               </div>
               <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 bg-white/50 py-3.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition focus:border-violet-600 focus:bg-white"
+                  className="w-full rounded-xl border border-white/20 glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-violet-600 focus:glass-panel"
                 />
               </div>
             </div>
@@ -148,8 +146,8 @@ export default function LibrarianLogin() {
             </button>
           </form>
 
-          <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs">
-            <span className="text-slate-500">
+          <div className="mt-8 border-t border-white/20 pt-6 text-center text-xs">
+            <span className="text-blue-200">
               Are you a student?{' '}
             </span>
             <Link
@@ -168,8 +166,8 @@ export default function LibrarianLogin() {
           </p>
         </div>
 
-        <p className="text-center text-[10px] tracking-wide text-slate-400">
-          © 2026 Digital Sanctuary. Librarian Admin Portal.
+        <p className="text-center text-[10px] tracking-wide text-blue-200">
+          © 2026 BCOE-lib. Admin Portal.
         </p>
       </div>
     </div>

@@ -1,19 +1,22 @@
 package com.example.library.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+
+import lombok.Data;
 
 @Entity
 @Table(name = "gate_logs")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class GateLog {
 
     @Id

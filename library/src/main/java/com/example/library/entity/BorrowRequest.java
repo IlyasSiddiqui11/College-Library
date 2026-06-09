@@ -1,20 +1,23 @@
 package com.example.library.entity;
 
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+
 import com.example.library.enums.BorrowStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+import lombok.Data;
 
 @Entity
 @Table(name = "borrow_requests")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BorrowRequest {
 
     @Id

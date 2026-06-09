@@ -1,5 +1,8 @@
 package com.example.library.service;
 
+import lombok.RequiredArgsConstructor;
+
+
 import com.example.library.dto.request.LoginRequest;
 import com.example.library.dto.request.RegisterRequest;
 import com.example.library.dto.response.AuthResponse;
@@ -8,7 +11,6 @@ import com.example.library.dto.response.UserResponse;
 import com.example.library.entity.User;
 import com.example.library.exception.BadRequestException;
 import com.example.library.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

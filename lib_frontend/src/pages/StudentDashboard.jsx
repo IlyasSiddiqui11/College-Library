@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
   GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2
@@ -23,6 +24,9 @@ export default function StudentDashboard() {
   })
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
+
+  const scannerRef = useRef(null)
+  const isProcessingQr = useRef(false)
 
   // Profile completion states
   const [branch, setBranch] = useState('')
@@ -114,16 +118,72 @@ export default function StudentDashboard() {
     }
   }
 
-  // Gate Check-In Simulator
+  // Gate Scanner Logic
+  useEffect(() => {
+    if (showQrModal) {
+      initScanner()
+    } else {
+      stopScanner()
+    }
+    return () => stopScanner()
+  }, [showQrModal])
+
+  const initScanner = () => {
+    isProcessingQr.current = false
+    setTimeout(() => {
+      try {
+        const scanner = new Html5Qrcode('gate-scanner-view')
+        scannerRef.current = scanner
+        
+        scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 200, height: 200 },
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+          },
+          (decodedText) => {
+            if (decodedText === 'BCOE-LIB-GATE') {
+               stopScanner()
+               triggerGateCheckIn()
+            } else {
+               console.warn('Scanned incorrect code:', decodedText)
+            }
+          },
+          (error) => {}
+        ).catch(err => console.error('Failed to start scanner:', err))
+      } catch (err) {
+        console.error('Failed to create scanner:', err)
+      }
+    }, 100) // Slight delay to ensure DOM is ready
+  }
+
+  const stopScanner = () => {
+    if (scannerRef.current) {
+      try {
+        scannerRef.current.stop().then(() => {
+          if (scannerRef.current) scannerRef.current.clear()
+        }).catch(() => {
+          if (scannerRef.current) scannerRef.current.clear()
+        })
+      } catch (err) {}
+    }
+  }
+
+  // Gate Check-In API
   const triggerGateCheckIn = async () => {
-    if (!user) return
+    if (!user || isProcessingQr.current) return
+    isProcessingQr.current = true
     try {
       await apiClient.post('/api/gate/scan', { userId: user.id })
       fetchData() // Refresh status and logs
-      alert('Checked in successfully via simulated QR reader!')
+      alert('Checked in successfully at the gate!')
       setShowQrModal(false)
     } catch (err) {
-      alert('Check-in error: ' + err.message)
+      alert('Check-in error: ' + (err.response?.data?.message || err.message))
+      setShowQrModal(false)
+    } finally {
+      isProcessingQr.current = false
     }
   }
 
@@ -167,16 +227,14 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#F8FAFC] pb-32">
+    <div className="relative flex min-h-screen w-full flex-col text-white pb-32">
       {/* Dynamic Header */}
-      <header className="sticky top-0 z-20 border-b border-white/60 bg-white/70 px-4 py-4 shadow-sm backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <BookOpen className="size-4.5" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-800">
-              Digital Sanctuary
+            <img src="/logo.png" alt="BCOE-lib" className="h-8 w-8 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <span className="text-xl font-bold tracking-tight text-white">
+              BCOE-lib
             </span>
           </div>
           
@@ -184,7 +242,7 @@ export default function StudentDashboard() {
             type="button"
             onClick={logout}
             aria-label="Logout"
-            className="flex size-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition"
+            className="flex size-9 items-center justify-center rounded-full glass-panel text-blue-100 hover:bg-red-50 hover:text-red-600 transition"
           >
             <LogOut className="size-4" />
           </button>
@@ -194,11 +252,11 @@ export default function StudentDashboard() {
       {/* Main Container */}
       <main className="mx-auto w-full max-w-md px-4 pt-6 flex flex-col gap-6">
         {/* Welcome Section */}
-        <section className="flex flex-col gap-1.5 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-          <h1 className="text-xl font-bold tracking-tight text-slate-800">
+        <section className="flex flex-col gap-1.5 glass-panel p-5 rounded-2xl border border-white/20 shadow-xl">
+          <h1 className="text-xl font-bold tracking-tight text-white">
             Welcome Back, {user.name}
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-blue-200">
             {profile ? (
               <span>
                 {profile.branch} • Year {profile.year}
@@ -212,24 +270,24 @@ export default function StudentDashboard() {
         </section>
 
         {/* Live Attendance Zone Status Card */}
-        <section className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-md flex flex-col gap-4">
+        <section className="rounded-2xl border border-white/20 glass-panel p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Attendance State</p>
-              <h3 className="text-sm font-bold text-slate-800 mt-0.5">Library Gate Status</h3>
+              <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Attendance State</p>
+              <h3 className="text-sm font-bold text-white mt-0.5">Library Gate Status</h3>
             </div>
             <div className="flex items-center gap-2">
               <span className={`size-2.5 rounded-full ${attendanceStatus.insideLibrary ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
-              <span className={`text-xs font-bold ${attendanceStatus.insideLibrary ? 'text-green-600' : 'text-slate-500'}`}>
+              <span className={`text-xs font-bold ${attendanceStatus.insideLibrary ? 'text-green-600' : 'text-blue-200'}`}>
                 {attendanceStatus.insideLibrary ? 'INSIDE LIBRARY' : 'OUTSIDE'}
               </span>
             </div>
           </div>
 
           {attendanceStatus.insideLibrary && attendanceStatus.entryTime && (
-            <div className="border-t border-slate-100/60 pt-3 text-[11px] text-slate-500 font-medium">
-              <span className="text-slate-400">Entered at:</span>
-              <p className="font-semibold text-slate-700 mt-0.5">{formatDateFull(attendanceStatus.entryTime)}</p>
+            <div className="border-t border-white/20 pt-3 text-[11px] text-blue-200 font-medium">
+              <span className="text-blue-200">Entered at:</span>
+              <p className="font-semibold text-white mt-0.5">{formatDateFull(attendanceStatus.entryTime)}</p>
             </div>
           )}
 
@@ -305,8 +363,8 @@ export default function StudentDashboard() {
         {/* Current Borrows */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-md font-bold text-slate-800">Currently Borrowing</h2>
-            <span className="text-xs font-semibold text-slate-500">
+            <h2 className="text-md font-bold text-white">Currently Borrowing</h2>
+            <span className="text-xs font-semibold text-blue-200">
               {activeBorrows.length} Active Items
             </span>
           </div>
@@ -314,19 +372,19 @@ export default function StudentDashboard() {
           <div className="flex flex-col gap-4">
             {loading ? (
               <div className="flex flex-col items-center py-8">
-                <Loader2 className="size-6 animate-spin text-slate-400" />
-                <span className="text-xs text-slate-400 mt-2">Syncing with library database...</span>
+                <Loader2 className="size-6 animate-spin text-blue-200" />
+                <span className="text-xs text-blue-200 mt-2">Syncing with library database...</span>
               </div>
             ) : activeBorrows.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white/40 px-4 py-8 text-center">
-                <p className="text-sm font-medium text-slate-600">No books currently borrowed</p>
-                <p className="text-xs text-slate-400 mt-1">Tap &quot;Scan Book&quot; to pick up your next academic read</p>
+              <div className="rounded-2xl border border-dashed border-white/20 glass-panel px-4 py-8 text-center">
+                <p className="text-sm font-medium text-blue-100">No books currently borrowed</p>
+                <p className="text-xs text-blue-200 mt-1">Tap &quot;Scan Book&quot; to pick up your next academic read</p>
               </div>
             ) : (
               activeBorrows.map((req) => (
                 <div 
                   key={req.id} 
-                  className="rounded-2xl border border-white/60 bg-white/70 p-4 shadow-sm backdrop-blur-md"
+                  className="rounded-2xl border border-white/20 glass-panel p-4 shadow-xl backdrop-blur-md"
                 >
                   <div className="flex gap-4">
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -334,17 +392,17 @@ export default function StudentDashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between">
-                        <h4 className="font-bold text-slate-800 truncate text-sm">
+                        <h4 className="font-bold text-white truncate text-sm">
                           {req.bookTitle}
                         </h4>
                         <span className="text-[10px] font-bold bg-green-50 text-green-700 border border-green-200/50 rounded-full px-2 py-0.5 tracking-wide">
                           APPROVED
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-blue-200 mt-0.5">
                         Author: {req.bookAuthor || req.author || 'Unknown Author'}
                       </p>
-                      <div className="flex items-center gap-4 mt-3 text-[11px] text-slate-500 font-medium">
+                      <div className="flex items-center gap-4 mt-3 text-[11px] text-blue-200 font-medium">
                         <span className="flex items-center gap-1">
                           <Calendar className="size-3" />
                           Borrowed: {formatDateFull(req.requestDate).split(',')[0]}
@@ -359,12 +417,12 @@ export default function StudentDashboard() {
             {/* Pending requests */}
             {!loading && pendingRequests.length > 0 && (
               <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Awaiting Approval ({pendingRequests.length})</p>
+                <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider">Awaiting Approval ({pendingRequests.length})</p>
                 {pendingRequests.map((req) => (
                   <div key={req.id} className="rounded-xl border border-amber-100 bg-amber-50/40 p-3 flex justify-between items-center text-xs">
                     <div className="min-w-0 flex-1 pr-4">
-                      <p className="font-semibold text-slate-700 truncate">{req.bookTitle}</p>
-                      <p className="text-[10px] text-slate-400">ISBN: {req.isbn}</p>
+                      <p className="font-semibold text-white truncate">{req.bookTitle}</p>
+                      <p className="text-[10px] text-blue-200">ISBN: {req.isbn}</p>
                     </div>
                     <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/40 shrink-0">
                       PENDING
@@ -379,29 +437,29 @@ export default function StudentDashboard() {
         {/* GateLogs History Feed */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-md font-bold text-slate-800">Zone Logs</h2>
-            <span className="text-xs text-slate-400 font-medium">Gate attendance</span>
+            <h2 className="text-md font-bold text-white">Zone Logs</h2>
+            <span className="text-xs text-blue-200 font-medium">Gate attendance</span>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+          <div className="rounded-2xl border border-white/20 glass-panel p-5 shadow-xl backdrop-blur-md">
             {loading ? (
               <div className="flex justify-center py-4">
-                <Loader2 className="size-5 animate-spin text-slate-400" />
+                <Loader2 className="size-5 animate-spin text-blue-200" />
               </div>
             ) : gateLogs.length === 0 ? (
-              <p className="text-center text-xs text-slate-400 py-2">No gate entries logged yet.</p>
+              <p className="text-center text-xs text-blue-200 py-2">No gate entries logged yet.</p>
             ) : (
               <div className="flex flex-col gap-4">
                 {gateLogs.slice(0, 3).map((log, idx) => (
-                  <div key={log.id || idx} className="flex gap-3 items-center text-xs text-slate-600">
+                  <div key={log.id || idx} className="flex gap-3 items-center text-xs text-blue-100">
                     <div className={`flex size-7 shrink-0 items-center justify-center rounded-lg font-bold text-[10px] ${
                       log.action === 'ENTRY' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                     }`}>
                       {log.action === 'ENTRY' ? 'IN' : 'OUT'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-800">Library Entrance Gate</p>
-                      <p className="text-[10px] text-slate-400">{formatDateFull(log.timestamp)}</p>
+                      <p className="font-semibold text-white">Library Entrance Gate</p>
+                      <p className="text-[10px] text-blue-200">{formatDateFull(log.timestamp)}</p>
                     </div>
                     <CheckCircle2 className={`size-4 shrink-0 ${log.action === 'ENTRY' ? 'text-green-500' : 'text-red-500'}`} />
                   </div>
@@ -414,41 +472,28 @@ export default function StudentDashboard() {
 
       {/* Floating QR Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-xs rounded-2xl border border-white bg-white/95 p-6 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-white/20 text-white p-6 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-end">
               <button 
                 type="button" 
                 onClick={() => setShowQrModal(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                className="text-blue-200 hover:text-white font-bold"
               >
                 ✕
               </button>
             </div>
             
-            <h3 className="font-bold text-slate-800 text-lg">Your Attendance QR</h3>
-            <p className="text-xs text-slate-500 mt-1">Scan this at the entrance checkpoint</p>
+            <h3 className="font-bold text-white text-lg">Scan Gate QR</h3>
+            <p className="text-xs text-blue-200 mt-1">Point your camera at the library gate QR code</p>
 
-            <div className="my-6 mx-auto flex size-44 items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-col items-center gap-2">
-                <QrCode className="size-20 text-slate-800 animate-pulse" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                  ID: #{user.id}
-                </span>
-              </div>
+            <div className="my-6 mx-auto overflow-hidden rounded-2xl border border-white/20 bg-black">
+              <div id="gate-scanner-view" className="w-full min-h-[250px] text-white" />
             </div>
 
-            <p className="text-[10px] text-slate-400">
-              This code matches User ID {user.id}.
+            <p className="text-[10px] text-blue-200">
+              Only the official <strong>BCOE-LIB-GATE</strong> QR code will be accepted.
             </p>
-
-            <button
-              type="button"
-              onClick={triggerGateCheckIn}
-              className="mt-4 w-full rounded-xl bg-blue-600 py-2.5 text-xs font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Simulate Gate Scan
-            </button>
           </div>
         </div>
       )}
@@ -456,12 +501,12 @@ export default function StudentDashboard() {
       {/* Profile Completion Modal */}
       {showProfileModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl border border-white bg-white/95 p-6 shadow-2xl animate-in fade-in duration-150">
-            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+          <div className="w-full max-w-sm rounded-2xl border border-white/20 glass-panel p-6 shadow-2xl animate-in fade-in duration-150">
+            <h3 className="font-bold text-white text-lg flex items-center gap-2">
               <GraduationCap className="size-5 text-blue-600" />
               Academic Verification
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-blue-200 mt-1">
               Please finalize your details to enable book borrowing.
             </p>
 
@@ -473,24 +518,24 @@ export default function StudentDashboard() {
 
             <form onSubmit={handleProfileSubmit} className="mt-4 flex flex-col gap-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Branch / Major</label>
+                <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Branch / Major</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Computer Science Engineering"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none focus:border-blue-600"
+                  className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Academic Year</label>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Academic Year</label>
                   <select
                     value={year}
                     onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none focus:border-blue-600"
+                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
                   >
                     {[1, 2, 3, 4].map(y => (
                       <option key={y} value={y}>Year {y}</option>
@@ -498,27 +543,27 @@ export default function StudentDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Contact Number</label>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Contact Number</label>
                   <input
                     type="tel"
                     required
                     placeholder="e.g. +1 555-0199"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none focus:border-blue-600"
+                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Residential Address</label>
+                <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Residential Address</label>
                 <textarea
                   required
                   rows={2}
                   placeholder="Street Address, Dormitory, City"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none focus:border-blue-600 resize-none"
+                  className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 resize-none"
                 />
               </div>
 
@@ -543,11 +588,11 @@ export default function StudentDashboard() {
 
       {/* Bottom Sticky Mobile Navigation */}
       <nav className="fixed bottom-4 left-4 right-4 z-30 mx-auto max-w-sm">
-        <div className="flex items-center justify-around rounded-full border border-white/60 bg-white/80 px-6 py-2 shadow-xl shadow-slate-200/50 backdrop-blur-lg">
+        <div className="flex items-center justify-around rounded-full border border-white/20 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 text-blue-600"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-white shadow-lg transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
@@ -556,7 +601,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -565,7 +610,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Profile</span>

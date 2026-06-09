@@ -1,5 +1,8 @@
 package com.example.library.service;
 
+import lombok.RequiredArgsConstructor;
+
+
 import com.example.library.dto.request.ProfileCompleteRequest;
 import com.example.library.dto.response.ProfileResponse;
 import com.example.library.entity.StudentProfile;
@@ -7,7 +10,6 @@ import com.example.library.entity.User;
 import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.StudentProfileRepository;
 import com.example.library.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

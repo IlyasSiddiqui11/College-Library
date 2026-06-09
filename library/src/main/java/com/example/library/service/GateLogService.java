@@ -1,5 +1,8 @@
 package com.example.library.service;
 
+import lombok.RequiredArgsConstructor;
+
+
 import com.example.library.dto.request.GateScanRequest;
 import com.example.library.dto.response.GateLogResponse;
 import com.example.library.dto.response.GateStatusResponse;
@@ -11,7 +14,6 @@ import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.GateLogRepository;
 import com.example.library.repository.StudentProfileRepository;
 import com.example.library.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +40,7 @@ public class GateLogService {
                 .findTopByUserIdAndExitTimeIsNullOrderByEntryTimeDesc(user.getId());
 
         if (activeLogOpt.isPresent()) {
-            // Student is checking out
-            GateLog gateLog = activeLogOpt.get();
-            gateLog.setExitTime(LocalDateTime.now());
-            GateLog savedLog = gateLogRepository.save(gateLog);
-            return mapToGateLogResponse(savedLog);
+            throw new BadRequestException("You are already inside the library. Please exit before entering again.");
         } else {
             // Student is checking in
             GateLog gateLog = GateLog.builder()
@@ -134,5 +132,19 @@ public class GateLogService {
                 .exitTime(log.getExitTime())
                 .createdAt(log.getCreatedAt())
                 .build();
+    }
+
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 16 * * *") // Runs every day at 4:00 PM
+    @Transactional
+    public void autoExitStudentsAt4PM() {
+        List<GateLog> activeLogs = gateLogRepository.findAllByExitTimeIsNull();
+        if (activeLogs.isEmpty()) {
+            return;
+        }
+        LocalDateTime exitTime = LocalDateTime.now().withHour(16).withMinute(0).withSecond(0).withNano(0);
+        for (GateLog log : activeLogs) {
+            log.setExitTime(exitTime);
+        }
+        gateLogRepository.saveAll(activeLogs);
     }
 }

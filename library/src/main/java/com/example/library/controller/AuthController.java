@@ -1,20 +1,22 @@
 package com.example.library.controller;
 
+import lombok.RequiredArgsConstructor;
+
+
 import com.example.library.dto.request.LoginRequest;
 import com.example.library.dto.request.RegisterRequest;
 import com.example.library.dto.response.AuthResponse;
 import com.example.library.dto.response.LoginResponse;
 import com.example.library.service.AuthService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;

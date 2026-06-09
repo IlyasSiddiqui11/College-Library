@@ -114,17 +114,15 @@ export default function AdminDashboard() {
   const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
 
   return (
-    <div className="min-h-screen flex bg-[#F8FAFC]">
+    <div className="min-h-screen flex text-white">
       {/* Admin Sidebar Navigation */}
-      <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden md:flex">
+      <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
           {/* Logo Brand */}
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-100">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/10">
-              <BookOpen className="size-4.5" />
-            </div>
-            <span className="font-bold tracking-tight text-slate-800 text-base">
-              Sanctuary Admin
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-white/20">
+            <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <span className="font-bold tracking-tight text-white text-base">
+              BCOE-lib
             </span>
           </div>
 
@@ -139,7 +137,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
@@ -151,21 +149,21 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => navigate('/inventory')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <BookOpen className="size-4.5" />
               Catalog Inventory
             </button>
             <button
               onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Clock className="size-4.5" />
               Gate Logs
             </button>
             <button
               onClick={() => navigate('/returns')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Users className="size-4.5" />
               Return Station Kiosk
@@ -174,15 +172,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* User Card & Logout */}
-        <div className="p-4 border-t border-slate-100">
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+        <div className="p-4 border-t border-white/20">
+          <div className="flex items-center justify-between rounded-xl glass-panel p-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">{user.name}</p>
-              <p className="text-[10px] text-slate-400 font-medium">Administrator</p>
+              <p className="text-xs font-bold text-white truncate">{user.name}</p>
+              <p className="text-[10px] text-blue-200 font-medium">Administrator</p>
             </div>
             <button
               onClick={logout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+              className="p-1.5 rounded-lg text-blue-200 hover:text-red-600 hover:bg-red-50 transition"
               title="Sign Out"
             >
               <LogOut className="size-4" />
@@ -194,19 +192,19 @@ export default function AdminDashboard() {
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Header App Bar */}
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 px-8 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-8 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-800">
+              <h1 className="text-xl font-bold tracking-tight text-white">
                 System Overview
               </h1>
-              <p className="text-xs text-slate-500 mt-0.5">Live academic catalog and gate metrics</p>
+              <p className="text-xs text-blue-200 mt-0.5">Live academic catalog and gate metrics</p>
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={loadData}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition"
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition"
               >
                 <RefreshCw className="size-3.5" />
                 Sync
@@ -227,7 +225,7 @@ export default function AdminDashboard() {
           {/* Stat Metrics Row */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Stat 1 */}
-            <div className="relative rounded-2xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                   <Library className="size-5" />
@@ -236,14 +234,14 @@ export default function AdminDashboard() {
                   LIVE
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Total Inventory</p>
-              <h3 className="text-2xl font-bold text-slate-800 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-400" /> : totalBooksCount}
+              <p className="text-sm font-semibold text-blue-200 mt-4">Total Inventory</p>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalBooksCount}
               </h3>
             </div>
 
             {/* Stat 2 */}
-            <div className="relative rounded-2xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
                   <ClipboardList className="size-5" />
@@ -252,14 +250,14 @@ export default function AdminDashboard() {
                   ACTIVE
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Live Borrows</p>
-              <h3 className="text-2xl font-bold text-slate-800 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-400" /> : liveBorrowsCount}
+              <p className="text-sm font-semibold text-blue-200 mt-4">Live Borrows</p>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : liveBorrowsCount}
               </h3>
             </div>
 
             {/* Stat 3 */}
-            <div className="relative rounded-2xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
                   <Users className="size-5" />
@@ -268,14 +266,14 @@ export default function AdminDashboard() {
                   GATE
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Total Check-Ins</p>
-              <h3 className="text-2xl font-bold text-slate-800 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-400" /> : visitorFlowCount}
+              <p className="text-sm font-semibold text-blue-200 mt-4">Total Check-Ins</p>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : visitorFlowCount}
               </h3>
             </div>
 
             {/* Stat 4 */}
-            <div className="relative rounded-2xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
                   <ShieldAlert className="size-5" />
@@ -286,20 +284,20 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Requests Awaiting</p>
-              <h3 className="text-2xl font-bold text-slate-800 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-400" /> : pendingRequests.length}
+              <p className="text-sm font-semibold text-blue-200 mt-4">Requests Awaiting</p>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : pendingRequests.length}
               </h3>
             </div>
           </section>
 
           {/* Master-Detail Layout */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-6">
+            <div className="lg:col-span-8 rounded-2xl border border-white/20 glass-panel p-6 shadow-xl flex flex-col gap-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-slate-800">Review Queue</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Asset borrow requests awaiting administrative approval</p>
+                  <h3 className="text-base font-bold text-white">Review Queue</h3>
+                  <p className="text-xs text-blue-200 mt-0.5">Asset borrow requests awaiting administrative approval</p>
                 </div>
                 <button
                   onClick={() => navigate('/lending')}
@@ -312,7 +310,7 @@ export default function AdminDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                    <tr className="border-b border-white/20 text-blue-200 font-bold uppercase tracking-wider">
                       <th className="pb-3 font-semibold">Requester</th>
                       <th className="pb-3 font-semibold">Asset Title</th>
                       <th className="pb-3 font-semibold">Date</th>
@@ -324,26 +322,26 @@ export default function AdminDashboard() {
                     {loading ? (
                       <tr>
                         <td colSpan={5} className="py-8 text-center">
-                          <Loader2 className="size-6 animate-spin text-slate-400 mx-auto" />
+                          <Loader2 className="size-6 animate-spin text-blue-200 mx-auto" />
                         </td>
                       </tr>
                     ) : borrowRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center text-slate-400 font-medium">
+                        <td colSpan={5} className="py-8 text-center text-blue-200 font-medium">
                           No borrow requests logged in queue.
                         </td>
                       </tr>
                     ) : (
                       borrowRequests.slice(0, 5).map((req) => (
-                        <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition">
-                          <td className="py-4 font-bold text-slate-800">
+                        <tr key={req.id} className="border-b border-slate-50 hover:bg-white/10 transition">
+                          <td className="py-4 font-bold text-white">
                             {req.userName || `Student #${req.userId}`}
                           </td>
                           <td className="py-4">
-                            <p className="font-bold text-slate-800 max-w-[200px] truncate">{req.bookTitle}</p>
-                            <p className="text-[10px] text-slate-400">ISBN: {req.isbn}</p>
+                            <p className="font-bold text-white max-w-[200px] truncate">{req.bookTitle}</p>
+                            <p className="text-[10px] text-blue-200">ISBN: {req.isbn}</p>
                           </td>
-                          <td className="py-4 text-slate-500">
+                          <td className="py-4 text-blue-200">
                             {new Date(req.requestDate).toLocaleDateString()}
                           </td>
                           <td className="py-4">
@@ -389,7 +387,7 @@ export default function AdminDashboard() {
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-slate-400 text-[10px] font-semibold italic">Complete</span>
+                              <span className="text-blue-200 text-[10px] font-semibold italic">Complete</span>
                             )}
                           </td>
                         </tr>
@@ -401,35 +399,35 @@ export default function AdminDashboard() {
             </div>
 
             {/* Real-time Gate Monitor */}
-            <div className="lg:col-span-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-6">
+            <div className="lg:col-span-4 rounded-2xl border border-white/20 glass-panel p-6 shadow-xl flex flex-col gap-6">
               <div>
-                <h3 className="text-base font-bold text-slate-800">Gate Monitor</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Real-time scan feeds from entrance</p>
+                <h3 className="text-base font-bold text-white">Gate Monitor</h3>
+                <p className="text-xs text-blue-200 mt-0.5">Real-time scan feeds from entrance</p>
               </div>
 
               <div className="flex-1 overflow-y-auto max-h-[360px] pr-2 flex flex-col gap-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="size-5 animate-spin text-slate-400" />
+                    <Loader2 className="size-5 animate-spin text-blue-200" />
                   </div>
                 ) : gateLogs.length === 0 ? (
-                  <p className="text-slate-400 text-xs text-center py-4">No recent entry logs.</p>
+                  <p className="text-blue-200 text-xs text-center py-4">No recent entry logs.</p>
                 ) : (
                   gateLogs.slice(0, 10).map((log, idx) => (
-                    <div key={log.id || idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+                    <div key={log.id || idx} className="flex items-start gap-3 p-3 glass-panel rounded-xl">
                       <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
                         log.action === 'ENTRY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {log.action === 'ENTRY' ? 'IN' : 'OUT'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold text-white">
                           {log.userName || `Student ID #${log.userId}`}
                         </p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">
+                        <p className="text-[10px] text-blue-200 mt-0.5">
                           {log.action === 'ENTRY' ? 'Checked into Library' : 'Checked out of Library'}
                         </p>
-                        <p className="text-[9px] text-slate-400 mt-1">
+                        <p className="text-[9px] text-blue-200 mt-1">
                           {new Date(log.timestamp).toLocaleString()}
                         </p>
                       </div>
