@@ -60,6 +60,9 @@ export default function StudentLogin() {
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center px-4 py-12"
+      style={{
+        backgroundImage: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)',
+      }}
     >
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
@@ -87,7 +90,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                !isRegister ? 'bg-blue-600 text-white shadow-xl' : 'text-blue-200 hover:text-white'
+                !isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-blue-200 hover:text-white'
               }`}
             >
               Sign In
@@ -100,7 +103,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                isRegister ? 'bg-blue-600 text-white shadow-xl' : 'text-blue-200 hover:text-white'
+                isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-blue-200 hover:text-white'
               }`}
             >
               Register
@@ -108,14 +111,14 @@ export default function StudentLogin() {
           </div>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-500/50 bg-red-500/20 p-4 text-xs font-medium text-red-100">
-              <AlertTriangle className="size-4 shrink-0 text-red-400" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-700">
+              <AlertTriangle className="size-4 shrink-0 text-red-500" />
               <span>{error}</span>
             </div>
           )}
           {successMsg && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-green-500/50 bg-green-500/20 p-4 text-xs font-medium text-green-100">
-              <div className="size-2 mt-1 rounded-full bg-green-400" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-green-100 bg-green-50 p-4 text-xs font-medium text-green-700">
+              <div className="size-2 mt-1 rounded-full bg-green-500" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -163,7 +166,7 @@ export default function StudentLogin() {
                   Password
                 </label>
                 {!isRegister && (
-                  <button type="button" className="text-[11px] text-blue-400 hover:underline">
+                  <button type="button" className="text-[11px] text-blue-600 hover:underline">
                     Forgot Password?
                   </button>
                 )}
@@ -213,7 +216,7 @@ export default function StudentLogin() {
                 setError(null)
                 setSuccessMsg(null)
               }}
-              className="font-bold text-blue-400 hover:underline"
+              className="font-bold text-blue-600 hover:underline"
             >
               {isRegister ? 'Sign In' : 'Register Account'}
             </button>
