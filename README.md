@@ -11,6 +11,7 @@ Streamlining college library operations through **QR-based attendance**, **ISBN 
 ![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Frontend-38BDF8?logo=tailwindcss)
+![Contributors](https://img.shields.io/badge/Contributors-2-blue)
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 
 </div>
@@ -328,18 +329,34 @@ npm run dev
 
 ---
 
-## 👨‍💻 Developer
+## 👨‍💻 Contributors
+
+This project was collaboratively developed by:
 
 ### Mohammed Ilyas Israr Ahmed Siddiqui
 
 **BE Computer Science & Engineering (Data Science)**
 
-Passionate about Full-Stack Development, Spring Boot, React, and Building Real-World Software Solutions.
+Passionate about Full-Stack Development, Spring Boot, React, and building real-world software solutions.
+
+**GitHub:** https://github.com/IlyasSiddiqui11
 
 ---
 
-<div align="center">
+### Prince Yadav
+
+Passionate about software development and building practical applications using modern technologies.
+
+**GitHub:** https://github.com/prince902226062-code
+
+---
+
+## 🤝 Collaboration
+
+The Smart Library Management System was designed and developed as a collaborative project with the goal of modernizing traditional library workflows. The project combines QR-based attendance tracking, ISBN barcode scanning, real-time inventory management, and digital borrowing processes to create a seamless library experience for both students and administrators.
+
+Both contributors worked together on system design, implementation, testing, and deployment, applying industry-standard software development practices and modern full-stack technologies.
+
+---
 
 ### ⭐ If you like this project, consider giving it a star!
-
-</div>
