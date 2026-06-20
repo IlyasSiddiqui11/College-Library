@@ -46,6 +46,15 @@ public class BorrowService {
             throw new BadRequestException("You already have a pending or approved borrow request for this book");
         }
 
+        // Enforce simultaneous borrow limit: max 2 books at a time
+        long activeBorrowCount = borrowRequestRepository.findByUserId(user.getId()).stream()
+                .filter(req -> req.getStatus() == BorrowStatus.APPROVED || req.getStatus() == BorrowStatus.PENDING)
+                .count();
+
+        if (activeBorrowCount >= 2) {
+            throw new BadRequestException("Borrow limit reached: students may only borrow up to 2 books simultaneously.");
+        }
+
         BorrowRequest request = BorrowRequest.builder()
                 .user(user)
                 .book(book)
@@ -58,7 +67,7 @@ public class BorrowService {
     }
 
     @Transactional
-    public BorrowResponse approveBorrowRequest(Long requestId) {
+    public BorrowResponse approveBorrowRequest(Long requestId, String accessionNumber) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found with ID: " + requestId));
 
@@ -77,6 +86,7 @@ public class BorrowService {
 
         request.setStatus(BorrowStatus.APPROVED);
         request.setApprovedDate(LocalDateTime.now());
+        request.setAccessionNumber(accessionNumber);
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
 
         return mapToBorrowResponse(approvedRequest);
@@ -95,6 +105,25 @@ public class BorrowService {
         BorrowRequest rejectedRequest = borrowRequestRepository.save(request);
 
         return mapToBorrowResponse(rejectedRequest);
+    }
+
+    @Transactional
+    public BorrowResponse cancelBorrowRequest(Long requestId, Long userId) {
+        BorrowRequest request = borrowRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found with ID: " + requestId));
+
+        if (!request.getUser().getId().equals(userId)) {
+            throw new BadRequestException("You can only cancel your own borrow requests.");
+        }
+
+        if (request.getStatus() != BorrowStatus.PENDING) {
+            throw new BadRequestException("Only PENDING requests can be cancelled. Current status: " + request.getStatus());
+        }
+
+        request.setStatus(BorrowStatus.CANCELLED);
+        BorrowRequest cancelledRequest = borrowRequestRepository.save(request);
+
+        return mapToBorrowResponse(cancelledRequest);
     }
 
     @Transactional
@@ -140,6 +169,9 @@ public class BorrowService {
     }
 
     private BorrowResponse mapToBorrowResponse(BorrowRequest request) {
+        LocalDateTime dueDate = request.getApprovedDate() != null
+                ? request.getApprovedDate().plusDays(7)
+                : null;
         return BorrowResponse.builder()
                 .id(request.getId())
                 .userId(request.getUser().getId())
@@ -151,9 +183,11 @@ public class BorrowService {
                 .status(request.getStatus())
                 .requestDate(request.getRequestDate())
                 .approvedDate(request.getApprovedDate())
+                .dueDate(dueDate)
                 .returnedDate(request.getReturnedDate())
                 .createdAt(request.getCreatedAt())
                 .updatedAt(request.getUpdatedAt())
+                .accessionNumber(request.getAccessionNumber())
                 .build();
     }
 }

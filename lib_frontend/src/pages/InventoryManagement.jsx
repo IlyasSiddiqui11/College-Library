@@ -5,7 +5,8 @@ import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList, 
-  Users, PlusCircle, MinusCircle, X, ScanLine, Camera, Clock
+  Users, PlusCircle, MinusCircle, X, ScanLine, Camera, Clock,
+  UserCheck
 } from 'lucide-react'
 
 export default function InventoryManagement() {
@@ -23,6 +24,10 @@ export default function InventoryManagement() {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [totalCopies, setTotalCopies] = useState(5)
+  const [publisher, setPublisher] = useState('')
+  const [price, setPrice] = useState('')
+  const [publicationYear, setPublicationYear] = useState('')
+  const [accessionNumbers, setAccessionNumbers] = useState('')
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
   
@@ -102,6 +107,10 @@ export default function InventoryManagement() {
     setTitle('')
     setAuthor('')
     setTotalCopies(5)
+    setPublisher('')
+    setPrice('')
+    setPublicationYear('')
+    setAccessionNumbers('')
     setErrorMsg(null)
   }
 
@@ -156,7 +165,10 @@ export default function InventoryManagement() {
         isbn,
         title,
         author,
-        totalCopies
+        totalCopies,
+        publisher,
+        price: price ? parseFloat(price) : null,
+        publicationYear: publicationYear ? parseInt(publicationYear, 10) : null
       })
 
       setShowAddModal(false)
@@ -165,6 +177,9 @@ export default function InventoryManagement() {
       setTitle('')
       setAuthor('')
       setTotalCopies(5)
+      setPublisher('')
+      setPrice('')
+      setPublicationYear('')
 
       // Refresh list
       fetchBooks()
@@ -252,6 +267,13 @@ export default function InventoryManagement() {
               <Users className="size-4.5" />
               Return Station Kiosk
             </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
+            </button>
           </nav>
         </div>
 
@@ -313,24 +335,27 @@ export default function InventoryManagement() {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-white/20 text-blue-200 font-bold uppercase tracking-wider">
-                    <th className="pb-3 font-semibold">Asset Info</th>
-                    <th className="pb-3 font-semibold">Author</th>
-                    <th className="pb-3 font-semibold">ISBN Code</th>
-                    <th className="pb-3 font-semibold text-center">In Shelf Stock</th>
-                    <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 pr-4 font-semibold">Asset Info</th>
+                    <th className="pb-3 pr-4 font-semibold">Author</th>
+                    <th className="pb-3 pr-4 font-semibold">ISBN Code</th>
+                    <th className="pb-3 pr-4 font-semibold">Publisher</th>
+                    <th className="pb-3 pr-4 font-semibold">Price</th>
+                    <th className="pb-3 pr-4 font-semibold">Year</th>
+                    <th className="pb-3 pr-4 font-semibold text-center">In Shelf Stock</th>
+                    <th className="pb-3 pr-4 font-semibold">Status</th>
                     <th className="pb-3 font-semibold text-right">Quick Stock Modifier</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center">
+                      <td colSpan={9} className="py-8 text-center">
                         <Loader2 className="size-6 animate-spin text-blue-200 mx-auto" />
                       </td>
                     </tr>
                   ) : filteredBooks.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-blue-200 font-medium">
+                      <td colSpan={9} className="py-8 text-center text-blue-200 font-medium">
                         No book assets match your query.
                       </td>
                     </tr>
@@ -352,22 +377,34 @@ export default function InventoryManagement() {
                             </div>
                           </td>
                           
-                          <td className="py-4 text-blue-100 font-medium">
+                          <td className="py-4 pr-4 text-blue-100 font-medium">
                             {book.author}
                           </td>
                           
-                          <td className="py-4 font-mono text-blue-200">
+                          <td className="py-4 pr-4 font-mono text-blue-200">
                             {book.isbn}
                           </td>
+
+                          <td className="py-4 pr-4 text-blue-100">
+                            {book.publisher || <span className="text-white/30">—</span>}
+                          </td>
+
+                          <td className="py-4 pr-4 text-blue-100">
+                            {book.price != null ? `₹${book.price}` : <span className="text-white/30">—</span>}
+                          </td>
+
+                          <td className="py-4 pr-4 text-blue-100">
+                            {book.publicationYear || <span className="text-white/30">—</span>}
+                          </td>
                           
-                          <td className="py-4 text-center font-bold text-white">
+                          <td className="py-4 pr-4 text-center font-bold text-white">
                             <span className={isOutOfStock ? 'text-red-500' : 'text-white'}>
                               {book.availableCopies}
                             </span>
                             <span className="text-blue-200 font-medium"> / {book.totalCopies}</span>
                           </td>
                           
-                          <td className="py-4">
+                          <td className="py-4 pr-4">
                             {isOutOfStock ? (
                               <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 font-bold text-[9px] border border-red-200/40">
                                 OUT OF STOCK
@@ -496,6 +533,42 @@ export default function InventoryManagement() {
                     className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
                   />
                 </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Publisher</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Oxford University Press"
+                    value={publisher}
+                    onChange={(e) => setPublisher(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="e.g. 725.00"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Publication Year</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 2008"
+                      value={publicationYear}
+                      onChange={(e) => setPublicationYear(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
 
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Total Copies</label>

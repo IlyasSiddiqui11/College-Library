@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
-  BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X, UserCheck, Clock
+  BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X, QrCode,
+  Clock,
+  UserCheck
 } from 'lucide-react'
 
 export default function BorrowRequests() {
@@ -14,9 +16,17 @@ export default function BorrowRequests() {
   const [borrowRequests, setBorrowRequests] = useState([])
   const [selectedRequestId, setSelectedRequestId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterPendingOnly, setFilterPendingOnly] = useState(true)
+  const [filterStatus, setFilterStatus] = useState('PENDING')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
+  const [showAccessionInput, setShowAccessionInput] = useState(false)
+  const [accessionNumber, setAccessionNumber] = useState('')
+
+  // Student Profile Modal State
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [selectedProfile, setSelectedProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileError, setProfileError] = useState(null)
 
   // Redirect if not admin
   useEffect(() => {
@@ -53,11 +63,13 @@ export default function BorrowRequests() {
   }, [user])
 
   // Handle Approve Action
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, accNum) => {
     setActionLoading(true)
     try {
-      await apiClient.post(`/api/admin/approve/${id}`)
+      await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum || '')}`)
       await fetchRequests()
+      setShowAccessionInput(false)
+      setAccessionNumber('')
     } catch (err) {
       alert('Approval failed: ' + err.message)
     } finally {
@@ -78,19 +90,37 @@ export default function BorrowRequests() {
     }
   }
 
+  // Handle View Profile
+  const handleViewProfile = async (userId) => {
+    setShowProfileModal(true)
+    setProfileLoading(true)
+    setProfileError(null)
+    setSelectedProfile(null)
+    try {
+      const res = await apiClient.get(`/api/profile/${userId}`)
+      setSelectedProfile(res.data)
+    } catch (err) {
+      setProfileError(err.message || 'Failed to fetch student profile')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
   if (!user) return null
 
   // Filter requests
-  const filteredRequests = borrowRequests.filter((req) => {
-    const q = searchQuery.toLowerCase()
-    const matchesSearch = 
-      (req.bookTitle?.toLowerCase() || '').includes(q) ||
-      (req.userName?.toLowerCase() || '').includes(q) ||
-      (req.isbn || '').includes(q)
-    
-    const matchesStatus = !filterPendingOnly || req.status === 'PENDING'
-    return matchesSearch && matchesStatus
-  })
+  const filteredRequests = borrowRequests
+    .filter((req) => {
+      const q = searchQuery.toLowerCase()
+      const matchesSearch = 
+        (req.bookTitle?.toLowerCase() || '').includes(q) ||
+        (req.userName?.toLowerCase() || '').includes(q) ||
+        (req.isbn || '').includes(q)
+      
+      const matchesStatus = filterStatus === 'ALL' || req.status === filterStatus
+      return matchesSearch && matchesStatus
+    })
+    .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
   // Selected request details
   const selectedReq = borrowRequests.find((req) => req.id === selectedRequestId)
@@ -151,6 +181,13 @@ export default function BorrowRequests() {
               <Users className="size-4.5" />
               Return Station Kiosk
             </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
+            </button>
           </nav>
         </div>
 
@@ -194,16 +231,28 @@ export default function BorrowRequests() {
                 />
               </div>
 
-              <button
-                onClick={() => setFilterPendingOnly(!filterPendingOnly)}
-                className={`rounded-xl border px-3.5 py-2 text-xs font-bold transition active:scale-[0.98] ${
-                  filterPendingOnly
-                    ? 'border-amber-200 bg-amber-50 text-amber-700'
-                    : 'border-white/20 glass-panel text-blue-100 hover:bg-white/10'
-                }`}
-              >
-                {filterPendingOnly ? 'Pending Only' : 'Show All'}
-              </button>
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                {[
+                  { id: 'ALL', label: 'All' },
+                  { id: 'PENDING', label: 'Pending' },
+                  { id: 'APPROVED', label: 'Pending Return' },
+                  { id: 'RETURNED', label: 'Returned' },
+                  { id: 'REJECTED', label: 'Rejected' },
+                  { id: 'CANCELLED', label: 'Cancelled' }
+                ].map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setFilterStatus(f.id)}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                      filterStatus === f.id
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-blue-200 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </header>
@@ -227,7 +276,11 @@ export default function BorrowRequests() {
                   return (
                     <button
                       key={req.id}
-                      onClick={() => setSelectedRequestId(req.id)}
+                      onClick={() => {
+                        setSelectedRequestId(req.id)
+                        setShowAccessionInput(false)
+                        setAccessionNumber('')
+                      }}
                       className={`w-full text-left rounded-xl p-4 border transition flex gap-3 ${
                         isSelected 
                           ? 'border-blue-500 bg-blue-50/20 shadow-xl' 
@@ -248,7 +301,11 @@ export default function BorrowRequests() {
                               ? 'bg-amber-50 text-amber-600 border-amber-200/50' 
                               : req.status === 'APPROVED'
                               ? 'bg-blue-50 text-blue-600 border-blue-200/50'
-                              : 'bg-green-50 text-green-600 border-green-200/50'
+                              : req.status === 'RETURNED'
+                              ? 'bg-green-50 text-green-600 border-green-200/50'
+                              : req.status === 'REJECTED'
+                              ? 'bg-red-50 text-red-600 border-red-200/50'
+                              : 'bg-slate-100 text-slate-500 border-slate-300/40'
                           }`}>
                             {req.status}
                           </span>
@@ -290,13 +347,21 @@ export default function BorrowRequests() {
                   {/* Requester Profile Summary */}
                   <div className="py-6 border-b border-white/20 flex flex-col gap-3">
                     <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Requester Profile</h4>
-                    <div className="flex items-center gap-3 glass-panel p-4 rounded-xl border border-white/20">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
-                        {selectedReq.userName?.slice(0, 2).toUpperCase() || 'ST'}
+                    <div className="flex items-center justify-between gap-3 glass-panel p-4 rounded-xl border border-white/20">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
+                          {selectedReq.userName?.slice(0, 2).toUpperCase() || 'ST'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-sm">{selectedReq.userName || `Student ID #${selectedReq.userId}`}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-white text-sm">{selectedReq.userName || `Student ID #${selectedReq.userId}`}</p>
-                      </div>
+                      <button 
+                        onClick={() => handleViewProfile(selectedReq.userId)}
+                        className="px-3 py-1.5 text-[10px] font-bold text-blue-100 bg-white/10 hover:bg-white/20 hover:text-white rounded-lg transition"
+                      >
+                        View Full Profile
+                      </button>
                     </div>
                   </div>
 
@@ -312,6 +377,12 @@ export default function BorrowRequests() {
                         <p className="text-blue-200">Default Schedule Duration</p>
                         <p className="font-bold text-blue-600 mt-0.5">14 Days Loan</p>
                       </div>
+                      {selectedReq.accessionNumber && (
+                        <div>
+                          <p className="text-blue-200">Accession Number</p>
+                          <p className="font-bold text-amber-300 mt-0.5 font-mono">{selectedReq.accessionNumber}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -328,19 +399,66 @@ export default function BorrowRequests() {
                         <X className="size-4" />
                         Decline Request
                       </button>
-                      <button
-                        onClick={() => handleApprove(selectedReq.id)}
-                        disabled={actionLoading}
-                        className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
-                      >
-                        <Check className="size-4" />
-                        Approve Borrow Request
-                      </button>
+                      
+                      {showAccessionInput ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Up to 10-digit Accession No."
+                            maxLength={10}
+                            value={accessionNumber}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '')
+                              setAccessionNumber(val)
+                            }}
+                            className="w-48 rounded-xl border border-white/20 glass-input py-2.5 px-3 text-xs text-white placeholder:text-blue-200 outline-none focus:border-blue-500 transition"
+                          />
+                          <button
+                            onClick={() => {
+                              if (accessionNumber.length > 0 && accessionNumber.length <= 10) {
+                                handleApprove(selectedReq.id, accessionNumber)
+                              } else {
+                                alert('Please enter up to 10 numbers for the accession number.')
+                              }
+                            }}
+                            disabled={actionLoading}
+                            className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
+                          >
+                            <Check className="size-4" />
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowAccessionInput(false)
+                              setAccessionNumber('')
+                            }}
+                            className="p-2.5 rounded-xl border border-white/20 glass-panel text-blue-200 hover:text-white transition flex items-center justify-center"
+                          >
+                            <X className="size-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowAccessionInput(true)}
+                          disabled={actionLoading}
+                          className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <Check className="size-4" />
+                          Approve Borrow Request
+                        </button>
+                      )}
                     </>
                   ) : (
-                    <div className="w-full flex items-center justify-center gap-2 p-4 glass-panel border border-white/20 rounded-xl text-xs font-semibold text-blue-200">
-                      <UserCheck className="size-4 text-blue-200" />
-                      Lending request has already been finalized: Status &quot;{selectedReq.status}&quot;
+                    <div className="w-full flex items-center justify-between gap-2 p-4 glass-panel border border-white/20 rounded-xl">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-blue-200">
+                        <UserCheck className="size-4 text-blue-200" />
+                        Lending request has already been finalized: Status &quot;{selectedReq.status}&quot;
+                      </div>
+                      {selectedReq.accessionNumber && (
+                        <span className="text-[10px] font-bold text-amber-300 font-mono bg-amber-500/10 border border-amber-400/20 px-2 py-1 rounded-lg shrink-0">
+                          Acc# {selectedReq.accessionNumber}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -355,6 +473,70 @@ export default function BorrowRequests() {
           </div>
         </main>
       </div>
+
+      {/* Student Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-white/20 glass-panel p-6 shadow-2xl animate-in fade-in duration-150">
+            <div className="flex justify-between items-center pb-3 border-b border-white/20">
+              <h3 className="font-bold text-white text-base flex items-center gap-2">
+                <UserCheck className="size-5 text-blue-600" />
+                Student Profile
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowProfileModal(false)}
+                className="text-blue-200 hover:text-blue-100"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {profileLoading && (
+              <div className="py-8 text-center">
+                <Loader2 className="size-6 animate-spin text-blue-200 mx-auto" />
+                <p className="text-xs text-blue-200 mt-2">Loading profile...</p>
+              </div>
+            )}
+
+            {profileError && (
+              <div className="py-6 text-center text-red-500">
+                <p className="text-sm font-bold">{profileError}</p>
+                <p className="text-xs mt-1 text-red-400">This student may not have completed their profile yet.</p>
+              </div>
+            )}
+
+            {selectedProfile && !profileLoading && (
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Name</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.userName || 'N/A'}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Email</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.userEmail || 'N/A'}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Branch</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.branch || 'N/A'}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Year</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.year || 'N/A'}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Contact</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.contactNumber || 'N/A'}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-blue-200 font-bold text-xs uppercase tracking-wider">Address</div>
+                  <div className="col-span-2 text-white font-medium">{selectedProfile.address || 'N/A'}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

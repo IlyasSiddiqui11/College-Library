@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,10 @@ public class AdminController {
     private final BorrowService borrowService;
 
     @PostMapping("/approve/{id}")
-    public ResponseEntity<BorrowResponse> approveRequest(@PathVariable Long id) {
-        BorrowResponse response = borrowService.approveBorrowRequest(id);
+    public ResponseEntity<BorrowResponse> approveRequest(
+            @PathVariable Long id,
+            @RequestParam(required = false) String accessionNumber) {
+        BorrowResponse response = borrowService.approveBorrowRequest(id, accessionNumber);
         return ResponseEntity.ok(response);
     }
 

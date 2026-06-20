@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, User, Mail, Phone, GraduationCap, 
-  MapPin, Clock, Loader2, Save, Edit2, History
+  MapPin, Clock, Loader2, Save, Edit2, History, FileText
 } from 'lucide-react'
 
 export default function StudentProfile() {
@@ -40,22 +40,26 @@ export default function StudentProfile() {
     }
   }, [user, navigate])
 
-  const loadProfileData = async () => {
+  const loadProfileData = async (showLoading = true) => {
     if (!user) return
-    setLoading(true)
-    setErrorMsg(null)
-    setSuccessMsg(null)
+    if (showLoading) {
+      setLoading(true)
+      setErrorMsg(null)
+      setSuccessMsg(null)
+    }
     try {
       // 1. Sync authentication context profile
       const prof = await fetchProfile()
       
-      // 2. Initialize fields
-      setName(user.name || '')
-      if (prof) {
-        setBranch(prof.branch || '')
-        setYear(prof.year || 1)
-        setContact(prof.contactNumber || '')
-        setAddress(prof.address || '')
+      // 2. Initialize fields (only on initial load)
+      if (showLoading) {
+        setName(user.name || '')
+        if (prof) {
+          setBranch(prof.branch || '')
+          setYear(prof.year || 1)
+          setContact(prof.contactNumber || '')
+          setAddress(prof.address || '')
+        }
       }
 
       // 3. Get borrowing stats
@@ -67,14 +71,19 @@ export default function StudentProfile() {
       setAttendanceStatus(statusRes.data)
     } catch (err) {
       console.error('Error loading profile details:', err)
-      setErrorMsg('Failed to sync profile data. Please try again.')
+      if (showLoading) setErrorMsg('Failed to sync profile data. Please try again.')
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadProfileData()
+    if (!user) return
+    loadProfileData(true)
+    const intervalId = setInterval(() => {
+      loadProfileData(false)
+    }, 5000)
+    return () => clearInterval(intervalId)
   }, [user])
 
   const handleSaveProfile = async (e) => {
@@ -253,6 +262,19 @@ export default function StudentProfile() {
                   />
                 </div>
 
+                {/* Student ID (Read Only) */}
+                <div>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="size-3 text-blue-200 shrink-0" /> Student ID
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={user.id || 'N/A'}
+                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-panel/40 px-3.5 py-3 text-xs text-blue-200 outline-none border-white/20 transition"
+                  />
+                </div>
+
                 {/* Email (Read Only) */}
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -310,7 +332,7 @@ export default function StudentProfile() {
                     className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   >
                     {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y}>Year {y}</option>
+                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
                     ))}
                   </select>
                 </div>
@@ -372,7 +394,7 @@ export default function StudentProfile() {
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 text-blue-200 hover:text-blue-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
@@ -380,8 +402,17 @@ export default function StudentProfile() {
 
           <button
             type="button"
+            onClick={() => navigate('/catalog')}
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+          >
+            <FileText className="size-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 text-blue-200 hover:text-blue-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -390,7 +421,7 @@ export default function StudentProfile() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 text-blue-600"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-white shadow-lg transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>

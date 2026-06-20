@@ -12,6 +12,8 @@ import ReturnStation from './pages/ReturnStation.jsx'
 import BookScanner from './pages/BookScanner.jsx'
 import GateLogs from './pages/GateLogs.jsx'
 import StudentProfile from './pages/StudentProfile.jsx'
+import RegisteredStudents from './pages/RegisteredStudents.jsx'
+import StudentCatalog from './pages/StudentCatalog.jsx'
 
 function App() {
   return (
@@ -24,8 +26,10 @@ function App() {
           <Route path="/lending" element={<BorrowRequests />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/gate-logs" element={<GateLogs />} />
+          <Route path="/admin/students" element={<RegisteredStudents />} />
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/catalog" element={<StudentCatalog />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/history" element={<BorrowHistory />} />
           <Route path="/returns" element={<ReturnStation />} />

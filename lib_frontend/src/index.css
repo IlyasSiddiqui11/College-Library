@@ -27,8 +27,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* ── Dark gradient background shown on every page ── */
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1060 30%, #302b63 60%, #0f0c29 100%);
+  /* ── Modern Slate/Dark Gray gradient background ── */
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
   background-attachment: fixed;
   min-height: 100vh;
   color: #ffffff;
@@ -38,31 +38,33 @@ body {
   min-height: 100vh;
 }
 
-/* ─── Glassmorphism Utilities ────────────────────────────────── */
+/* ─── Solid Utilities ────────────────────────────────── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(30, 41, 59, 1); /* Slate 800 */
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .glass-input {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 1); /* Slate 900 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
   transition: border-color 0.2s, background 0.2s;
 }
 
 .glass-input::placeholder {
-  color: rgba(147, 197, 253, 0.7);
+  color: rgba(148, 163, 184, 0.7); /* Slate 400 placeholder */
 }
 
 .glass-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(99, 102, 241, 0.8);
+  background: rgba(30, 41, 59, 1); /* Slate 800 */
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Disable inline blur classes */
+.backdrop-blur-sm, .backdrop-blur-md, .backdrop-blur-lg, .backdrop-blur-xl {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* ─── Animations ─────────────────────────────────────────────── */

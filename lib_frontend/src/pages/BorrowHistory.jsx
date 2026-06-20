@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, Search, Clock, CheckCircle2, 
-  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon
+  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText
 } from 'lucide-react'
 
 export default function BorrowHistory() {
@@ -16,6 +16,7 @@ export default function BorrowHistory() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
+  const [cancellingId, setCancellingId] = useState(null)
 
   // Redirect if not logged in
   useEffect(() => {
@@ -24,22 +25,40 @@ export default function BorrowHistory() {
     }
   }, [user, navigate])
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (showLoading = true) => {
     if (!user) return
-    setLoading(true)
+    if (showLoading) setLoading(true)
     try {
       const response = await apiClient.get(`/api/borrow/user/${user.id}`)
       setBorrowRequests(response.data)
     } catch (err) {
       console.error('Error fetching borrowing history:', err)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchHistory()
+    if (!user) return
+    fetchHistory(true)
+    const intervalId = setInterval(() => {
+      fetchHistory(false)
+    }, 5000)
+    return () => clearInterval(intervalId)
   }, [user])
+
+  const handleCancelRequest = async (requestId) => {
+    if (!user) return
+    setCancellingId(requestId)
+    try {
+      await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
+      await fetchHistory(false)
+    } catch (err) {
+      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   if (!user) return null
 
@@ -51,17 +70,19 @@ export default function BorrowHistory() {
   }
 
   // Filtered requests
-  const filteredItems = borrowRequests.filter((item) => {
-    const bookTitle = item.bookTitle?.toLowerCase() || ''
-    const bookAuthor = (item.bookAuthor || item.author || '').toLowerCase()
-    const bookIsbn = item.isbn || ''
-    const query = searchQuery.toLowerCase()
+  const filteredItems = borrowRequests
+    .filter((item) => {
+      const bookTitle = item.bookTitle?.toLowerCase() || ''
+      const bookAuthor = (item.bookAuthor || item.author || '').toLowerCase()
+      const bookIsbn = item.isbn || ''
+      const query = searchQuery.toLowerCase()
 
-    const matchesSearch = bookTitle.includes(query) || bookAuthor.includes(query) || bookIsbn.includes(query)
-    const matchesFilter = filterStatus === 'ALL' || item.status === filterStatus
+      const matchesSearch = bookTitle.includes(query) || bookAuthor.includes(query) || bookIsbn.includes(query)
+      const matchesFilter = filterStatus === 'ALL' || item.status === filterStatus
 
-    return matchesSearch && matchesFilter
-  })
+      return matchesSearch && matchesFilter
+    })
+    .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
   // Compute Stats
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
@@ -139,7 +160,7 @@ export default function BorrowHistory() {
 
           {/* Quick status filter pills */}
           <div className="flex gap-1.5 flex-wrap">
-            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED'].map((status) => (
+            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
                 type="button"
@@ -204,6 +225,14 @@ export default function BorrowHistory() {
                   )
                   borderClass = 'border-red-100 bg-red-50/10'
                   break
+                case 'CANCELLED':
+                  statusBadge = (
+                    <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-500 border border-slate-300/40">
+                      <XCircle className="size-2.5" /> CANCELLED
+                    </span>
+                  )
+                  borderClass = 'border-white/10 bg-white/5'
+                  break
               }
 
               return (
@@ -233,6 +262,12 @@ export default function BorrowHistory() {
                           <span>ISBN</span>
                           <span className="font-mono text-blue-100">{item.isbn}</span>
                         </div>
+                        {item.accessionNumber && (
+                          <div className="flex justify-between">
+                            <span>Accession No.</span>
+                            <span className="font-mono font-bold text-amber-300">{item.accessionNumber}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span>Date Submitted</span>
                           <span>{formatDate(item.requestDate)}</span>
@@ -243,6 +278,19 @@ export default function BorrowHistory() {
                             <span>{formatDate(item.approvedDate)}</span>
                           </div>
                         )}
+                        {item.dueDate && item.status !== 'REJECTED' && item.status !== 'RETURNED' && (() => {
+                          const isOverdue = new Date(item.dueDate) < new Date()
+                          return (
+                            <div className="flex justify-between">
+                              <span className={`font-semibold ${isOverdue ? 'text-red-400' : 'text-amber-200'}`}>
+                                {isOverdue ? '⚠ Overdue!' : 'Return By'}
+                              </span>
+                              <span className={`font-bold ${isOverdue ? 'text-red-400' : 'text-amber-300'}`}>
+                                {formatDate(item.dueDate)}
+                              </span>
+                            </div>
+                          )
+                        })()}
                         {item.status === 'RETURNED' && (
                           <div className="flex justify-between">
                             <span>Returned On</span>
@@ -250,6 +298,25 @@ export default function BorrowHistory() {
                           </div>
                         )}
                       </div>
+
+                      {/* Cancel button for PENDING items */}
+                      {item.status === 'PENDING' && (
+                        <div className="mt-3 flex justify-end border-t border-white/10 pt-2.5">
+                          <button
+                            type="button"
+                            onClick={() => handleCancelRequest(item.id)}
+                            disabled={cancellingId === item.id}
+                            className="flex items-center gap-1.5 rounded-full bg-red-500/15 border border-red-400/25 px-3 py-1.5 text-[10px] font-bold text-red-300 hover:bg-red-500/25 transition disabled:opacity-50"
+                          >
+                            {cancellingId === item.id ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                              <XCircle className="size-3" />
+                            )}
+                            {cancellingId === item.id ? 'Cancelling...' : 'Cancel Request'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -269,6 +336,15 @@ export default function BorrowHistory() {
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/catalog')}
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+          >
+            <FileText className="size-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
           </button>
 
           <button

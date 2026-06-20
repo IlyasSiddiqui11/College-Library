@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
-  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2
+  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText
 } from 'lucide-react'
 
 export default function StudentDashboard() {
@@ -24,6 +24,7 @@ export default function StudentDashboard() {
   })
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
+  const [cancellingId, setCancellingId] = useState(null)
 
   const scannerRef = useRef(null)
   const isProcessingQr = useRef(false)
@@ -46,9 +47,9 @@ export default function StudentDashboard() {
   }, [user, navigate])
 
   // Fetch dynamic data
-  const fetchData = async () => {
+  const fetchData = async (showLoading = true) => {
     if (!user) return
-    setLoading(true)
+    if (showLoading) setLoading(true)
     try {
       // 1. Get borrowing requests
       const borrowRes = await apiClient.get(`/api/borrow/user/${user.id}`)
@@ -82,12 +83,22 @@ export default function StudentDashboard() {
     } catch (err) {
       console.error('Error fetching dashboard data:', err)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchData()
+    if (!user) return
+    fetchData(true)
+
+    // Auto-refresh data every 5 seconds without showing loading spinner
+    const intervalId = setInterval(() => {
+      if (!isProcessingQr.current && !exiting) {
+        fetchData(false)
+      }
+    }, 5000)
+
+    return () => clearInterval(intervalId)
   }, [user])
 
   // Auto trigger profile completion modal if incomplete
@@ -193,7 +204,7 @@ export default function StudentDashboard() {
     setExiting(true)
     try {
       await apiClient.post(`/api/gate/exit/${user.id}`)
-      fetchData() // Refresh status and logs
+      fetchData()
       alert('Successfully marked as OUTSIDE. Thank you for visiting!')
     } catch (err) {
       alert('Exit error: ' + err.message)
@@ -202,11 +213,30 @@ export default function StudentDashboard() {
     }
   }
 
+  // Cancel borrow request
+  const handleCancelRequest = async (requestId) => {
+    if (!user) return
+    setCancellingId(requestId)
+    try {
+      await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
+      await fetchData(false)
+    } catch (err) {
+      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
   if (!user) return null
 
   // Compute stats
-  const activeBorrows = borrowRequests.filter(req => req.status === 'APPROVED')
-  const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
+  // Compute stats
+  const activeBorrows = borrowRequests
+    .filter(req => req.status === 'APPROVED')
+    .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
+  const pendingRequests = borrowRequests
+    .filter(req => req.status === 'PENDING')
+    .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
   // Format date helper: 26 May 2026, 10:45 AM
   const formatDateFull = (dateString) => {
@@ -325,14 +355,26 @@ export default function StudentDashboard() {
 
           <button
             type="button"
-            onClick={() => setShowQrModal(true)}
-            className="flex h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 p-5 text-left text-white shadow-md shadow-purple-600/10 hover:shadow-lg transition active:scale-[0.98]"
+            onClick={() => navigate('/catalog')}
+            className="flex h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 p-5 text-left text-white shadow-md shadow-teal-600/10 hover:shadow-lg transition active:scale-[0.98]"
           >
-            <QrCode className="size-7" />
+            <Library className="size-7" />
+            <div>
+              <p className="font-semibold text-white">Digital Catalog</p>
+              <p className="text-[11px] text-teal-100 mt-0.5">Search and request books online</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowQrModal(true)}
+            className="col-span-2 flex h-24 flex-row items-center justify-between rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 p-5 text-left text-white shadow-md shadow-purple-600/10 hover:shadow-lg transition active:scale-[0.98]"
+          >
             <div>
               <p className="font-semibold text-white">QR Attendance</p>
               <p className="text-[11px] text-purple-100 mt-0.5">Instant gate check-in and zone entry</p>
             </div>
+            <QrCode className="size-7" />
           </button>
         </section>
 
@@ -407,6 +449,15 @@ export default function StudentDashboard() {
                           <Calendar className="size-3" />
                           Borrowed: {formatDateFull(req.requestDate).split(',')[0]}
                         </span>
+                        {req.dueDate && (() => {
+                          const isOverdue = new Date(req.dueDate) < new Date()
+                          return (
+                            <span className={`flex items-center gap-1 font-semibold ${isOverdue ? 'text-red-400' : 'text-amber-300'}`}>
+                              <Calendar className="size-3" />
+                              {isOverdue ? '⚠ Overdue: ' : 'Due: '}{formatDateFull(req.dueDate).split(',')[0]}
+                            </span>
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -424,9 +475,23 @@ export default function StudentDashboard() {
                       <p className="font-semibold text-white truncate">{req.bookTitle}</p>
                       <p className="text-[10px] text-blue-200">ISBN: {req.isbn}</p>
                     </div>
-                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/40 shrink-0">
-                      PENDING
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/40">
+                        PENDING
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCancelRequest(req.id)}
+                        disabled={cancellingId === req.id}
+                        className="flex items-center gap-1 rounded-full bg-red-500/20 border border-red-400/30 px-2.5 py-1 text-[9px] font-bold text-red-300 hover:bg-red-500/30 transition disabled:opacity-50"
+                      >
+                        {cancellingId === req.id ? (
+                          <Loader2 className="size-2.5 animate-spin" />
+                        ) : (
+                          '✕ Cancel'
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -538,7 +603,7 @@ export default function StudentDashboard() {
                     className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
                   >
                     {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y}>Year {y}</option>
+                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
                     ))}
                   </select>
                 </div>
@@ -596,6 +661,15 @@ export default function StudentDashboard() {
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/catalog')}
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+          >
+            <FileText className="size-5" />
+            <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
           </button>
 
           <button

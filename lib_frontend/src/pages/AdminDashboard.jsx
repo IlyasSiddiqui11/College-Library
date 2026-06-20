@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
-  Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock
+  Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
+  UserCheck
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -17,6 +18,8 @@ export default function AdminDashboard() {
   const [gateLogs, setGateLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [actionLoadingId, setActionLoadingId] = useState(null)
+  const [approvingId, setApprovingId] = useState(null)
+  const [accessionNumber, setAccessionNumber] = useState('')
 
   // Redirect if not admin
   useEffect(() => {
@@ -27,8 +30,8 @@ export default function AdminDashboard() {
     }
   }, [user, navigate])
 
-  const loadData = async () => {
-    setLoading(true)
+  const loadData = async (showLoading = true) => {
+    if (showLoading) setLoading(true)
     try {
       // 1. Fetch books
       const booksRes = await apiClient.get('/api/books')
@@ -71,20 +74,34 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Error fetching admin overview metrics:', err)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadData()
+    if (!user) return
+    loadData(true)
+
+    // Auto-refresh data every 5 seconds without showing loading spinner
+    const intervalId = setInterval(() => {
+      loadData(false)
+    }, 5000)
+
+    return () => clearInterval(intervalId)
   }, [user])
 
   // Handle Quick Approval
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, accNum) => {
+    if (!accNum || accNum.trim() === '') {
+      alert('Please enter an accession number.')
+      return
+    }
     setActionLoadingId(id)
     try {
-      await apiClient.post(`/api/admin/approve/${id}`)
+      await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
       await loadData()
+      setApprovingId(null)
+      setAccessionNumber('')
     } catch (err) {
       alert('Approval error: ' + err.message)
     } finally {
@@ -110,7 +127,8 @@ export default function AdminDashboard() {
   // Compute metrics
   const totalBooksCount = books.reduce((acc, book) => acc + (book.totalCopies || 0), 0)
   const liveBorrowsCount = borrowRequests.filter(req => req.status === 'APPROVED').length
-  const visitorFlowCount = gateLogs.length
+  const totalCheckIns = gateLogs.filter(log => log.action === 'ENTRY').length
+  const totalCheckOuts = gateLogs.filter(log => log.action === 'EXIT').length
   const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
 
   return (
@@ -168,6 +186,13 @@ export default function AdminDashboard() {
               <Users className="size-4.5" />
               Return Station Kiosk
             </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
+            </button>
           </nav>
         </div>
 
@@ -203,7 +228,7 @@ export default function AdminDashboard() {
 
             <div className="flex items-center gap-4">
               <button
-                onClick={loadData}
+                onClick={() => loadData(true)}
                 className="flex items-center gap-1.5 rounded-xl border border-white/20 px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition"
               >
                 <RefreshCw className="size-3.5" />
@@ -223,7 +248,7 @@ export default function AdminDashboard() {
         {/* Dashboard Canvas */}
         <main className="flex-1 p-8 flex flex-col gap-8 max-w-[1440px] mx-auto w-full">
           {/* Stat Metrics Row */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <section className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Stat 1 */}
             <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
@@ -263,12 +288,28 @@ export default function AdminDashboard() {
                   <Users className="size-5" />
                 </div>
                 <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                  GATE
+                  IN
                 </span>
               </div>
               <p className="text-sm font-semibold text-blue-200 mt-4">Total Check-Ins</p>
               <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : visitorFlowCount}
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalCheckIns}
+              </h3>
+            </div>
+
+            {/* Stat Check-Outs */}
+            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <LogOut className="size-5" />
+                </div>
+                <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+                  OUT
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-blue-200 mt-4">Total Check-Outs</p>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalCheckOuts}
               </h3>
             </div>
 
@@ -332,7 +373,10 @@ export default function AdminDashboard() {
                         </td>
                       </tr>
                     ) : (
-                      borrowRequests.slice(0, 5).map((req) => (
+                      [...borrowRequests]
+                        .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
+                        .slice(0, 5)
+                        .map((req) => (
                         <tr key={req.id} className="border-b border-slate-50 hover:bg-white/10 transition">
                           <td className="py-4 font-bold text-white">
                             {req.userName || `Student #${req.userId}`}
@@ -365,29 +409,72 @@ export default function AdminDashboard() {
                                 REJECTED
                               </span>
                             )}
+                            {req.status === 'CANCELLED' && (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-bold text-[9px] border border-slate-300/40">
+                                CANCELLED
+                              </span>
+                            )}
                           </td>
                           <td className="py-4 text-right">
                             {req.status === 'PENDING' ? (
                               <div className="flex justify-end gap-1.5">
-                                <button
-                                  disabled={actionLoadingId === req.id}
-                                  onClick={() => handleApprove(req.id)}
-                                  className="flex size-7 items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition"
-                                  title="Approve Request"
-                                >
-                                  <Check className="size-4" />
-                                </button>
-                                <button
-                                  disabled={actionLoadingId === req.id}
-                                  onClick={() => handleReject(req.id)}
-                                  className="flex size-7 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
-                                  title="Reject Request"
-                                >
-                                  <X className="size-4" />
-                                </button>
+                                {approvingId === req.id ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="text"
+                                      placeholder="Accession No."
+                                      maxLength={10}
+                                      value={accessionNumber}
+                                      onChange={(e) => setAccessionNumber(e.target.value.replace(/\D/g, ''))}
+                                      className="w-28 rounded-lg border border-white/20 glass-input px-2 py-1 text-[10px] text-white placeholder:text-blue-200 outline-none focus:border-blue-500 transition"
+                                      autoFocus
+                                    />
+                                    <button
+                                      disabled={actionLoadingId === req.id}
+                                      onClick={() => handleApprove(req.id, accessionNumber)}
+                                      className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md hover:bg-blue-700 transition"
+                                      title="Confirm Approve"
+                                    >
+                                      <Check className="size-3.5" />
+                                    </button>
+                                    <button
+                                      disabled={actionLoadingId === req.id}
+                                      onClick={() => {
+                                        setApprovingId(null)
+                                        setAccessionNumber('')
+                                      }}
+                                      className="flex size-7 items-center justify-center rounded-lg border border-white/20 glass-panel hover:text-white transition"
+                                      title="Cancel"
+                                    >
+                                      <X className="size-3.5" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <button
+                                      disabled={actionLoadingId === req.id}
+                                      onClick={() => {
+                                        setApprovingId(req.id)
+                                        setAccessionNumber('')
+                                      }}
+                                      className="flex size-7 items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition"
+                                      title="Approve Request"
+                                    >
+                                      <Check className="size-4" />
+                                    </button>
+                                    <button
+                                      disabled={actionLoadingId === req.id}
+                                      onClick={() => handleReject(req.id)}
+                                      className="flex size-7 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
+                                      title="Reject Request"
+                                    >
+                                      <X className="size-4" />
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             ) : (
-                              <span className="text-blue-200 text-[10px] font-semibold italic">Complete</span>
+                              <span className={`text-[10px] font-semibold italic pr-1 ${req.status === 'REJECTED' || req.status === 'CANCELLED' ? 'text-red-400' : 'text-green-400'}`}>Complete</span>
                             )}
                           </td>
                         </tr>

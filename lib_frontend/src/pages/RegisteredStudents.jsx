@@ -4,28 +4,26 @@ import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client.js'
 import {
   Users,
-  Clock,
   LogOut,
-  LogIn,
   Search,
   RefreshCw,
   AlertTriangle,
   Loader2,
   ArrowLeft,
+  BookOpen,
   Library,
   ClipboardList,
-  UserCheck,
-  BookOpen
+  Clock,
+  UserCheck
 } from 'lucide-react'
 
-export default function GateLogs() {
+export default function RegisteredStudents() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [logs, setLogs] = useState([])
+  const [profiles, setProfiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterBy, setFilterBy] = useState('ALL')
 
   // Admin-only page
   useEffect(() => {
@@ -34,72 +32,40 @@ export default function GateLogs() {
     }
   }, [user, navigate])
 
-  // Fetch gate logs
+  // Fetch profiles
   useEffect(() => {
-    fetchLogs()
+    fetchProfiles()
   }, [])
 
-  const fetchLogs = async () => {
+  const fetchProfiles = async () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await apiClient.get('/api/gate/logs')
+      const response = await apiClient.get('/api/profile/all')
       
-      // Flatten sessions into individual entry and exit actions
-      const flatLogs = []
-      response.data.forEach((log) => {
-        // Entry action
-        flatLogs.push({
-          id: log.id * 2,
-          userId: log.userId,
-          userName: log.userName,
-          userEmail: log.userEmail || 'N/A',
-          branch: log.branch || 'N/A',
-          year: log.year,
-          action: 'ENTRY',
-          timestamp: log.entryTime,
-          status: log.exitTime ? 'OUTSIDE' : 'INSIDE'
-        })
-        
-        // Exit action (if checked out)
-        if (log.exitTime) {
-          flatLogs.push({
-            id: log.id * 2 + 1,
-            userId: log.userId,
-            userName: log.userName,
-            userEmail: log.userEmail || 'N/A',
-            branch: log.branch || 'N/A',
-            year: log.year,
-            action: 'EXIT',
-            timestamp: log.exitTime,
-            status: 'OUTSIDE'
-          })
-        }
-      })
+      const flatProfiles = response.data || []
       
-      // Sort by timestamp descending
-      flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      setLogs(flatLogs)
+      // Sort by creation date descending
+      flatProfiles.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      setProfiles(flatProfiles)
     } catch (err) {
-      setError(err.message || 'Failed to fetch gate logs')
+      setError(err.message || 'Failed to fetch student profiles')
     } finally {
       setLoading(false)
     }
   }
 
   // Filter logs
-  const filteredLogs = logs.filter((log) => {
+  const filteredProfiles = profiles.filter((p) => {
     const q = searchTerm.toLowerCase()
-    const matchesSearch =
-      (log.userName || '').toLowerCase().includes(q) ||
-      (log.userEmail || '').toLowerCase().includes(q)
-    const matchesFilter = filterBy === 'ALL' || log.action === filterBy
-    return matchesSearch && matchesFilter
+    return (
+      (p.userName || '').toLowerCase().includes(q) ||
+      (p.userEmail || '').toLowerCase().includes(q) ||
+      (p.branch || '').toLowerCase().includes(q) ||
+      (p.contactNumber || '').includes(q)
+    )
   })
 
-  // Calculate statistics
-  const totalStudents = new Set(logs.map((l) => l.userId)).size
-  
   // Format Date Helper: 26 May 2026, 10:45 AM
   const formatDateFull = (dateString) => {
     if (!dateString) return 'N/A'
@@ -118,14 +84,6 @@ export default function GateLogs() {
     
     return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
   }
-
-  const todayLogs = logs.filter(
-    (l) =>
-      new Date(l.timestamp).toDateString() === new Date().toDateString()
-  )
-  
-  // Currently inside: number of ENTRY logs that have status === 'INSIDE'
-  const currentlyInside = logs.filter(l => l.action === 'ENTRY' && l.status === 'INSIDE').length
 
   if (user?.role !== 'ADMIN') {
     return null
@@ -169,7 +127,7 @@ export default function GateLogs() {
             </button>
             <button
               onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Clock className="size-4.5" />
               Gate Logs
@@ -183,7 +141,7 @@ export default function GateLogs() {
             </button>
             <button
               onClick={() => navigate('/admin/students')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
             >
               <UserCheck className="size-4.5" />
               Registered Students
@@ -222,12 +180,12 @@ export default function GateLogs() {
                 <ArrowLeft className="h-5 w-5 text-blue-100" />
               </button>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-white">Gate Logs</h1>
-                <p className="text-xs text-blue-200 mt-0.5">Real-time library access monitoring</p>
+                <h1 className="text-xl font-bold tracking-tight text-white">Registered Students</h1>
+                <p className="text-xs text-blue-200 mt-0.5">View all students who have completed their profiles</p>
               </div>
             </div>
             <button
-              onClick={fetchLogs}
+              onClick={fetchProfiles}
               disabled={loading}
               className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
             >
@@ -236,72 +194,17 @@ export default function GateLogs() {
             </button>
           </div>
 
-          {/* Analytics Cards */}
-          <div className="grid gap-6 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/20 glass-panel p-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-100">Total Students</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{totalStudents}</p>
-                </div>
-                <div className="rounded-lg bg-blue-100 p-3 text-blue-600">
-                  <Users className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/20 glass-panel p-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-100">Currently Inside</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{currentlyInside}</p>
-                </div>
-                <div className="rounded-lg bg-green-100 p-3 text-green-600">
-                  <LogIn className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/20 glass-panel p-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-100">Today's Entries</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{todayLogs.filter(l => l.action === 'ENTRY').length}</p>
-                </div>
-                <div className="rounded-lg bg-purple-100 p-3 text-purple-600">
-                  <Clock className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Search and Filters */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative flex-1 sm:max-w-xs">
+            <div className="relative flex-1 sm:max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-200" />
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search by name, email, branch or contact..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full rounded-lg border border-white/20 glass-panel pl-9 pr-4 py-2 text-sm placeholder:text-blue-200 focus:border-blue-600 focus:outline-none"
               />
-            </div>
-
-            <div className="flex gap-2">
-              {['ALL', 'ENTRY', 'EXIT'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilterBy(type)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                    filterBy === type
-                      ? 'bg-blue-600 text-white'
-                      : 'glass-panel text-white hover:bg-slate-200'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -310,7 +213,7 @@ export default function GateLogs() {
             <div className="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-4">
               <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-red-900">Error Loading Logs</p>
+                <p className="font-medium text-red-900">Error Loading Profiles</p>
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
@@ -323,12 +226,12 @@ export default function GateLogs() {
             </div>
           )}
 
-          {/* Logs Table */}
+          {/* Profiles Table */}
           {!loading && (
             <div className="overflow-hidden rounded-xl border border-white/20 glass-panel shadow-xl">
-              {filteredLogs.length === 0 ? (
+              {filteredProfiles.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-blue-100">No gate logs found</p>
+                  <p className="text-blue-100">No student profiles found</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -336,53 +239,30 @@ export default function GateLogs() {
                     <thead className="border-b border-white/20 glass-panel">
                       <tr className="text-blue-200 font-bold uppercase tracking-wider">
                         <th className="px-6 py-3 font-semibold">Student</th>
-                        <th className="px-6 py-3 font-semibold">Branch</th>
-                        <th className="px-6 py-3 font-semibold">Action</th>
-                        <th className="px-6 py-3 font-semibold">Time</th>
-                        <th className="px-6 py-3 font-semibold">Status</th>
+                        <th className="px-6 py-3 font-semibold">Branch & Year</th>
+                        <th className="px-6 py-3 font-semibold">Contact & Address</th>
+                        <th className="px-6 py-3 font-semibold">Registered At</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filteredLogs.map((log) => (
-                        <tr key={log.id} className="hover:bg-white/10 transition">
+                      {filteredProfiles.map((p) => (
+                        <tr key={p.id} className="hover:bg-white/10 transition">
                           <td className="px-6 py-4 font-bold text-white">
                             <div>
-                              <p className="font-bold text-white">{log.userName}</p>
-                              <p className="text-[10px] text-blue-200 mt-0.5">{log.userEmail}</p>
+                              <p className="font-bold text-white text-sm">{p.userName}</p>
+                              <p className="text-xs text-blue-200 mt-0.5">{p.userEmail}</p>
                             </div>
                           </td>
                           <td className="px-6 py-4 font-medium text-blue-100">
-                            {log.branch || 'N/A'}
-                            {log.year && ` - Year ${log.year}`}
+                            <p>{p.branch || 'N/A'}</p>
+                            <p className="text-blue-200 mt-0.5">Year {p.year}</p>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {log.action === 'ENTRY' ? (
-                                <>
-                                  <LogIn className="h-4 w-4 text-green-600" />
-                                  <span className="text-xs font-bold text-green-600">Entry</span>
-                                </>
-                              ) : (
-                                <>
-                                  <LogOut className="h-4 w-4 text-red-600" />
-                                  <span className="text-xs font-bold text-red-600">Exit</span>
-                                </>
-                              )}
-                            </div>
+                          <td className="px-6 py-4 font-medium text-blue-100 max-w-xs">
+                            <p>{p.contactNumber || 'N/A'}</p>
+                            <p className="text-blue-200 mt-0.5 truncate" title={p.address}>{p.address || 'N/A'}</p>
                           </td>
-                          <td className="px-6 py-4 text-blue-200">
-                            {formatDateFull(log.timestamp)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold border ${
-                                log.status === 'INSIDE'
-                                  ? 'bg-green-50 text-green-700 border-green-200/40'
-                                  : 'glass-panel text-white border-white/20/40'
-                              }`}
-                            >
-                              {log.status}
-                            </span>
+                          <td className="px-6 py-4 text-blue-200 font-medium">
+                            {formatDateFull(p.createdAt)}
                           </td>
                         </tr>
                       ))}
@@ -395,7 +275,7 @@ export default function GateLogs() {
 
           {/* Records count */}
           <p className="text-xs text-blue-200 font-medium">
-            Showing {filteredLogs.length} of {logs.length} records
+            Showing {filteredProfiles.length} of {profiles.length} registered students
           </p>
         </div>
       </div>

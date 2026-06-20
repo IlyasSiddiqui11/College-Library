@@ -22,6 +22,10 @@ public class BookResponse {
     private String author;
     private int totalCopies;
     private int availableCopies;
+    private String publisher;
+    private Double price;
+    private Integer publicationYear;
+    private String accessionNumbers;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

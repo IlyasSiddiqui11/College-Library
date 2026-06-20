@@ -38,6 +38,18 @@ public class Book {
     @Column(name = "available_copies", nullable = false)
     private int availableCopies;
 
+    @Column(name = "publisher")
+    private String publisher;
+
+    @Column(name = "price")
+    private Double price;
+
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    @Column(name = "accession_numbers")
+    private String accessionNumbers;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

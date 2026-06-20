@@ -13,7 +13,9 @@ import com.example.library.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +72,14 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not completed for user ID: " + userId));
 
         return mapToProfileResponse(profile);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfileResponse> getAllProfiles() {
+        return profileRepository.findAll()
+                .stream()
+                .map(this::mapToProfileResponse)
+                .collect(Collectors.toList());
     }
 
     private ProfileResponse mapToProfileResponse(StudentProfile profile) {

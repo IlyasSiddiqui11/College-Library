@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -28,5 +30,11 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> getProfile(@PathVariable Long userId) {
         ProfileResponse response = profileService.getProfileByUserId(userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ProfileResponse>> getAllProfiles() {
+        List<ProfileResponse> responses = profileService.getAllProfiles();
+        return ResponseEntity.ok(responses);
     }
 }

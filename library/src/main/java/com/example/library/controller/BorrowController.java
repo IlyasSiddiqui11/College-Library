@@ -43,4 +43,12 @@ public class BorrowController {
         List<BorrowResponse> response = borrowService.getRequestsByUserId(userId);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{requestId}/cancel")
+    public ResponseEntity<BorrowResponse> cancelBorrowRequest(
+            @PathVariable Long requestId,
+            @RequestParam Long userId) {
+        BorrowResponse response = borrowService.cancelBorrowRequest(requestId, userId);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -27,7 +27,9 @@ public class BorrowResponse {
     private BorrowStatus status;
     private LocalDateTime requestDate;
     private LocalDateTime approvedDate;
+    private LocalDateTime dueDate;
     private LocalDateTime returnedDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String accessionNumber;
 }

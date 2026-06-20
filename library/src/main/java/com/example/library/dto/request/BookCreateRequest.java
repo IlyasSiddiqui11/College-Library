@@ -30,4 +30,9 @@ public class BookCreateRequest {
     @NotNull(message = "Total copies is required")
     @Min(value = 1, message = "Total copies must be at least 1")
     private Integer totalCopies;
+
+    private String publisher;
+    private Double price;
+    private Integer publicationYear;
+    private String accessionNumbers;
 }

@@ -33,6 +33,10 @@ public class BookService {
                 .author(request.getAuthor())
                 .totalCopies(request.getTotalCopies())
                 .availableCopies(request.getTotalCopies())
+                .publisher(request.getPublisher())
+                .price(request.getPrice())
+                .publicationYear(request.getPublicationYear())
+                .accessionNumbers(request.getAccessionNumbers())
                 .build();
 
         Book savedBook = bookRepository.save(book);
@@ -80,6 +84,10 @@ public class BookService {
                 .author(book.getAuthor())
                 .totalCopies(book.getTotalCopies())
                 .availableCopies(book.getAvailableCopies())
+                .publisher(book.getPublisher())
+                .price(book.getPrice())
+                .publicationYear(book.getPublicationYear())
+                .accessionNumbers(book.getAccessionNumbers())
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
                 .build();
