@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X, QrCode,
   Clock,
-  UserCheck
+  UserCheck, Download
 } from 'lucide-react'
 
 export default function BorrowRequests() {
@@ -126,8 +126,47 @@ export default function BorrowRequests() {
   const selectedReq = borrowRequests.find((req) => req.id === selectedRequestId)
   const pendingCount = borrowRequests.filter((r) => r.status === 'PENDING').length
 
+  const handleExport = () => {
+    const headers = ['Request ID', 'Book Title', 'Book Author', 'ISBN', 'Requester Name', 'Requester ID', 'Request Date', 'Due Date', 'Accession Number', 'Status', 'Approved Date', 'Returned Date', 'Rejected/Cancelled Date']
+    const csvRows = [
+      headers.join(','),
+      ...filteredRequests.map(req => {
+        const approvedDate = req.approvedDate ? new Date(req.approvedDate).toLocaleString() : ''
+        const returnedDate = req.returnedDate ? new Date(req.returnedDate).toLocaleString() : ''
+        let rejectedDate = ''
+        if ((req.status === 'REJECTED' || req.status === 'CANCELLED') && req.updatedAt) {
+          rejectedDate = new Date(req.updatedAt).toLocaleString()
+        }
+
+        return [
+          `"${req.id}"`,
+          `"${(req.bookTitle || '').replace(/"/g, '""')}"`,
+          `"${(req.bookAuthor || req.author || '').replace(/"/g, '""')}"`,
+          `"${req.isbn || ''}"`,
+          `"${(req.userName || '').replace(/"/g, '""')}"`,
+          `"${req.userId || ''}"`,
+          `"${new Date(req.requestDate).toLocaleString()}"`,
+          `"${req.dueDate ? new Date(req.dueDate).toLocaleString() : ''}"`,
+          `"${req.accessionNumber || ''}"`,
+          `"${req.status}"`,
+          `"${approvedDate}"`,
+          `"${returnedDate}"`,
+          `"${rejectedDate}"`
+        ].join(',')
+      })
+    ]
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `borrow_requests_${new Date().getTime()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
@@ -220,6 +259,14 @@ export default function BorrowRequests() {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredRequests.length === 0}
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-green-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-blue-200" />
                 <input
@@ -375,7 +422,7 @@ export default function BorrowRequests() {
                       </div>
                       <div>
                         <p className="text-blue-200">Default Schedule Duration</p>
-                        <p className="font-bold text-blue-600 mt-0.5">14 Days Loan</p>
+                        <p className="font-bold text-blue-600 mt-0.5">7 Days Loan</p>
                       </div>
                       {selectedReq.accessionNumber && (
                         <div>

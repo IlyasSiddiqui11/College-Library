@@ -132,7 +132,7 @@ export default function AdminDashboard() {
   const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
 
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Admin Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">

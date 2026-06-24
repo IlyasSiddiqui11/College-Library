@@ -14,7 +14,8 @@ import {
   Library,
   ClipboardList,
   Clock,
-  UserCheck
+  UserCheck,
+  Download
 } from 'lucide-react'
 
 export default function RegisteredStudents() {
@@ -85,12 +86,36 @@ export default function RegisteredStudents() {
     return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
   }
 
+  const handleExport = () => {
+    const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Contact Number', 'Address', 'Registered At']
+    const csvRows = [
+      headers.join(','),
+      ...filteredProfiles.map(p => [
+        `"${p.userName || ''}"`,
+        `"${p.userEmail || ''}"`,
+        `"${p.branch || 'N/A'}"`,
+        `"${p.year || ''}"`,
+        `"${p.contactNumber || ''}"`,
+        `"${(p.address || '').replace(/"/g, '""')}"`,
+        `"${formatDateFull(p.createdAt)}"`
+      ].join(','))
+    ]
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `registered_students_${new Date().getTime()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (user?.role !== 'ADMIN') {
     return null
   }
 
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Admin Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
@@ -184,14 +209,24 @@ export default function RegisteredStudents() {
                 <p className="text-xs text-blue-200 mt-0.5">View all students who have completed their profiles</p>
               </div>
             </div>
-            <button
-              onClick={fetchProfiles}
-              disabled={loading}
-              className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
-            >
-              <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredProfiles.length === 0}
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-green-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
+              <button
+                onClick={fetchProfiles}
+                disabled={loading}
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Search and Filters */}
@@ -249,7 +284,12 @@ export default function RegisteredStudents() {
                         <tr key={p.id} className="hover:bg-white/10 transition">
                           <td className="px-6 py-4 font-bold text-white">
                             <div>
-                              <p className="font-bold text-white text-sm">{p.userName}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-white text-sm">{p.userName}</p>
+                                <span className="px-1.5 py-0.5 rounded-md bg-blue-500/20 border border-blue-500/30 text-[10px] text-blue-200 font-mono">
+                                  ID: {p.userId || p.id}
+                                </span>
+                              </div>
                               <p className="text-xs text-blue-200 mt-0.5">{p.userEmail}</p>
                             </div>
                           </td>

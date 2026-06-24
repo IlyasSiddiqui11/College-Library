@@ -6,7 +6,7 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList, 
   Users, PlusCircle, MinusCircle, X, ScanLine, Camera, Clock,
-  UserCheck
+  UserCheck, Download
 } from 'lucide-react'
 
 export default function InventoryManagement() {
@@ -217,8 +217,34 @@ export default function InventoryManagement() {
     )
   })
 
+  const handleExport = () => {
+    const headers = ['ID', 'Title', 'Author', 'ISBN', 'Publisher', 'Price', 'Publication Year', 'Available Copies', 'Total Copies']
+    const csvRows = [
+      headers.join(','),
+      ...filteredBooks.map(book => [
+        `"${book.id}"`,
+        `"${(book.title || '').replace(/"/g, '""')}"`,
+        `"${(book.author || '').replace(/"/g, '""')}"`,
+        `"${book.isbn || ''}"`,
+        `"${(book.publisher || '').replace(/"/g, '""')}"`,
+        `"${book.price || ''}"`,
+        `"${book.publicationYear || ''}"`,
+        `"${book.availableCopies}"`,
+        `"${book.totalCopies}"`
+      ].join(','))
+    ]
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `catalog_inventory_${new Date().getTime()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
@@ -306,6 +332,14 @@ export default function InventoryManagement() {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredBooks.length === 0}
+                className="flex items-center gap-1 rounded-xl border border-white/20 glass-panel px-4 py-2 text-xs font-bold text-green-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-blue-200" />
                 <input

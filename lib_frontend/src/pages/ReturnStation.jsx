@@ -17,6 +17,7 @@ export default function ReturnStation() {
   const [returnStatus, setReturnStatus] = useState('idle')
   const [isbn, setIsbn] = useState('')
   const [studentId, setStudentId] = useState('')
+  const [accessionNumber, setAccessionNumber] = useState('')
   const [sessionHistory, setSessionHistory] = useState([])
   const [errorMsg, setErrorMsg] = useState('')
   const [successDetails, setSuccessDetails] = useState(null)
@@ -24,6 +25,7 @@ export default function ReturnStation() {
   // Input refs for barcode gun and student ID
   const barcodeInputRef = useRef(null)
   const studentInputRef = useRef(null)
+  const accessionInputRef = useRef(null)
   const scannerRef = useRef(null)
   const isProcessing = useRef(false)
 
@@ -39,7 +41,7 @@ export default function ReturnStation() {
   // Keep barcode gun input focused at all times except when user is typing student ID
   useEffect(() => {
     const keepFocused = () => {
-      if (document.activeElement === studentInputRef.current) {
+      if (document.activeElement === studentInputRef.current || document.activeElement === accessionInputRef.current) {
         return
       }
       if (barcodeInputRef.current && returnStatus === 'idle') {
@@ -55,12 +57,12 @@ export default function ReturnStation() {
   // Handle USB Gun Scan Submit (auto trigger when barcode is entered via gun)
   const handleGunScanSubmit = (e) => {
     e.preventDefault()
-    if (!isbn.trim() || !studentId.trim()) {
-      setErrorMsg('Please specify both Student ID and Book ISBN.')
+    if (!isbn.trim() || !studentId.trim() || !accessionNumber.trim()) {
+      setErrorMsg('Please specify Student ID, Book ISBN, and Accession Number.')
       setReturnStatus('error')
       return
     }
-    processReturn(Number(studentId), isbn.trim())
+    processReturn(Number(studentId), isbn.trim(), accessionNumber.trim())
   }
 
   const initScanner = () => {
@@ -146,14 +148,14 @@ export default function ReturnStation() {
     if (isProcessing.current) return
     isProcessing.current = true
 
-    if (!studentId) {
-      setErrorMsg('Please specify Student ID manually before scanning the ISBN barcode.')
+    if (!studentId || !accessionNumber) {
+      setErrorMsg('Please specify Student ID and Accession Number manually before scanning the ISBN barcode.')
       setReturnStatus('error')
     } else {
-      processReturn(Number(studentId), isbnCode.trim())
+      processReturn(Number(studentId), isbnCode.trim(), accessionNumber.trim())
     }
   }
-  const processReturn = async (sId, isbnCode) => {
+  const processReturn = async (sId, isbnCode, accNum) => {
     setReturnStatus('processing')
     setErrorMsg('')
 
@@ -161,7 +163,8 @@ export default function ReturnStation() {
       const response = await apiClient.post('/api/borrow/return', null, {
         params: {
           userId: sId,
-          isbn: isbnCode
+          isbn: isbnCode,
+          accessionNumber: accNum
         }
       })
 
@@ -184,6 +187,7 @@ export default function ReturnStation() {
       // Auto reset to idle after 4 seconds
       setTimeout(() => {
         setIsbn('')
+        setAccessionNumber('')
         setReturnStatus('idle')
         setSuccessDetails(null)
       }, 4000)
@@ -195,7 +199,7 @@ export default function ReturnStation() {
   }
 
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
@@ -342,6 +346,19 @@ export default function ReturnStation() {
                       placeholder="Click here & Scan with Gun / Enter ISBN"
                       value={isbn}
                       onChange={(e) => setIsbn(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2.5 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-blue-200 uppercase">Accession Number</label>
+                    <input
+                      ref={accessionInputRef}
+                      type="text"
+                      required
+                      placeholder="Enter Accession Number"
+                      value={accessionNumber}
+                      onChange={(e) => setAccessionNumber(e.target.value)}
                       className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2.5 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel"
                     />
                   </div>

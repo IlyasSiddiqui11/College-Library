@@ -80,6 +80,14 @@ public class BorrowService {
             throw new BadRequestException("No copies available of book: " + book.getTitle());
         }
 
+        // Validate accession number uniqueness: cannot be assigned to another active loan
+        if (accessionNumber != null && !accessionNumber.isBlank()) {
+            boolean accessionInUse = borrowRequestRepository.existsByAccessionNumberAndStatus(accessionNumber, BorrowStatus.APPROVED);
+            if (accessionInUse) {
+                throw new BadRequestException("Accession number '" + accessionNumber + "' is already assigned to another active borrow. Please use a different accession number.");
+            }
+        }
+
         // Safely decrement available copies
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookRepository.save(book);
@@ -127,13 +135,17 @@ public class BorrowService {
     }
 
     @Transactional
-    public BorrowResponse returnBook(Long userId, String isbn) {
+    public BorrowResponse returnBook(Long userId, String isbn, String accessionNumber) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         BorrowRequest request = borrowRequestRepository
                 .findFirstByUserIdAndBookIsbnAndStatusOrderByRequestDateDesc(user.getId(), isbn, BorrowStatus.APPROVED)
                 .orElseThrow(() -> new ResourceNotFoundException("No active approved borrow request found for user ID: " + userId + " and book ISBN: " + isbn));
+
+        if (request.getAccessionNumber() != null && !request.getAccessionNumber().equals(accessionNumber)) {
+            throw new BadRequestException("Returned book accession number does not match the borrowed book. Expected: " + request.getAccessionNumber() + ", Provided: " + accessionNumber);
+        }
 
         Book book = request.getBook();
         // Increment available copies

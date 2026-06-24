@@ -9,6 +9,7 @@ import {
   LogIn,
   Search,
   RefreshCw,
+  Download,
   AlertTriangle,
   Loader2,
   ArrowLeft,
@@ -45,41 +46,22 @@ export default function GateLogs() {
     try {
       const response = await apiClient.get('/api/gate/logs')
       
-      // Flatten sessions into individual entry and exit actions
-      const flatLogs = []
-      response.data.forEach((log) => {
-        // Entry action
-        flatLogs.push({
-          id: log.id * 2,
-          userId: log.userId,
-          userName: log.userName,
-          userEmail: log.userEmail || 'N/A',
-          branch: log.branch || 'N/A',
-          year: log.year,
-          action: 'ENTRY',
-          timestamp: log.entryTime,
-          status: log.exitTime ? 'OUTSIDE' : 'INSIDE'
-        })
-        
-        // Exit action (if checked out)
-        if (log.exitTime) {
-          flatLogs.push({
-            id: log.id * 2 + 1,
-            userId: log.userId,
-            userName: log.userName,
-            userEmail: log.userEmail || 'N/A',
-            branch: log.branch || 'N/A',
-            year: log.year,
-            action: 'EXIT',
-            timestamp: log.exitTime,
-            status: 'OUTSIDE'
-          })
-        }
-      })
+      // Map sessions into a single row with entry and exit times
+      const sessionLogs = response.data.map((log) => ({
+        id: log.id,
+        userId: log.userId,
+        userName: log.userName,
+        userEmail: log.userEmail || 'N/A',
+        branch: log.branch || 'N/A',
+        year: log.year,
+        entryTime: log.entryTime,
+        exitTime: log.exitTime,
+        status: log.exitTime ? 'OUTSIDE' : 'INSIDE'
+      }))
       
-      // Sort by timestamp descending
-      flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      setLogs(flatLogs)
+      // Sort by entryTime descending
+      sessionLogs.sort((a, b) => new Date(b.entryTime).getTime() - new Date(a.entryTime).getTime())
+      setLogs(sessionLogs)
     } catch (err) {
       setError(err.message || 'Failed to fetch gate logs')
     } finally {
@@ -93,7 +75,7 @@ export default function GateLogs() {
     const matchesSearch =
       (log.userName || '').toLowerCase().includes(q) ||
       (log.userEmail || '').toLowerCase().includes(q)
-    const matchesFilter = filterBy === 'ALL' || log.action === filterBy
+    const matchesFilter = filterBy === 'ALL' || log.status === filterBy
     return matchesSearch && matchesFilter
   })
 
@@ -121,18 +103,42 @@ export default function GateLogs() {
 
   const todayLogs = logs.filter(
     (l) =>
-      new Date(l.timestamp).toDateString() === new Date().toDateString()
+      new Date(l.entryTime).toDateString() === new Date().toDateString()
   )
   
-  // Currently inside: number of ENTRY logs that have status === 'INSIDE'
-  const currentlyInside = logs.filter(l => l.action === 'ENTRY' && l.status === 'INSIDE').length
+  // Currently inside: number of logs that have status === 'INSIDE'
+  const currentlyInside = logs.filter(l => l.status === 'INSIDE').length
+
+  const handleExport = () => {
+    const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
+    const csvRows = [
+      headers.join(','),
+      ...filteredLogs.map(log => [
+        `"${log.userName || ''}"`,
+        `"${log.userEmail || ''}"`,
+        `"${log.branch || 'N/A'}"`,
+        `"${log.year || ''}"`,
+        `"${formatDateFull(log.entryTime)}"`,
+        `"${formatDateFull(log.exitTime)}"`,
+        `"${log.status}"`
+      ].join(','))
+    ]
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `gate_logs_${new Date().getTime()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   if (user?.role !== 'ADMIN') {
     return null
   }
 
   return (
-    <div className="min-h-screen flex text-white">
+    <div className="h-screen flex text-white">
       {/* Admin Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
@@ -226,14 +232,24 @@ export default function GateLogs() {
                 <p className="text-xs text-blue-200 mt-0.5">Real-time library access monitoring</p>
               </div>
             </div>
-            <button
-              onClick={fetchLogs}
-              disabled={loading}
-              className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
-            >
-              <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredLogs.length === 0}
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-green-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
+              <button
+                onClick={fetchLogs}
+                disabled={loading}
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Analytics Cards */}
@@ -289,7 +305,7 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
-              {['ALL', 'ENTRY', 'EXIT'].map((type) => (
+              {['ALL', 'INSIDE', 'OUTSIDE'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setFilterBy(type)}
@@ -337,8 +353,8 @@ export default function GateLogs() {
                       <tr className="text-blue-200 font-bold uppercase tracking-wider">
                         <th className="px-6 py-3 font-semibold">Student</th>
                         <th className="px-6 py-3 font-semibold">Branch</th>
-                        <th className="px-6 py-3 font-semibold">Action</th>
-                        <th className="px-6 py-3 font-semibold">Time</th>
+                        <th className="px-6 py-3 font-semibold">Entry Time</th>
+                        <th className="px-6 py-3 font-semibold">Exit Time</th>
                         <th className="px-6 py-3 font-semibold">Status</th>
                       </tr>
                     </thead>
@@ -355,23 +371,11 @@ export default function GateLogs() {
                             {log.branch || 'N/A'}
                             {log.year && ` - Year ${log.year}`}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {log.action === 'ENTRY' ? (
-                                <>
-                                  <LogIn className="h-4 w-4 text-green-600" />
-                                  <span className="text-xs font-bold text-green-600">Entry</span>
-                                </>
-                              ) : (
-                                <>
-                                  <LogOut className="h-4 w-4 text-red-600" />
-                                  <span className="text-xs font-bold text-red-600">Exit</span>
-                                </>
-                              )}
-                            </div>
+                          <td className="px-6 py-4 text-blue-200">
+                            {formatDateFull(log.entryTime)}
                           </td>
                           <td className="px-6 py-4 text-blue-200">
-                            {formatDateFull(log.timestamp)}
+                            {formatDateFull(log.exitTime)}
                           </td>
                           <td className="px-6 py-4">
                             <span
