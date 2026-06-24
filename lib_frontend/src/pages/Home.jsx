@@ -82,7 +82,7 @@ export default function Home() {
         </div>
 
         <div className="relative mx-auto max-w-4xl text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-900/40 px-4 py-2 text-sm font-medium text-blue-200">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/50 px-4 py-2 text-sm font-medium text-blue-600">
             <Zap className="h-4 w-4" />
             Modern Library Management System
           </div>
@@ -211,7 +211,7 @@ export default function Home() {
           <p className="mb-8 text-lg text-blue-100">Join the BCOE-lib ecosystem and experience modern library management.</p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-blue-700 shadow-xl hover:bg-blue-50 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-xl glass-panel px-8 py-4 text-base font-semibold text-blue-600 shadow-xl hover:bg-white/10 transition"
           >
             Get Started Now
             <ArrowRight className="h-4 w-4" />
