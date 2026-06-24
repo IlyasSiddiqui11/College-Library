@@ -28,6 +28,7 @@ public class BorrowService {
     private final BorrowRequestRepository borrowRequestRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional
     public BorrowResponse submitBorrowRequest(BorrowRequestDto dto) {
@@ -96,6 +97,20 @@ public class BorrowService {
         request.setApprovedDate(LocalDateTime.now());
         request.setAccessionNumber(accessionNumber);
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
+
+        // Send approval email
+        String userEmail = approvedRequest.getUser().getEmail();
+        if (userEmail != null && !userEmail.isBlank()) {
+            LocalDateTime dueDate = approvedRequest.getApprovedDate().plusDays(7);
+            String subject = "Borrow Request Approved - " + book.getTitle();
+            String body = String.format("Your request to borrow '%s' has been approved.\n" +
+                    "You have to return this book on %s.\n\n" +
+                    "Accession Number: %s", 
+                    book.getTitle(), 
+                    dueDate.toLocalDate().toString(),
+                    accessionNumber != null ? accessionNumber : "N/A");
+            emailService.sendEmail(userEmail, subject, body);
+        }
 
         return mapToBorrowResponse(approvedRequest);
     }
