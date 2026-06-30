@@ -63,6 +63,7 @@ public class ReturnReminderTask {
                                 "----------------------------------------\n\n" +
 
                                 "Please return the book on or before the due date to avoid overdue fines or penalties.\n\n" +
+                                "Returning books on time helps ensure that other students can also access the library's resources.\n" +
 
                                 "If you have already returned the book, please disregard this reminder.\n\n" +
 

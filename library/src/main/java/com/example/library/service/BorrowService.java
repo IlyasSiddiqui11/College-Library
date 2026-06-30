@@ -28,7 +28,6 @@ public class BorrowService {
     private final BorrowRequestRepository borrowRequestRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final EmailService emailService;
     private final BorrowingService borrowingService;
 
     @Transactional
