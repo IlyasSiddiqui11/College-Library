@@ -50,13 +50,34 @@ public class ReturnReminderTask {
             if (userEmail != null && !userEmail.isBlank()) {
                 LocalDateTime dueDate = request.getApprovedDate().plusDays(7);
                 String subject = "Reminder: Book Due Tomorrow - " + request.getBook().getTitle();
-                String body = String.format("Hello %s,\n\n" +
-                        "This is a friendly reminder that the book you borrowed ('%s') is due tomorrow, %s.\n\n" +
-                        "Please ensure it is returned on time to avoid any penalties.\n\n" +
-                        "Thank you,\nLibrary Management",
+                String body = String.format(
+                        "Dear %s,\n\n" +
+                                "This is a friendly reminder that the following book borrowed from the College Library is due for return tomorrow.\n\n" +
+
+                                "Book Details:\n" +
+                                "----------------------------------------\n" +
+                                "Title       : %s\n" +
+                                "Author      : %s\n" +
+                                "ISBN        : %s\n" +
+                                "Due Date    : %s\n" +
+                                "----------------------------------------\n\n" +
+
+                                "Please return the book on or before the due date to avoid overdue fines or penalties.\n\n" +
+
+                                "If you have already returned the book, please disregard this reminder.\n\n" +
+
+                                "Thank you for using the College Library Management System.\n\n" +
+
+                                "Best Regards,\n" +
+                                "College Library\n" +
+                                "Library Management System",
+
                         request.getUser().getName(),
                         request.getBook().getTitle(),
-                        dueDate.toLocalDate().toString());
+                        request.getBook().getAuthor(),
+                        request.getBook().getIsbn(),
+                        dueDate.toLocalDate()
+                );
                 
                 emailService.sendEmail(userEmail, subject, body);
             }

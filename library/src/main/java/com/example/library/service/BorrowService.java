@@ -2,7 +2,6 @@ package com.example.library.service;
 
 import lombok.RequiredArgsConstructor;
 
-
 import com.example.library.dto.request.BorrowRequestDto;
 import com.example.library.dto.response.BorrowResponse;
 import com.example.library.entity.Book;
@@ -17,6 +16,7 @@ import com.example.library.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +29,7 @@ public class BorrowService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final BorrowingService borrowingService;
 
     @Transactional
     public BorrowResponse submitBorrowRequest(BorrowRequestDto dto) {
@@ -38,9 +39,10 @@ public class BorrowService {
         Book book = bookRepository.findByIsbn(dto.getIsbn())
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with ISBN: " + dto.getIsbn()));
 
-        // Check if there is an active (PENDING or APPROVED) request for this book by this user
+        // Check if there is an active (PENDING or APPROVED) request for this book by
+        // this user
         boolean hasActiveRequest = borrowRequestRepository.findByUserId(user.getId()).stream()
-                .anyMatch(req -> req.getBook().getId().equals(book.getId()) && 
+                .anyMatch(req -> req.getBook().getId().equals(book.getId()) &&
                         (req.getStatus() == BorrowStatus.PENDING || req.getStatus() == BorrowStatus.APPROVED));
 
         if (hasActiveRequest) {
@@ -53,7 +55,8 @@ public class BorrowService {
                 .count();
 
         if (activeBorrowCount >= 2) {
-            throw new BadRequestException("Borrow limit reached: students may only borrow up to 2 books simultaneously.");
+            throw new BadRequestException(
+                    "Borrow limit reached: students may only borrow up to 2 books simultaneously.");
         }
 
         BorrowRequest request = BorrowRequest.builder()
@@ -73,7 +76,8 @@ public class BorrowService {
                 .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found with ID: " + requestId));
 
         if (request.getStatus() != BorrowStatus.PENDING) {
-            throw new BadRequestException("Borrow request must be in PENDING status to be approved. Current status: " + request.getStatus());
+            throw new BadRequestException(
+                    "Borrow request must be in PENDING status to be approved. Current status: " + request.getStatus());
         }
 
         Book book = request.getBook();
@@ -81,11 +85,14 @@ public class BorrowService {
             throw new BadRequestException("No copies available of book: " + book.getTitle());
         }
 
-        // Validate accession number uniqueness: cannot be assigned to another active loan
+        // Validate accession number uniqueness: cannot be assigned to another active
+        // loan
         if (accessionNumber != null && !accessionNumber.isBlank()) {
-            boolean accessionInUse = borrowRequestRepository.existsByAccessionNumberAndStatus(accessionNumber, BorrowStatus.APPROVED);
+            boolean accessionInUse = borrowRequestRepository.existsByAccessionNumberAndStatus(accessionNumber,
+                    BorrowStatus.APPROVED);
             if (accessionInUse) {
-                throw new BadRequestException("Accession number '" + accessionNumber + "' is already assigned to another active borrow. Please use a different accession number.");
+                throw new BadRequestException("Accession number '" + accessionNumber
+                        + "' is already assigned to another active borrow. Please use a different accession number.");
             }
         }
 
@@ -98,18 +105,19 @@ public class BorrowService {
         request.setAccessionNumber(accessionNumber);
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
 
-        // Send approval email
+        // Send approval email via shared borrowing mail service
         String userEmail = approvedRequest.getUser().getEmail();
         if (userEmail != null && !userEmail.isBlank()) {
-            LocalDateTime dueDate = approvedRequest.getApprovedDate().plusDays(7);
-            String subject = "Borrow Request Approved - " + book.getTitle();
-            String body = String.format("Your request to borrow '%s' has been approved.\n" +
-                    "You have to return this book on %s.\n\n" +
-                    "Accession Number: %s", 
-                    book.getTitle(), 
-                    dueDate.toLocalDate().toString(),
-                    accessionNumber != null ? accessionNumber : "N/A");
-            emailService.sendEmail(userEmail, subject, body);
+            LocalDate issueDate = approvedRequest.getApprovedDate().toLocalDate();
+            LocalDate dueDate = issueDate.plusDays(7);
+            borrowingService.processBookApproval(
+                    userEmail,
+                    approvedRequest.getUser().getName(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getIsbn(),
+                    issueDate,
+                    dueDate);
         }
 
         return mapToBorrowResponse(approvedRequest);
@@ -121,7 +129,8 @@ public class BorrowService {
                 .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found with ID: " + requestId));
 
         if (request.getStatus() != BorrowStatus.PENDING) {
-            throw new BadRequestException("Borrow request must be in PENDING status to be rejected. Current status: " + request.getStatus());
+            throw new BadRequestException(
+                    "Borrow request must be in PENDING status to be rejected. Current status: " + request.getStatus());
         }
 
         request.setStatus(BorrowStatus.REJECTED);
@@ -140,7 +149,8 @@ public class BorrowService {
         }
 
         if (request.getStatus() != BorrowStatus.PENDING) {
-            throw new BadRequestException("Only PENDING requests can be cancelled. Current status: " + request.getStatus());
+            throw new BadRequestException(
+                    "Only PENDING requests can be cancelled. Current status: " + request.getStatus());
         }
 
         request.setStatus(BorrowStatus.CANCELLED);
@@ -156,10 +166,12 @@ public class BorrowService {
 
         BorrowRequest request = borrowRequestRepository
                 .findFirstByUserIdAndBookIsbnAndStatusOrderByRequestDateDesc(user.getId(), isbn, BorrowStatus.APPROVED)
-                .orElseThrow(() -> new ResourceNotFoundException("No active approved borrow request found for user ID: " + userId + " and book ISBN: " + isbn));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active approved borrow request found for user ID: " + userId + " and book ISBN: " + isbn));
 
         if (request.getAccessionNumber() != null && !request.getAccessionNumber().equals(accessionNumber)) {
-            throw new BadRequestException("Returned book accession number does not match the borrowed book. Expected: " + request.getAccessionNumber() + ", Provided: " + accessionNumber);
+            throw new BadRequestException("Returned book accession number does not match the borrowed book. Expected: "
+                    + request.getAccessionNumber() + ", Provided: " + accessionNumber);
         }
 
         Book book = request.getBook();
@@ -170,6 +182,18 @@ public class BorrowService {
         request.setStatus(BorrowStatus.RETURNED);
         request.setReturnedDate(LocalDateTime.now());
         BorrowRequest returnedRequest = borrowRequestRepository.save(request);
+
+        // Send return confirmation email via shared borrowing mail service
+        String userEmail = returnedRequest.getUser().getEmail();
+        if (userEmail != null && !userEmail.isBlank()) {
+            borrowingService.processBookReturn(
+                    userEmail,
+                    returnedRequest.getUser().getName(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getIsbn(),
+                    returnedRequest.getReturnedDate().toLocalDate());
+        }
 
         return mapToBorrowResponse(returnedRequest);
     }
