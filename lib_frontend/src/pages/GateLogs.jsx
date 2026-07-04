@@ -175,7 +175,7 @@ export default function GateLogs() {
             </button>
             <button
               onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 text-left transition"
             >
               <Clock className="size-4.5" />
               Gate Logs

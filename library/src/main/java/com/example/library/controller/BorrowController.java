@@ -27,7 +27,7 @@ public class BorrowController {
     }
 
     @PostMapping("/return")
-    public ResponseEntity<BorrowResponse> returnBook(@RequestParam Long userId, @RequestParam String isbn, @RequestParam String accessionNumber) {
+    public ResponseEntity<BorrowResponse> returnBook(@RequestParam Long userId, @RequestParam String isbn, @RequestParam(required = false) String accessionNumber) {
         BorrowResponse response = borrowService.returnBook(userId, isbn, accessionNumber);
         return ResponseEntity.ok(response);
     }

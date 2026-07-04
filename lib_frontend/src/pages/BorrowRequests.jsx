@@ -42,15 +42,6 @@ export default function BorrowRequests() {
     try {
       const response = await apiClient.get('/api/borrow')
       setBorrowRequests(response.data)
-      
-      if (response.data.length > 0 && !selectedRequestId) {
-        const pending = response.data.find((r) => r.status === 'PENDING')
-        if (pending) {
-          setSelectedRequestId(pending.id)
-        } else {
-          setSelectedRequestId(response.data[0].id)
-        }
-      }
     } catch (err) {
       console.error('Failed to fetch lending queue:', err)
     } finally {
@@ -189,7 +180,7 @@ export default function BorrowRequests() {
             </button>
             <button
               onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 text-left transition"
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests

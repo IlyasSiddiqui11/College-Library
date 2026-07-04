@@ -5,11 +5,11 @@ import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
-  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText
+  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText, ChevronDown
 } from 'lucide-react'
 
 export default function StudentDashboard() {
-  const { user, profile, completeProfile, logout } = useAuth()
+  const { user, profile, completeProfile, logout, profileLoading } = useAuth()
   const navigate = useNavigate()
 
   // State variables
@@ -32,6 +32,7 @@ export default function StudentDashboard() {
   // Profile completion states
   const [branch, setBranch] = useState('')
   const [year, setYear] = useState(1)
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false)
   const [contact, setContact] = useState('')
   const [address, setAddress] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
@@ -103,12 +104,12 @@ export default function StudentDashboard() {
 
   // Auto trigger profile completion modal if incomplete
   useEffect(() => {
-    if (user && !profile && !loading) {
+    if (user && !profile && !loading && !profileLoading) {
       setShowProfileModal(true)
     } else {
       setShowProfileModal(false)
     }
-  }, [user, profile, loading])
+  }, [user, profile, loading, profileLoading])
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
@@ -595,17 +596,41 @@ export default function StudentDashboard() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="relative">
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Academic Year</label>
-                  <select
-                    value={year}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                  <button
+                    type="button"
+                    onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
+                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 flex justify-between items-center"
                   >
-                    {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
-                    ))}
-                  </select>
+                    <span>Year {year}</span>
+                    <ChevronDown className="size-3 text-blue-200" />
+                  </button>
+                  {yearDropdownOpen && (
+                    <>
+                      <div className="absolute top-[calc(100%+4px)] left-0 z-50 w-full rounded-lg border border-white/20 glass-panel shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 flex flex-col">
+                        {[1, 2, 3, 4].map(y => (
+                          <button
+                            key={y}
+                            type="button"
+                            onClick={() => {
+                              setYear(y);
+                              setYearDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2.5 text-xs transition ${
+                              year === y ? 'bg-indigo-600/30 text-white font-bold' : 'text-blue-100 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            Year {y}
+                          </button>
+                        ))}
+                      </div>
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setYearDropdownOpen(false)} 
+                      />
+                    </>
+                  )}
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Contact Number</label>

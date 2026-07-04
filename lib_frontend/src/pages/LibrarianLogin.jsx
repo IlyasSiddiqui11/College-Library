@@ -44,9 +44,6 @@ export default function LibrarianLogin() {
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center px-4 py-12"
-      style={{
-        backgroundImage: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)',
-      }}
     >
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />
@@ -73,14 +70,14 @@ export default function LibrarianLogin() {
         </div>
 
         <div className="w-full rounded-2xl border border-white/20 glass-panel p-8 shadow-[0_20px_50px_rgba(139,92,246,0.04)] backdrop-blur-xl">
-          <div className="mb-6 flex items-center gap-2 rounded-lg bg-violet-50 border border-violet-100 px-4 py-2.5">
-            <Shield className="h-4 w-4 text-violet-600" />
-            <span className="text-xs font-semibold text-violet-700">LIBRARIAN ACCESS REQUIRED</span>
+          <div className="mb-6 flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-4 py-2.5">
+            <Shield className="h-4 w-4 text-violet-300" />
+            <span className="text-xs font-semibold text-violet-200">LIBRARIAN ACCESS REQUIRED</span>
           </div>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-700">
-              <AlertTriangle className="size-4 shrink-0 text-red-500 mt-0.5" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-xs font-medium text-red-300">
+              <AlertTriangle className="size-4 shrink-0 text-red-400 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
@@ -167,9 +164,9 @@ export default function LibrarianLogin() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-violet-100 bg-violet-50/50 p-4">
-          <p className="text-[11px] font-semibold text-violet-700 mb-2">🔒 Secure Access</p>
-          <p className="text-[11px] text-violet-600">
+        <div className="rounded-xl border border-violet-500/30 glass-panel p-4">
+          <p className="text-[11px] font-semibold text-violet-300 mb-2">🔒 Secure Access</p>
+          <p className="text-[11px] text-violet-200/80">
             This portal is restricted to librarians and administrators only. If you don't have credentials, contact the system administrator.
           </p>
         </div>
