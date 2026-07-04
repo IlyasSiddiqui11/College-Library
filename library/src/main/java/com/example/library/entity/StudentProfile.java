@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -30,7 +29,7 @@ public class StudentProfile {
     @Column(nullable = false)
     private String branch;
 
-    @Column(nullable = false)
+    @Column(name = "study_year", nullable = false)
     private Integer year;
 
     @Column(name = "contact_number", nullable = false)
