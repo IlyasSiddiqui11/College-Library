@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://college-library-mrzl.onrender.com',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
       }
