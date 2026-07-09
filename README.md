@@ -17,12 +17,6 @@
 
 ---
 
-## 🎬 Quick Demo
-
-![Demo](path/to/demo.gif)
-
----
-
 # 🚀 Overview
 
 **College-Library** is a **full-stack Smart Library Management System** designed to digitize and automate the complete workflow of a college library. It replaces traditional paper-based processes with a modern web application that enables students and librarians to manage books, borrowing, attendance, and notifications efficiently.
