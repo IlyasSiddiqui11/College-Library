@@ -1,362 +1,418 @@
-# 📚 Smart Library Management System
+# 📚 College-Library – Smart Library Management System
 
-<div align="center">
+<p align="center">
+  <b>A modern Smart Library Management System with QR-based attendance, ISBN barcode scanning, digital borrowing, and automated email notifications.</b>
+</p>
 
-### 🚀 Modern Full-Stack Library Automation Platform
+<p align="center">
 
-Streamlining college library operations through **QR-based attendance**, **ISBN barcode scanning**, **real-time inventory tracking**, and **digital borrowing workflows**.
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react\&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-6DB33F?logo=springboot\&logoColor=white)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk\&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql\&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38BDF8?logo=tailwindcss\&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-![React](https://img.shields.io/badge/React-18-blue?logo=react)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-green?logo=springboot)
-![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
-![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Frontend-38BDF8?logo=tailwindcss)
-![Contributors](https://img.shields.io/badge/Contributors-2-blue)
-![Status](https://img.shields.io/badge/Status-Completed-success)
-
-</div>
-
----
-
-## ✨ Project Overview
-
-Traditional library systems often rely on manual processes for attendance, borrowing, and inventory tracking.
-
-This project introduces a **Smart Library Management System** that digitizes the entire workflow using modern web technologies and automation.
-
-Students can enter the library using QR-based attendance, scan book ISBN barcodes directly from their phones, and request books without standing in queues. Librarians manage inventory, approve requests, monitor attendance logs, and process returns through a centralized dashboard.
+</p>
 
 ---
 
-## 🎯 Key Features
+## 🎬 Quick Demo
 
-### 👨‍🎓 Student Module
-
-✅ Registration & Login
-
-✅ Profile Completion
-
-✅ QR-Based Library Entry
-
-✅ Library Exit Tracking
-
-✅ ISBN Barcode Scanning
-
-✅ Borrow Request Submission
-
-✅ Borrow History Tracking
-
-✅ Real-Time Library Status
-
-✅ Mobile Responsive Dashboard
+![Demo](path/to/demo.gif)
 
 ---
 
-### 👨‍💼 Admin Module
+# 🚀 Overview
 
-✅ Admin Dashboard
+**College-Library** is a **full-stack Smart Library Management System** designed to digitize and automate the complete workflow of a college library. It replaces traditional paper-based processes with a modern web application that enables students and librarians to manage books, borrowing, attendance, and notifications efficiently.
 
-✅ Book Inventory Management
-
-✅ Borrow Request Approval/Rejection
-
-✅ Return Station Management
-
-✅ Student Activity Monitoring
-
-✅ Attendance Monitoring
-
-✅ Gate Log Analytics
-
-✅ Real-Time Inventory Updates
+The system combines **QR-based library entry**, **ISBN barcode scanning**, **digital borrow requests**, **approval workflows**, **return reminders**, and **gate log analytics** into a single platform. Students enjoy a seamless borrowing experience while librarians gain complete control over inventory and library operations.
 
 ---
 
-## 🔄 System Workflow
+# ✨ Key Features
 
-### 📍 Library Entry
+## 👨‍🎓 Student Features
+
+* Student Registration & Login
+* Secure Authentication
+* Profile Management
+* QR Code Library Entry
+* QR Exit Logging
+* Search Books
+* View Book Availability
+* ISBN Barcode Book Search
+* Borrow Request Submission
+* View Borrow Status
+* Borrow History
+* Automated Return Reminder Emails
+* Return Book Request
+
+---
+
+## 👨‍💼 Admin Features
+
+* Admin Dashboard
+* Student Management
+* Book Management (CRUD)
+* ISBN Barcode Scanner Integration
+* Approve/Reject Borrow Requests
+* Return Approval
+* Inventory Tracking
+* QR Attendance Monitoring
+* Entry/Exit Gate Logs
+* Email Notifications
+* Borrow Analytics
+* Library Statistics
+* Due Date Monitoring
+
+---
+
+# 🏗️ Architecture
 
 ```text
-Student
-   ↓
-Scan QR Code
-   ↓
-Attendance Recorded
-   ↓
-Status Updated to INSIDE
+                   +--------------------+
+                   |   React Frontend   |
+                   | (Vite + Tailwind)  |
+                   +---------+----------+
+                             |
+                        REST API
+                             |
+                             ▼
+                 +----------------------+
+                 | Spring Boot Backend  |
+                 | Business Logic       |
+                 | Authentication       |
+                 | Email Service        |
+                 +----------+-----------+
+                            |
+                     Spring Data JPA
+                            |
+                            ▼
+                  +-------------------+
+                  |   MySQL Database  |
+                  +-------------------+
 ```
-
----
-
-### 📖 Book Borrowing
-
-```text
-Scan ISBN Barcode
-        ↓
-Borrow Request Created
-        ↓
-Admin Reviews Request
-        ↓
-Approved / Rejected
-        ↓
-Inventory Updated
-```
-
----
-
-### 🔁 Book Return
-
-```text
-Return Station
-      ↓
-Student ID + ISBN
-      ↓
-Return Processed
-      ↓
-Inventory Increased
-```
-
----
-
-### 🚪 Library Exit
-
-```text
-Student Clicks Exit Library
-           ↓
-Exit Time Recorded
-           ↓
-Status Updated to OUTSIDE
-```
-
----
-
-## 🏗️ System Architecture
-
-```text
-┌─────────────────────┐
-│   React Frontend    │
-│  (Vite + Tailwind)  │
-└─────────┬───────────┘
-          │ REST APIs
-          ▼
-┌─────────────────────┐
-│ Spring Boot Backend │
-│      (Java 17)      │
-└─────────┬───────────┘
-          │ JPA/Hibernate
-          ▼
-┌─────────────────────┐
-│   MySQL Database    │
-└─────────────────────┘
-```
-
----
-
-## 🛠️ Tech Stack
 
 ### Frontend
 
 * React 18
-* Vite
-* JavaScript
 * Tailwind CSS
-* React Router DOM
-* Axios
-* html5-qrcode
+* QR Scanner
+* Barcode Scanner
+* Axios API Client
 
 ### Backend
 
-* Spring Boot
-* Spring Data JPA
-* Hibernate ORM
-* REST APIs
-* BCrypt Password Encryption
+* Spring Boot REST APIs
+* Authentication
+* Business Logic
+* Email Notifications
+* Inventory Management
 
 ### Database
 
-* MySQL
+Stores
 
-### Deployment
-
-* Vercel
-* Render
-* Railway MySQL
-
----
-
-## 🗄️ Database Modules
-
-### 👤 User
-
-* ID
-* Name
-* Email
-* Password
-* Role
-
-### 🎓 Student Profile
-
-* Branch
-* Year
-* Phone Number
-* Address
-
-### 📚 Books
-
-* ISBN
-* Title
-* Author
-* Total Copies
-* Available Copies
-
-### 📋 Borrow Requests
-
-* Student
-* Book
-* Status
-* Borrow Date
-* Return Date
-
-### 🚪 Gate Logs
-
-* Entry Time
-* Exit Time
-* Status
-* Student Details
+* Students
+* Books
+* Borrow Requests
+* Gate Logs
+* Attendance Records
+* User Accounts
 
 ---
 
-## 📡 API Modules
+# 🛠 Tech Stack
 
-### Authentication
+## Frontend
 
-```http
-POST /api/auth/register
-POST /api/auth/login
-```
-
-### Profile
-
-```http
-POST /api/profile/complete
-GET /api/profile/{userId}
-```
-
-### Books
-
-```http
-GET /api/books
-GET /api/books/isbn/{isbn}
-POST /api/books
-```
-
-### Borrow Requests
-
-```http
-POST /api/borrow/request
-PUT /api/admin/approve/{id}
-PUT /api/admin/reject/{id}
-PUT /api/admin/return/{id}
-```
-
-### Gate Logs
-
-```http
-POST /api/gate/scan
-POST /api/gate/exit/{userId}
-GET /api/gate/logs
-```
+| Technology   | Purpose        |
+| ------------ | -------------- |
+| React 18     | UI Development |
+| Vite         | Build Tool     |
+| Tailwind CSS | Styling        |
+| Axios        | REST API Calls |
+| html5-qrcode | QR Scanner     |
+| React Router | Routing        |
 
 ---
 
-## 🌟 Highlights
+## Backend
 
-🚀 Full-Stack Web Application
-
-📱 Mobile-Responsive Design
-
-📚 ISBN Barcode Scanning
-
-📍 QR-Based Attendance
-
-⚡ Real-Time Inventory Updates
-
-🔄 Transaction-Safe Borrow Workflow
-
-🏗️ Clean Layered Architecture
-
-🎯 Industry-Relevant Tech Stack
-
-💼 Portfolio & Internship Ready
+| Technology      | Purpose                        |
+| --------------- | ------------------------------ |
+| Java 17         | Programming Language           |
+| Spring Boot 3   | Backend Framework              |
+| Spring Data JPA | Database Layer                 |
+| Hibernate       | ORM                            |
+| Spring Security | Authentication & Authorization |
+| Lombok          | Boilerplate Reduction          |
+| RestTemplate    | HTTP Client                    |
+| Brevo Email API | Email Notifications            |
+| Maven           | Build Tool                     |
 
 ---
 
-## ⚙️ Local Setup
+# ⚙️ Setup & Installation
 
-### Clone Repository
+## 📌 Prerequisites
+
+Install the following before starting:
+
+* **JDK 17**
+* **Maven**
+* **Node.js ≥ 20**
+* **npm**
+* **MySQL** or **PostgreSQL**
+
+---
+
+## 📥 Clone Repository
 
 ```bash
 git clone https://github.com/IlyasSiddiqui11/College-Library.git
+
+cd College-Library
 ```
 
-### Backend
+---
+
+## ☕ Backend Setup
 
 ```bash
-cd backend
+cd library
+```
+
+Copy
+
+```text
+.env.example
+```
+
+to
+
+```text
+.env
+```
+
+Run
+
+```bash
 mvn spring-boot:run
 ```
 
-### Frontend
+---
+
+## ⚛️ Frontend Setup
 
 ```bash
-cd frontend
+cd lib_frontend
+
 npm install
+
 npm run dev
 ```
 
 ---
 
-## 🔮 Future Enhancements
+## 🗄 Database
+
+Create a **MySQL** (or PostgreSQL) database.
+
+Configure the database credentials inside the `.env` file.
+
+Spring Data JPA will automatically create the required tables on first startup.
+
+---
+
+# 🔐 Environment Variables
+
+Create:
+
+```text
+library/.env
+```
+
+Example:
+
+```env
+DATABASE_URL=jdbc:mysql://localhost:3306/college_library
+DATABASE_USERNAME=your_username
+DATABASE_PASSWORD=your_password
+BREVO_API_KEY=your_brevo_api_key
+MAIL_FROM=noreply@yourdomain.com
+```
+
+### Variable Description
+
+| Variable            | Purpose                              |
+| ------------------- | ------------------------------------ |
+| `DATABASE_URL`      | JDBC connection URL                  |
+| `DATABASE_USERNAME` | Database username                    |
+| `DATABASE_PASSWORD` | Database password                    |
+| `BREVO_API_KEY`     | Brevo API key used for email sending |
+| `MAIL_FROM`         | Sender email address                 |
+
+---
+
+# 📧 Email Service Configuration
+
+The project includes an **EmailService** responsible for sending automated emails such as:
+
+* Borrow Approval
+* Return Reminder
+* Borrow Notifications
+
+The service uses the **Brevo SMTP API** through Spring Boot.
+
+Required properties:
+
+* `BREVO_API_KEY`
+* `MAIL_FROM`
+
+> **Important**
+
+If your application is deployed on a cloud platform, ensure that **Brevo's "Block unknown IPs" setting is disabled**, or **whitelist the server's public IP address**. Otherwise, email requests may be rejected.
+
+---
+
+# ✅ Running Tests
+
+Run backend tests using Maven:
+
+```bash
+mvn test
+```
+
+---
+
+# 📚 API Documentation
+
+## Authentication
+
+| Method | Endpoint             |
+| ------ | -------------------- |
+| POST   | `/api/auth/register` |
+| POST   | `/api/auth/login`    |
+
+---
+
+## Profile
+
+| Method | Endpoint       |
+| ------ | -------------- |
+| GET    | `/api/profile` |
+| PUT    | `/api/profile` |
+
+---
+
+## Books
+
+| Method | Endpoint          |
+| ------ | ----------------- |
+| GET    | `/api/books`      |
+| GET    | `/api/books/{id}` |
+| POST   | `/api/books`      |
+| PUT    | `/api/books/{id}` |
+| DELETE | `/api/books/{id}` |
+
+---
+
+## Borrow Requests
+
+| Method | Endpoint                   |
+| ------ | -------------------------- |
+| POST   | `/api/borrow`              |
+| GET    | `/api/borrow`              |
+| PUT    | `/api/borrow/{id}/approve` |
+| PUT    | `/api/borrow/{id}/return`  |
+
+---
+
+## Gate Logs
+
+| Method | Endpoint              |
+| ------ | --------------------- |
+| POST   | `/api/gatelogs/entry` |
+| POST   | `/api/gatelogs/exit`  |
+| GET    | `/api/gatelogs`       |
+
+---
+
+### Example cURL
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email":"student@example.com",
+  "password":"password123"
+}'
+```
+
+---
+
+# 🚀 Future Enhancements
 
 * JWT Authentication
-* Email Notifications
-* Fine Management System
-* Book Reservation System
-* Advanced Analytics Dashboard
+* Fine Management
+* Reservation System
 * RFID Integration
-* Report Generation
+* Analytics Dashboard
 * Multi-Library Support
+* Mobile Application
+* Digital Library Integration
+* Book Recommendation System
+* AI-powered Search
 
 ---
 
-## 👨‍💻 Contributors
+# 🤝 Contributing
 
-This project was collaboratively developed by:
+Contributions are always welcome!
 
-### Mohammed Ilyas Israr Ahmed Siddiqui
-
-**BE Computer Science & Engineering (Data Science)**
-
-Passionate about Full-Stack Development, Spring Boot, React, and building real-world software solutions.
-
-**GitHub:** https://github.com/IlyasSiddiqui11
-
----
-
-### Prince Yadav
-
-Passionate about software development and building practical applications using modern technologies.
-
-**GitHub:** https://github.com/prince902226062-code
+1. Fork the repository.
+2. Create a feature branch.
+3. Follow **Spring Boot** coding conventions.
+4. Use **Lombok** where appropriate to reduce boilerplate.
+5. Write clean and well-documented code.
+6. Commit with meaningful messages.
+7. Open a Pull Request.
 
 ---
 
-## 🤝 Collaboration
+# 📄 License
 
-The Smart Library Management System was designed and developed as a collaborative project with the goal of modernizing traditional library workflows. The project combines QR-based attendance tracking, ISBN barcode scanning, real-time inventory management, and digital borrowing processes to create a seamless library experience for both students and administrators.
-
-Both contributors worked together on system design, implementation, testing, and deployment, applying industry-standard software development practices and modern full-stack technologies.
+This project is licensed under the **MIT License**.
 
 ---
 
-### ⭐ If you like this project, consider giving it a star!
+# 🙏 Acknowledgements
+
+Special thanks to:
+
+* **Brevo** for email delivery services.
+* **Spring Boot** community.
+* **React** ecosystem.
+* **Tailwind CSS**
+* **html5-qrcode**
+* **Axios**
+* **Hibernate**
+* **Spring Security**
+
+### Contributors
+
+* **Mohammed Ilyas Siddiqui**
+* **Prince**
+
+---
+
+# ⭐ Give a Star
+
+If you found this project useful, please consider giving it a **⭐ Star** on GitHub!
+
+It helps support the project and motivates future development.
+
+**⭐ Give a ⭐ if you like it!**
