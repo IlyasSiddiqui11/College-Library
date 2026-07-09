@@ -30,7 +30,6 @@ public class SecurityConfig {
 
                 // Authorization
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().permitAll()
                 )
 
