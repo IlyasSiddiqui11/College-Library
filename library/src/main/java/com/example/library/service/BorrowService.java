@@ -66,6 +66,18 @@ public class BorrowService {
                 .build();
 
         BorrowRequest savedRequest = borrowRequestRepository.save(request);
+        
+        String userEmail = savedRequest.getUser().getEmail();
+        if (userEmail != null && !userEmail.isBlank()) {
+            borrowingService.processBookRequest(
+                    userEmail,
+                    savedRequest.getUser().getName(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getIsbn(),
+                    savedRequest.getRequestDate().toLocalDate());
+        }
+
         return mapToBorrowResponse(savedRequest);
     }
 
@@ -115,6 +127,7 @@ public class BorrowService {
                     book.getTitle(),
                     book.getAuthor(),
                     book.getIsbn(),
+                    approvedRequest.getAccessionNumber(),
                     issueDate,
                     dueDate);
         }
@@ -191,6 +204,7 @@ public class BorrowService {
                     book.getTitle(),
                     book.getAuthor(),
                     book.getIsbn(),
+                    returnedRequest.getAccessionNumber(),
                     returnedRequest.getReturnedDate().toLocalDate());
         }
 

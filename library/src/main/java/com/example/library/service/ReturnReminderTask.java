@@ -56,10 +56,11 @@ public class ReturnReminderTask {
 
                                 "Book Details:\n" +
                                 "----------------------------------------\n" +
-                                "Title       : %s\n" +
-                                "Author      : %s\n" +
-                                "ISBN        : %s\n" +
-                                "Due Date    : %s\n" +
+                                "Title            : %s\n" +
+                                "Author           : %s\n" +
+                                "ISBN             : %s\n" +
+                                "Accession No.    : %s\n" +
+                                "Due Date         : %s\n" +
                                 "----------------------------------------\n\n" +
 
                                 "Please return the book on or before the due date to avoid overdue fines or penalties.\n\n" +
@@ -77,6 +78,7 @@ public class ReturnReminderTask {
                         request.getBook().getTitle(),
                         request.getBook().getAuthor(),
                         request.getBook().getIsbn(),
+                        request.getAccessionNumber() != null ? request.getAccessionNumber() : "N/A",
                         dueDate.toLocalDate()
                 );
                 

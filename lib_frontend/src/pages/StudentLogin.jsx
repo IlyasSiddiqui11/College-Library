@@ -170,7 +170,7 @@ export default function StudentLogin() {
                   Password
                 </label>
                 {!isRegister && (
-                  <button type="button" className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline transition">
+                  <button type="button" onClick={() => navigate('/forgot-password')} className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline transition">
                     Forgot Password?
                   </button>
                 )}

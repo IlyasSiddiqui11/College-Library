@@ -14,6 +14,8 @@ import GateLogs from './pages/GateLogs.jsx'
 import StudentProfile from './pages/StudentProfile.jsx'
 import RegisteredStudents from './pages/RegisteredStudents.jsx'
 import StudentCatalog from './pages/StudentCatalog.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<StudentLogin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin/login" element={<LibrarianLogin />} />
           <Route path="/lending" element={<BorrowRequests />} />
           <Route path="/admin" element={<AdminDashboard />} />

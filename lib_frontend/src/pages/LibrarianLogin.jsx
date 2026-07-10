@@ -105,7 +105,7 @@ export default function LibrarianLogin() {
                 <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                   Password
                 </label>
-                <button type="button" className="text-[11px] text-violet-600 hover:underline">
+                <button type="button" onClick={() => navigate('/forgot-password')} className="text-[11px] text-violet-600 hover:underline">
                   Forgot Password?
                 </button>
               </div>
