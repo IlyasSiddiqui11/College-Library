@@ -14,6 +14,8 @@ import GateLogs from './pages/GateLogs.jsx'
 import StudentProfile from './pages/StudentProfile.jsx'
 import RegisteredStudents from './pages/RegisteredStudents.jsx'
 import StudentCatalog from './pages/StudentCatalog.jsx'
+import BookDetails from './pages/BookDetails.jsx'
+import LostBooks from './pages/LostBooks.jsx'
 
 function App() {
   return (
@@ -30,10 +32,12 @@ function App() {
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/catalog" element={<StudentCatalog />} />
+          <Route path="/catalog/:isbn" element={<BookDetails />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/history" element={<BorrowHistory />} />
           <Route path="/returns" element={<ReturnStation />} />
           <Route path="/scanner" element={<BookScanner />} />
+          <Route path="/admin/lost-books" element={<LostBooks />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

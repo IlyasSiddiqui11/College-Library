@@ -21,7 +21,7 @@ public class AdminController {
     @PostMapping("/approve/{id}")
     public ResponseEntity<BorrowResponse> approveRequest(
             @PathVariable Long id,
-            @RequestParam(required = false) String accessionNumber) {
+            @RequestParam String accessionNumber) {
         BorrowResponse response = borrowService.approveBorrowRequest(id, accessionNumber);
         return ResponseEntity.ok(response);
     }

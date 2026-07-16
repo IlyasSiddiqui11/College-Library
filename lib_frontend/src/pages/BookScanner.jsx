@@ -235,8 +235,8 @@ export default function BookScanner() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-blue-200">Availability</span>
-                  <span className="font-semibold text-green-400">
-                    {bookDetails.availableCopies} of {bookDetails.totalCopies} copies in shelf
+                  <span className={`font-semibold ${bookDetails.status === 'AVAILABLE' ? 'text-green-400' : 'text-amber-300'}`}>
+                    {bookDetails.status === 'AVAILABLE' ? 'Available' : 'Unavailable'}
                   </span>
                 </div>
               </div>
@@ -246,7 +246,7 @@ export default function BookScanner() {
               <button
                 type="button"
                 onClick={handleRequestBorrow}
-                disabled={borrowing || bookDetails.availableCopies < 1}
+                disabled={borrowing || bookDetails.status !== 'AVAILABLE'}
                 className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-50"
               >
                 {borrowing ? 'Submitting Request...' : 'Confirm & Request Borrow'}
