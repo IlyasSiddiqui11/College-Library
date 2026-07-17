@@ -15,6 +15,7 @@ import {
   ShieldAlert,
   UserCheck,
   Users,
+  Bookmark,
   RefreshCw
 } from 'lucide-react'
 
@@ -186,6 +187,7 @@ export default function LostBooks() {
             {[
               { path: '/admin', icon: Library, label: 'Overview' },
               { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
+              { path: '/admin/reservations', icon: Bookmark, label: 'Reserve Books' },
               { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory' },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },

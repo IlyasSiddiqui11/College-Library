@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X,
   Clock,
-  UserCheck, Download, ShieldAlert
+  UserCheck, Download, ShieldAlert, Bookmark
 } from 'lucide-react'
 
 export default function BorrowRequests() {
@@ -221,6 +221,13 @@ export default function BorrowRequests() {
                   {pendingCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <Bookmark className="size-4.5" />
+              Reserve Books
             </button>
             <button
               onClick={() => navigate('/inventory')}

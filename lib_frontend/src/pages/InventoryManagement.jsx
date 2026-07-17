@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
-  BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList,
+  BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList, Bookmark,
   Users, X, ScanLine, Clock, ShieldAlert,
   UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine
 } from 'lucide-react'
@@ -308,6 +308,7 @@ export default function InventoryManagement() {
             {[
               { path: '/admin', icon: Library, label: 'Overview' },
               { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
+              { path: '/admin/reservations', icon: Bookmark, label: 'Reserve Books' },
               { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory', active: true },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
