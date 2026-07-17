@@ -160,7 +160,7 @@ export default function BorrowHistory() {
 
           {/* Quick status filter pills */}
           <div className="flex gap-1.5 flex-wrap">
-            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED'].map((status) => (
+            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED', 'LOST'].map((status) => (
               <button
                 key={status}
                 type="button"
@@ -233,6 +233,14 @@ export default function BorrowHistory() {
                   )
                   borderClass = 'border-white/10 bg-white/5'
                   break
+                case 'LOST':
+                  statusBadge = (
+                    <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold text-red-700 border border-red-200/60">
+                      <XCircle className="size-2.5" /> LOST
+                    </span>
+                  )
+                  borderClass = 'border-red-300/30 bg-red-500/5'
+                  break
               }
 
               return (
@@ -262,28 +270,16 @@ export default function BorrowHistory() {
                           <span>ISBN</span>
                           <span className="font-mono text-blue-100">{item.isbn}</span>
                         </div>
-                        {item.accessionNumber && (
-                          <div className="flex justify-between">
-                            <span>Accession No.</span>
-                            <span className="font-mono font-bold text-amber-300">{item.accessionNumber}</span>
-                          </div>
-                        )}
                         <div className="flex justify-between">
-                          <span>Date Submitted</span>
-                          <span>{formatDate(item.requestDate)}</span>
+                          <span>Borrow Date</span>
+                          <span>{formatDate(item.approvedDate || item.requestDate)}</span>
                         </div>
-                        {item.approvedDate && (
-                          <div className="flex justify-between">
-                            <span>Date Approved</span>
-                            <span>{formatDate(item.approvedDate)}</span>
-                          </div>
-                        )}
-                        {item.dueDate && item.status !== 'REJECTED' && item.status !== 'RETURNED' && (() => {
+                        {item.dueDate && item.status !== 'REJECTED' && item.status !== 'RETURNED' && item.status !== 'CANCELLED' && (() => {
                           const isOverdue = new Date(item.dueDate) < new Date()
                           return (
                             <div className="flex justify-between">
                               <span className={`font-semibold ${isOverdue ? 'text-red-400' : 'text-amber-200'}`}>
-                                {isOverdue ? '⚠ Overdue!' : 'Return By'}
+                                {isOverdue ? '⚠ Overdue!' : 'Due Date'}
                               </span>
                               <span className={`font-bold ${isOverdue ? 'text-red-400' : 'text-amber-300'}`}>
                                 {formatDate(item.dueDate)}

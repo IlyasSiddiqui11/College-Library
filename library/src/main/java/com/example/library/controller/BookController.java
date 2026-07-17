@@ -1,9 +1,9 @@
 package com.example.library.controller;
 
 import lombok.RequiredArgsConstructor;
-
-
 import com.example.library.dto.request.BookCreateRequest;
+import com.example.library.dto.response.AvailableCopyResponse;
+import com.example.library.dto.response.BookCatalogResponse;
 import com.example.library.dto.response.BookResponse;
 import com.example.library.service.BookService;
 import jakarta.validation.Valid;
@@ -32,9 +32,34 @@ public class BookController {
         return ResponseEntity.ok(response);
     }
 
+    /** Student catalog: one row per unique ISBN with calculated availability. */
+    @GetMapping("/catalog")
+    public ResponseEntity<List<BookCatalogResponse>> getCatalog() {
+        return ResponseEntity.ok(bookService.getCatalogGroupedByIsbn());
+    }
+
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<BookResponse> getBookByIsbn(@PathVariable String isbn) {
         BookResponse response = bookService.getBookByIsbn(isbn);
+        return ResponseEntity.ok(response);
+    }
+
+    /** Public title-level details for students (no accession / internal IDs). */
+    @GetMapping("/isbn/{isbn}/details")
+    public ResponseEntity<BookCatalogResponse> getBookDetailsByIsbn(@PathVariable String isbn) {
+        return ResponseEntity.ok(bookService.getCatalogBookByIsbn(isbn));
+    }
+
+    /** Available physical copies for librarian assignment during borrow approval. */
+    @GetMapping("/isbn/{isbn}/available-copies")
+    public ResponseEntity<List<AvailableCopyResponse>> getAvailableCopies(@PathVariable String isbn) {
+        return ResponseEntity.ok(bookService.getAvailableCopiesByIsbn(isbn));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BookResponse> updateBook(@PathVariable Long id,
+            @Valid @RequestBody BookCreateRequest request) {
+        BookResponse response = bookService.updateBook(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -42,5 +67,11 @@ public class BookController {
     public ResponseEntity<BookResponse> updateInventory(@PathVariable Long id, @RequestParam int totalCopies) {
         BookResponse response = bookService.updateInventory(id, totalCopies);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.ok().build();
     }
 }

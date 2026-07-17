@@ -1,9 +1,9 @@
 package com.example.library.service;
 
 import lombok.RequiredArgsConstructor;
-
-
 import com.example.library.dto.request.BookCreateRequest;
+import com.example.library.dto.response.AvailableCopyResponse;
+import com.example.library.dto.response.BookCatalogResponse;
 import com.example.library.dto.response.BookResponse;
 import com.example.library.entity.Book;
 import com.example.library.exception.BadRequestException;
@@ -12,7 +12,13 @@ import com.example.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,24 +29,59 @@ public class BookService {
 
     @Transactional
     public BookResponse addBook(BookCreateRequest request) {
-        if (bookRepository.existsByIsbn(request.getIsbn())) {
-            throw new BadRequestException("Book with ISBN " + request.getIsbn() + " already exists");
+        if (request.getAccessionNumbers() == null || request.getAccessionNumbers().isEmpty()) {
+            throw new BadRequestException("At least one accession number is required");
         }
 
-        Book book = Book.builder()
-                .isbn(request.getIsbn())
-                .title(request.getTitle())
-                .author(request.getAuthor())
-                .totalCopies(request.getTotalCopies())
-                .availableCopies(request.getTotalCopies())
-                .publisher(request.getPublisher())
-                .price(request.getPrice())
-                .publicationYear(request.getPublicationYear())
-                .accessionNumbers(request.getAccessionNumbers())
-                .build();
+        if (request.getQuantity() == null || request.getQuantity() < 1) {
+            throw new BadRequestException("Quantity must be at least 1");
+        }
 
-        Book savedBook = bookRepository.save(book);
-        return mapToBookResponse(savedBook);
+        if (request.getQuantity() != request.getAccessionNumbers().size()) {
+            throw new BadRequestException("Quantity must match the number of accession numbers provided");
+        }
+
+        Set<String> normalizedAccessions = new HashSet<>();
+        for (String accession : request.getAccessionNumbers()) {
+            if (accession == null || accession.trim().isEmpty()) {
+                throw new BadRequestException("Accession number cannot be empty");
+            }
+
+            String normalized = accession.trim();
+            if (!normalizedAccessions.add(normalized)) {
+                throw new BadRequestException("Duplicate accession number in request: '" + normalized + "'");
+            }
+
+            if (bookRepository.existsByAccessionNumber(normalized)) {
+                throw new BadRequestException("Book with accession number '" + normalized + "' already exists");
+            }
+        }
+
+        List<Book> savedBooks = new ArrayList<>();
+        for (String accession : request.getAccessionNumbers()) {
+            Book book = Book.builder()
+                    .accessionNumber(accession.trim())
+                    .isbn(request.getIsbn())
+                    .title(request.getTitle())
+                    .author(request.getAuthor())
+                    .publisher(request.getPublisher())
+                    .edition(request.getEdition())
+                    .series(request.getSeries())
+                    .publicationYear(request.getPublicationYear())
+                    .totalPages(request.getTotalPages())
+                    .price(request.getPrice())
+                    .billNumber(request.getBillNumber())
+                    .billDate(request.getBillDate())
+                    .branch(request.getBranch())
+                    .category(request.getCategory())
+                    .language(request.getLanguage())
+                    .status("AVAILABLE")
+                    .build();
+
+            savedBooks.add(bookRepository.save(book));
+        }
+
+        return mapToBookResponse(savedBooks.get(0));
     }
 
     @Transactional(readOnly = true)
@@ -50,44 +91,167 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Student catalog: one entry per unique ISBN with calculated availability.
+     */
+    @Transactional(readOnly = true)
+    public List<BookCatalogResponse> getCatalogGroupedByIsbn() {
+        List<Book> allBooks = bookRepository.findAll();
+        Map<String, List<Book>> byIsbn = new LinkedHashMap<>();
+
+        for (Book book : allBooks) {
+            if (book.getIsbn() == null || book.getIsbn().isBlank()) {
+                continue;
+            }
+            String key = book.getIsbn().trim();
+            byIsbn.computeIfAbsent(key, k -> new ArrayList<>()).add(book);
+        }
+
+        return byIsbn.entrySet().stream()
+                .map(entry -> mapToCatalogResponse(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(BookCatalogResponse::getTitle, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public BookCatalogResponse getCatalogBookByIsbn(String isbn) {
+        List<Book> list = bookRepository.findByIsbn(isbn);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
+        }
+        return mapToCatalogResponse(isbn.trim(), list);
+    }
+
     @Transactional(readOnly = true)
     public BookResponse getBookByIsbn(String isbn) {
-        Book book = bookRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ISBN: " + isbn));
-        return mapToBookResponse(book);
+        List<Book> list = bookRepository.findByIsbn(isbn);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
+        }
+
+        Book book = list.stream()
+                .filter(b -> "AVAILABLE".equals(b.getStatus()))
+                .findFirst()
+                .orElse(list.get(0));
+
+        // Public title-level view: omit accession / internal copy identity for students
+        BookResponse response = mapToBookResponse(book);
+        response.setId(null);
+        response.setAccessionNumber(null);
+        response.setPrice(null);
+        response.setBillNumber(null);
+        response.setBillDate(null);
+        long available = list.stream().filter(b -> "AVAILABLE".equals(b.getStatus())).count();
+        response.setStatus(available > 0 ? "AVAILABLE" : "UNAVAILABLE");
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public List<AvailableCopyResponse> getAvailableCopiesByIsbn(String isbn) {
+        List<Book> copies = bookRepository.findAllByIsbnAndStatus(isbn, "AVAILABLE");
+        return copies.stream()
+                .sorted(Comparator.comparing(Book::getAccessionNumber, String.CASE_INSENSITIVE_ORDER))
+                .map(b -> AvailableCopyResponse.builder()
+                        .id(b.getId())
+                        .accessionNumber(b.getAccessionNumber())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BookResponse updateBook(Long id, BookCreateRequest request) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ID: " + id));
+
+        if (request.getAccessionNumbers() == null || request.getAccessionNumbers().isEmpty()) {
+            throw new BadRequestException("Accession number is required");
+        }
+
+        String accessionNumber = request.getAccessionNumbers().get(0) == null ? null
+                : request.getAccessionNumbers().get(0).trim();
+        if (accessionNumber == null || accessionNumber.isEmpty()) {
+            throw new BadRequestException("Accession number is required");
+        }
+
+        Book existing = bookRepository.findByAccessionNumber(accessionNumber).orElse(null);
+        if (existing != null && !existing.getId().equals(id)) {
+            throw new BadRequestException("Book with accession number '" + accessionNumber + "' already exists");
+        }
+
+        book.setAccessionNumber(accessionNumber);
+        book.setIsbn(request.getIsbn());
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setPublisher(request.getPublisher());
+        book.setEdition(request.getEdition());
+        book.setSeries(request.getSeries());
+        book.setPublicationYear(request.getPublicationYear());
+        book.setTotalPages(request.getTotalPages());
+        book.setPrice(request.getPrice());
+        book.setBillNumber(request.getBillNumber());
+        book.setBillDate(request.getBillDate());
+        book.setBranch(request.getBranch());
+        book.setCategory(request.getCategory());
+        book.setLanguage(request.getLanguage());
+
+        return mapToBookResponse(bookRepository.save(book));
     }
 
     @Transactional
     public BookResponse updateInventory(Long id, int newTotalCopies) {
+        throw new BadRequestException("Quantity-based inventory updates are deprecated. Use Add Asset or Delete Copy.");
+    }
+
+    @Transactional
+    public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with ID: " + id));
-
-        int difference = newTotalCopies - book.getTotalCopies();
-        int newAvailableCopies = book.getAvailableCopies() + difference;
-
-        if (newAvailableCopies < 0) {
-            throw new BadRequestException("Cannot reduce total copies because it would result in negative available copies (" + newAvailableCopies + ")");
+        if ("BORROWED".equals(book.getStatus())) {
+            throw new BadRequestException("Cannot delete book copy that is currently borrowed.");
         }
+        bookRepository.delete(book);
+    }
 
-        book.setTotalCopies(newTotalCopies);
-        book.setAvailableCopies(newAvailableCopies);
+    private BookCatalogResponse mapToCatalogResponse(String isbn, List<Book> copies) {
+        Book representative = copies.get(0);
+        long available = copies.stream().filter(b -> "AVAILABLE".equals(b.getStatus())).count();
 
-        Book updatedBook = bookRepository.save(book);
-        return mapToBookResponse(updatedBook);
+        return BookCatalogResponse.builder()
+                .isbn(isbn)
+                .title(representative.getTitle())
+                .author(representative.getAuthor())
+                .publisher(representative.getPublisher())
+                .edition(representative.getEdition())
+                .series(representative.getSeries())
+                .publicationYear(representative.getPublicationYear())
+                .branch(representative.getBranch())
+                .category(representative.getCategory())
+                .language(representative.getLanguage())
+                .availability(available > 0 ? "Available" : "Unavailable")
+                .availableCopies(available)
+                .totalCopies(copies.size())
+                .build();
     }
 
     private BookResponse mapToBookResponse(Book book) {
         return BookResponse.builder()
                 .id(book.getId())
+                .accessionNumber(book.getAccessionNumber())
                 .isbn(book.getIsbn())
                 .title(book.getTitle())
                 .author(book.getAuthor())
-                .totalCopies(book.getTotalCopies())
-                .availableCopies(book.getAvailableCopies())
                 .publisher(book.getPublisher())
-                .price(book.getPrice())
+                .edition(book.getEdition())
+                .series(book.getSeries())
                 .publicationYear(book.getPublicationYear())
-                .accessionNumbers(book.getAccessionNumbers())
+                .totalPages(book.getTotalPages())
+                .price(book.getPrice())
+                .billNumber(book.getBillNumber())
+                .billDate(book.getBillDate())
+                .branch(book.getBranch())
+                .category(book.getCategory())
+                .language(book.getLanguage())
+                .status(book.getStatus())
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
                 .build();

@@ -16,7 +16,8 @@ import {
   Library,
   ClipboardList,
   UserCheck,
-  BookOpen
+  BookOpen,
+  ShieldAlert
 } from 'lucide-react'
 
 export default function GateLogs() {
@@ -193,6 +194,13 @@ export default function GateLogs() {
             >
               <UserCheck className="size-4.5" />
               Registered Students
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
             </button>
           </nav>
         </div>
