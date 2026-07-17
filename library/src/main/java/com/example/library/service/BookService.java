@@ -6,9 +6,12 @@ import com.example.library.dto.response.AvailableCopyResponse;
 import com.example.library.dto.response.BookCatalogResponse;
 import com.example.library.dto.response.BookResponse;
 import com.example.library.entity.Book;
+import com.example.library.entity.BorrowRequest;
+import com.example.library.enums.BorrowStatus;
 import com.example.library.exception.BadRequestException;
 import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.BookRepository;
+import com.example.library.repository.BorrowRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.example.library.dto.response.BulkUploadResponse;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BorrowRequestRepository borrowRequestRepository;
+    private final BorrowingService borrowingService;
 
     @Transactional
     public BookResponse addBook(BookCreateRequest request) {
@@ -230,6 +244,68 @@ public class BookService {
                 .availability(available > 0 ? "Available" : "Unavailable")
                 .availableCopies(available)
                 .totalCopies(copies.size())
+                .build();
+    }
+
+    @Transactional
+    public BulkUploadResponse bulkUploadBooks(MultipartFile file) {
+        List<Book> booksToSave = new ArrayList<>();
+        List<String> errorMessages = new ArrayList<>();
+        int successfulInserts = 0;
+        int failedInserts = 0;
+        int totalProcessed = 0;
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                totalProcessed++;
+                try {
+                    String isbn = csvRecord.get("isbn");
+                    if (bookRepository.existsByIsbn(isbn)) {
+                        errorMessages.add("Row " + totalProcessed + ": Book with ISBN " + isbn + " already exists");
+                        failedInserts++;
+                        continue;
+                    }
+
+                    Book book = Book.builder()
+                            .isbn(isbn)
+                            .title(csvRecord.get("title"))
+                            .author(csvRecord.get("author"))
+                            .totalCopies(Integer.parseInt(csvRecord.get("totalCopies")))
+                            .availableCopies(Integer.parseInt(csvRecord.get("totalCopies")))
+                            .publisher(csvRecord.isMapped("publisher") ? csvRecord.get("publisher") : null)
+                            .price(csvRecord.isMapped("price") && !csvRecord.get("price").isEmpty() ? Double.parseDouble(csvRecord.get("price")) : null)
+                            .publicationYear(csvRecord.isMapped("publicationYear") && !csvRecord.get("publicationYear").isEmpty() ? Integer.parseInt(csvRecord.get("publicationYear")) : null)
+                            .accessionNumbers(csvRecord.isMapped("accessionNumbers") ? csvRecord.get("accessionNumbers") : null)
+                            .build();
+
+                    booksToSave.add(book);
+                    successfulInserts++;
+
+                    if (booksToSave.size() >= 500) {
+                        bookRepository.saveAll(booksToSave);
+                        booksToSave.clear();
+                    }
+                } catch (Exception e) {
+                    errorMessages.add("Row " + totalProcessed + ": " + e.getMessage());
+                    failedInserts++;
+                }
+            }
+
+            if (!booksToSave.isEmpty()) {
+                bookRepository.saveAll(booksToSave);
+            }
+
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to parse CSV file: " + e.getMessage());
+        }
+
+        return BulkUploadResponse.builder()
+                .totalProcessed(totalProcessed)
+                .successfulInserts(successfulInserts)
+                .failedInserts(failedInserts)
+                .errorMessages(errorMessages)
                 .build();
     }
 

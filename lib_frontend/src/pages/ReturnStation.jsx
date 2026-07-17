@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import {
   ChevronLeft, ScanLine, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
-  Library, ClipboardList, BookOpen, Clock, Users, LogOut
+  Library, ClipboardList, BookOpen, Clock, Users, LogOut, Bookmark
 } from 'lucide-react'
 
 export default function ReturnStation() {
@@ -101,6 +101,56 @@ export default function ReturnStation() {
     }
   }
 
+  const processExtend = async (sId, accNum) => {
+    setReturnStatus('processing')
+    setErrorMsg('')
+
+    try {
+      const response = await apiClient.post('/api/borrow/extend', null, {
+        params: {
+          userId: sId,
+          accessionNumber: accNum
+        }
+      })
+
+      const details = response.data
+      setSuccessDetails(details)
+      setReturnStatus('extension_success')
+
+      setSessionHistory(prev => [
+        {
+          id: details.id,
+          title: details.bookTitle || 'Unknown Title',
+          student: details.userName || `Student #${sId}`,
+          accessionNumber: accNum,
+          timestamp: new Date(),
+          isExtension: true
+        },
+        ...prev
+      ])
+
+      setTimeout(() => {
+        setAccessionNumber('')
+        setReturnStatus('idle')
+        setSuccessDetails(null)
+      }, 4000)
+
+    } catch (err) {
+      setErrorMsg(err.message || 'Loan extension failed.')
+      setReturnStatus('error')
+    }
+  }
+
+  const handleExtendClick = (e) => {
+    e.preventDefault()
+    if (!studentId.trim() || !accessionNumber.trim()) {
+      setErrorMsg('Please specify both Student ID and Accession Number to extend loan.')
+      setReturnStatus('error')
+      return
+    }
+    processExtend(Number(studentId), accessionNumber.trim())
+  }
+
   if (!user) return null
 
   return (
@@ -131,6 +181,13 @@ export default function ReturnStation() {
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <Bookmark className="size-4.5" />
+              Reserve Books
             </button>
             <button
               onClick={() => navigate('/inventory')}
@@ -262,12 +319,21 @@ export default function ReturnStation() {
                       />
                     </div>
 
-                    <button
-                      type="submit"
-                      className="w-full rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition mt-2"
-                    >
-                      Process Return
-                    </button>
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <button
+                        type="button"
+                        onClick={handleExtendClick}
+                        className="rounded-xl border border-blue-500 text-blue-400 py-3 text-xs font-semibold hover:bg-blue-500/10 transition"
+                      >
+                        Extend Loan
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                      >
+                        Process Return
+                      </button>
+                    </div>
                   </form>
                 </div>
               )}
@@ -310,6 +376,36 @@ export default function ReturnStation() {
                 </div>
               )}
 
+              {returnStatus === 'extension_success' && successDetails && (
+                <div className="text-center py-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+                  <div className="flex size-14 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
+                    <CheckCircle2 className="size-8 animate-pulse" />
+                  </div>
+
+                  <h3 className="text-lg font-bold text-white">Loan Extended!</h3>
+                  <p className="text-xs text-blue-200 max-w-xs leading-relaxed">
+                    Book &quot;{successDetails.bookTitle}&quot; loan extended by 7 days. (Extensions: {successDetails.extensionCount}/2)
+                  </p>
+
+                  <div className="w-full glass-panel border border-white/20 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
+                    <div className="flex justify-between">
+                      <span className="text-blue-200">Student</span>
+                      <span className="font-bold text-white">{successDetails.userName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-200">Accession Number</span>
+                      <span className="font-mono text-blue-100 font-bold">{successDetails.accessionNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-200">New Due Date</span>
+                      <span className="font-bold text-blue-400">{new Date(successDetails.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] text-blue-200 mt-4 animate-pulse">Auto-resetting kiosk screen...</span>
+                </div>
+              )}
+
               {returnStatus === 'error' && (
                 <div className="text-center py-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
                   <div className="flex size-12 items-center justify-center rounded-full bg-red-50 text-red-500">
@@ -343,12 +439,12 @@ export default function ReturnStation() {
                 ) : (
                   sessionHistory.map((item, idx) => (
                     <div key={item.id || idx} className="rounded-xl border border-white/20 glass-panel p-3 flex gap-3 text-xs">
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600 font-bold text-[10px]">
-                        OK
+                      <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-[10px] ${item.isExtension ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                        {item.isExtension ? 'EXT' : 'OK'}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-white truncate">{item.title}</p>
-                        <p className="text-[10px] text-blue-200 mt-0.5">By: {item.student}</p>
+                        <p className="text-[10px] text-blue-200 mt-0.5">By: {item.student}{item.isExtension && ' (Extended)'}</p>
                         <p className="text-[9px] text-amber-300 mt-1 font-mono">Acc: {item.accessionNumber}</p>
                       </div>
                     </div>

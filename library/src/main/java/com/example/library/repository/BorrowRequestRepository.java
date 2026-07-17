@@ -23,6 +23,7 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
             BorrowStatus status);
 
     boolean existsByAccessionNumberAndStatus(String accessionNumber, BorrowStatus status);
+    List<BorrowRequest> findByBookIsbnAndStatusOrderByRequestDateAsc(String isbn, BorrowStatus status);
 
     Optional<BorrowRequest> findFirstByAccessionNumberAndStatusOrderByRequestDateDesc(String accessionNumber,
             BorrowStatus status);

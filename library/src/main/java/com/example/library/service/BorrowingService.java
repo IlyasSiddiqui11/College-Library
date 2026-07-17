@@ -12,7 +12,7 @@ public class BorrowingService {
 
     // Existing Approval Method
     public void processBookApproval(String studentEmail, String studentName, String bookTitle, 
-                                    String author, String isbn, LocalDate issueDate, LocalDate dueDate) {
+                                    String author, String isbn, String accessionNumber, LocalDate issueDate, LocalDate dueDate) {
         String subject = "Book Borrowing Request Approved";
         String body = """
             Dear %s,
@@ -21,11 +21,12 @@ public class BorrowingService {
             
             Book Details:
             ----------------------------------------
-            Title      : %s
-            Author     : %s
-            ISBN       : %s
-            Issue Date : %s
-            Due Date   : %s
+            Title            : %s
+            Author           : %s
+            ISBN             : %s
+            Accession No.    : %s
+            Issue Date       : %s
+            Due Date         : %s
             ----------------------------------------
             
             Please collect your book from the library at your earliest convenience. Kindly ensure that the book is returned on or before the due date to avoid any overdue penalties.
@@ -37,14 +38,14 @@ public class BorrowingService {
             Best Regards,
             College Library
             Library Management System
-            """.formatted(studentName, bookTitle, author, isbn, issueDate, dueDate);
+            """.formatted(studentName, bookTitle, author, isbn, accessionNumber, issueDate, dueDate);
 
         emailService.sendEmail(studentEmail, subject, body);
     }
 
     // NEW: Return Confirmation Method
     public void processBookReturn(String studentEmail, String studentName, String bookTitle, 
-            String author, String isbn, LocalDate returnDate) {
+            String author, String isbn, String accessionNumber, LocalDate returnDate) {
         
         String subject = "Book Return Confirmation";
         
@@ -56,10 +57,11 @@ public class BorrowingService {
             
             Book Details:
             ----------------------------------------
-            Title       : %s
-            Author      : %s
-            ISBN        : %s
-            Return Date : %s
+            Title            : %s
+            Author           : %s
+            ISBN             : %s
+            Accession No.    : %s
+            Return Date      : %s
             ----------------------------------------
             
             Thank you for returning the book on time.
@@ -73,9 +75,39 @@ public class BorrowingService {
             Best Regards,
             College Library
             Library Management System
-            """.formatted(studentName, bookTitle, author, isbn, returnDate);
+            """.formatted(studentName, bookTitle, author, isbn, accessionNumber, returnDate);
 
         // Reusing your clean EmailService
+        emailService.sendEmail(studentEmail, subject, body);
+    }
+
+    public void processBookRequest(String studentEmail, String studentName, String bookTitle, 
+            String author, String isbn, LocalDate requestDate) {
+        
+        String subject = "Book Borrowing Request Submitted";
+        
+        String body = """
+            Dear %s,
+            
+            This is to confirm that your request to borrow the following book has been successfully submitted to the College Library.
+            
+            Book Details:
+            ----------------------------------------
+            Title        : %s
+            Author       : %s
+            ISBN         : %s
+            Request Date : %s
+            ----------------------------------------
+            
+            Your request is currently pending approval by the library staff. You will receive another notification once your request has been approved.
+            
+            Thank you for using the College Library Management System.
+            
+            Best Regards,
+            College Library
+            Library Management System
+            """.formatted(studentName, bookTitle, author, isbn, requestDate);
+
         emailService.sendEmail(studentEmail, subject, body);
     }
 }

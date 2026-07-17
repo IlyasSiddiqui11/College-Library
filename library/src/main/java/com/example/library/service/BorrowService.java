@@ -88,6 +88,42 @@ public class BorrowService {
     }
 
     @Transactional
+    public BorrowResponse reserveBook(BorrowRequestDto dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + dto.getUserId()));
+
+        Book book = bookRepository.findByIsbn(dto.getIsbn())
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ISBN: " + dto.getIsbn()));
+
+        boolean hasActiveRequest = borrowRequestRepository.findByUserId(user.getId()).stream()
+                .anyMatch(req -> req.getBook() != null && req.getBook().getId().equals(book.getId()) &&
+                        (req.getStatus() == BorrowStatus.PENDING || req.getStatus() == BorrowStatus.APPROVED || req.getStatus() == BorrowStatus.RESERVED));
+
+        if (hasActiveRequest) {
+            throw new BadRequestException("You already have an active request or reservation for this book");
+        }
+
+        long activeBorrowCount = borrowRequestRepository.findByUserId(user.getId()).stream()
+                .filter(req -> req.getStatus() == BorrowStatus.APPROVED || req.getStatus() == BorrowStatus.PENDING || req.getStatus() == BorrowStatus.RESERVED)
+                .count();
+
+        if (activeBorrowCount >= 2) {
+            throw new BadRequestException(
+                    "Borrow limit reached: students may only borrow/reserve up to 2 books simultaneously.");
+        }
+
+        BorrowRequest request = BorrowRequest.builder()
+                .user(user)
+                .book(book)
+                .status(BorrowStatus.RESERVED)
+                .requestDate(LocalDateTime.now())
+                .build();
+
+        BorrowRequest savedRequest = borrowRequestRepository.save(request);
+        return mapToBorrowResponse(savedRequest, book);
+    }
+
+    @Transactional
     public BorrowResponse approveBorrowRequest(Long requestId, String accessionNumber) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found with ID: " + requestId));
@@ -258,6 +294,30 @@ public class BorrowService {
         return mapToBorrowResponse(returnedRequest, book);
     }
 
+    @Transactional
+    public BorrowResponse extendLoan(Long userId, String accessionNumber) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        BorrowRequest request = borrowRequestRepository
+                .findFirstByUserIdAndAccessionNumberAndStatusOrderByRequestDateDesc(user.getId(), accessionNumber, BorrowStatus.APPROVED)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active approved borrow request found for user ID: " + userId + " and Accession Number: " + accessionNumber));
+
+        int currentExtensions = request.getExtensionCount() != null ? request.getExtensionCount() : 0;
+        if (currentExtensions >= 2) {
+            throw new BadRequestException("Maximum loan extensions (2) reached for this book.");
+        }
+
+        request.setExtensionCount(currentExtensions + 1);
+        // Extend the due date by 7 more days
+        LocalDateTime currentDue = request.getDueDate() != null ? request.getDueDate() : request.getApprovedDate().plusDays(7);
+        request.setDueDate(currentDue.plusDays(7));
+        BorrowRequest extendedRequest = borrowRequestRepository.save(request);
+
+        return mapToBorrowResponse(extendedRequest, extendedRequest.getBook());
+    }
+
     @Transactional(readOnly = true)
     public List<BorrowResponse> getAllRequests() {
         return borrowRequestRepository.findAll().stream()
@@ -296,9 +356,10 @@ public class BorrowService {
     }
 
     private BorrowResponse mapToBorrowResponse(BorrowRequest request, Book bookHint) {
+        int extensions = request.getExtensionCount() != null ? request.getExtensionCount() : 0;
         LocalDateTime dueDate = request.getDueDate() != null
                 ? request.getDueDate()
-                : (request.getApprovedDate() != null ? request.getApprovedDate().plusDays(7) : null);
+                : (request.getApprovedDate() != null ? request.getApprovedDate().plusDays(7 * (extensions + 1)) : null);
 
         Long bookId = null;
         String bookTitle = "Unknown Book";
@@ -362,6 +423,7 @@ public class BorrowService {
                 .createdAt(request.getCreatedAt())
                 .updatedAt(request.getUpdatedAt())
                 .accessionNumber(request.getAccessionNumber())
+                .extensionCount(request.getExtensionCount())
                 .availableCopies(availableCopies)
                 .build();
     }

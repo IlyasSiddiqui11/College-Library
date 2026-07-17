@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   // On mount, load user from local storage
   useEffect(() => {
@@ -26,11 +27,17 @@ export const AuthProvider = ({ children }) => {
   // Auto-fetch profile if logged in as Student
   useEffect(() => {
     if (user && user.role === 'STUDENT') {
-      fetchProfile().catch((err) => {
-        console.warn('Failed to fetch student profile, might be incomplete:', err.message)
-      })
+      setProfileLoading(true)
+      fetchProfile()
+        .catch((err) => {
+          console.warn('Failed to fetch student profile, might be incomplete:', err.message)
+        })
+        .finally(() => {
+          setProfileLoading(false)
+        })
     } else {
       setProfile(null)
+      setProfileLoading(false)
     }
   }, [user])
 
@@ -97,6 +104,7 @@ export const AuthProvider = ({ children }) => {
         user,
         profile,
         loading,
+        profileLoading,
         login,
         register,
         completeProfile,

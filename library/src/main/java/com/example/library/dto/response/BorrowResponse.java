@@ -35,6 +35,7 @@ public class BorrowResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String accessionNumber;
+    private Integer extensionCount;
     /** Count of currently AVAILABLE physical copies for this ISBN (admin lending UI). */
     private Long availableCopies;
 }

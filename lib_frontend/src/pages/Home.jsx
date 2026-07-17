@@ -82,7 +82,7 @@ export default function Home() {
         </div>
 
         <div className="relative mx-auto max-w-4xl text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/50 px-4 py-2 text-sm font-medium text-blue-600">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-400/40 bg-blue-500/20 px-4 py-2 text-sm font-medium text-blue-200">
             <Zap className="h-4 w-4" />
             Modern Library Management System
           </div>
