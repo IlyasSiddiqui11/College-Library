@@ -189,7 +189,7 @@ export default function Home() {
               { num: '3', title: 'Scan Books', desc: 'Use camera to scan ISBN barcodes or manually search' },
               { num: '4', title: 'Request Borrowing', desc: 'Submit book requests for librarian approval' },
               { num: '5', title: 'Track Borrowing', desc: 'View history and manage your borrowed books' },
-              { num: '6', title: 'Return Books', desc: 'Use return station kiosk for quick returns' },
+              { num: '6', title: 'Return Books', desc: 'Use Return Station for quick returns' },
             ].map((step, idx) => (
               <div key={idx} className="flex gap-6">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-lg font-bold text-white shadow-lg shadow-blue-600/20">

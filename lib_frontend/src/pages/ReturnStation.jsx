@@ -208,7 +208,7 @@ export default function ReturnStation() {
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
             >
               <Users className="size-4.5" />
-              Return Station Kiosk
+              Return Station
             </button>
             <button
               onClick={() => navigate('/admin/students')}
