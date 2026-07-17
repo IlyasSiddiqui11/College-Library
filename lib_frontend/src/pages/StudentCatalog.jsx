@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
-  BookOpen, Search, Library, Loader2, CheckCircle2, LogOut, AlertCircle, History, User, FileText
+  BookOpen, Search, Library, Loader2, CheckCircle2, LogOut, AlertCircle, History, User, FileText, Bookmark
 } from 'lucide-react'
 
 export default function StudentCatalog() {
@@ -14,6 +14,7 @@ export default function StudentCatalog() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [requestingIsbn, setRequestingIsbn] = useState(null)
+  const [reservingIsbn, setReservingIsbn] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -69,6 +70,34 @@ export default function StudentCatalog() {
       setErrorMsg(err.message || 'Failed to submit borrow request')
     } finally {
       setRequestingIsbn(null)
+      setTimeout(() => {
+        setSuccessMsg('')
+        setErrorMsg('')
+      }, 5000)
+    }
+  }
+
+  const handleReserveBook = async (isbn) => {
+    if (!user || !profile) {
+      setErrorMsg('Please complete your profile from the Dashboard first to reserve books.')
+      return
+    }
+
+    setReservingIsbn(isbn)
+    setErrorMsg('')
+    setSuccessMsg('')
+
+    try {
+      await apiClient.post('/api/borrow/reserve', {
+        userId: user.id,
+        isbn: isbn
+      })
+      setSuccessMsg('Book reserved! You will be notified when it becomes available.')
+      await fetchBooks()
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to reserve book. You may already have a reservation.')
+    } finally {
+      setReservingIsbn(null)
       setTimeout(() => {
         setSuccessMsg('')
         setErrorMsg('')
@@ -311,26 +340,44 @@ export default function StudentCatalog() {
                       </div>
                     </button>
 
-                    <button
-                      onClick={() => handleRequestBorrow(book.isbn)}
-                      disabled={requestingIsbn === book.isbn || !isAvailable}
-                      className={`w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
-                        isAvailable
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
-                          : 'bg-white/10 text-slate-400 cursor-not-allowed shadow-none'
-                      }`}
-                    >
-                      {requestingIsbn === book.isbn ? (
-                        <>
-                          <Loader2 className="size-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : isAvailable ? (
-                        'Request to Borrow'
-                      ) : (
-                        'Not Available'
-                      )}
-                    </button>
+                    {/* Borrow button (only when available) */}
+                    {isAvailable && (
+                      <button
+                        onClick={() => handleRequestBorrow(book.isbn)}
+                        disabled={requestingIsbn === book.isbn}
+                        className="w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50"
+                      >
+                        {requestingIsbn === book.isbn ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          'Request to Borrow'
+                        )}
+                      </button>
+                    )}
+
+                    {/* Reserve button (only when unavailable) */}
+                    {!isAvailable && (
+                      <button
+                        onClick={() => handleReserveBook(book.isbn)}
+                        disabled={reservingIsbn === book.isbn}
+                        className="w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30 disabled:opacity-50"
+                      >
+                        {reservingIsbn === book.isbn ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Reserving...
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark className="size-4" />
+                            Reserve Book
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 )
               })}
