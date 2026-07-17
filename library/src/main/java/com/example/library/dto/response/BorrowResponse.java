@@ -24,6 +24,9 @@ public class BorrowResponse {
     private String bookTitle;
     private String bookAuthor;
     private String isbn;
+    private String edition;
+    private String branch;
+    private String category;
     private BorrowStatus status;
     private LocalDateTime requestDate;
     private LocalDateTime approvedDate;
@@ -33,4 +36,6 @@ public class BorrowResponse {
     private LocalDateTime updatedAt;
     private String accessionNumber;
     private Integer extensionCount;
+    /** Count of currently AVAILABLE physical copies for this ISBN (admin lending UI). */
+    private Long availableCopies;
 }

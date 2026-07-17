@@ -4,15 +4,15 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookResponse {
-    private Long id;
+public class LostBookDetailsResponse {
+    // Book details
+    private Long bookId;
     private String accessionNumber;
     private String isbn;
     private String title;
@@ -21,14 +21,18 @@ public class BookResponse {
     private String edition;
     private String series;
     private Integer publicationYear;
-    private Integer totalPages;
-    private Double price;
-    private String billNumber;
-    private LocalDate billDate;
-    private String branch;
-    private String category;
-    private String language;
-    private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String bookBranch;
+    private String bookCategory;
+
+    // Student details
+    private Long studentId;
+    private String studentName;
+    private String studentEmail;
+    private String studentBranch;
+    private String studentYear;
+
+    // Borrow details
+    private Long borrowRequestId;
+    private LocalDateTime borrowDate;
+    private LocalDateTime dueDate;
 }

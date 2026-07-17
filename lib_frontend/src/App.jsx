@@ -14,9 +14,8 @@ import GateLogs from './pages/GateLogs.jsx'
 import StudentProfile from './pages/StudentProfile.jsx'
 import RegisteredStudents from './pages/RegisteredStudents.jsx'
 import StudentCatalog from './pages/StudentCatalog.jsx'
-import ForgotPassword from './pages/ForgotPassword.jsx'
-import ResetPassword from './pages/ResetPassword.jsx'
-import AdminReservations from './pages/AdminReservations.jsx'
+import BookDetails from './pages/BookDetails.jsx'
+import LostBooks from './pages/LostBooks.jsx'
 
 function App() {
   return (
@@ -25,21 +24,20 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<StudentLogin />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin/login" element={<LibrarianLogin />} />
           <Route path="/lending" element={<BorrowRequests />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/gate-logs" element={<GateLogs />} />
           <Route path="/admin/students" element={<RegisteredStudents />} />
-          <Route path="/admin/reservations" element={<AdminReservations />} />
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/catalog" element={<StudentCatalog />} />
+          <Route path="/catalog/:isbn" element={<BookDetails />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/history" element={<BorrowHistory />} />
           <Route path="/returns" element={<ReturnStation />} />
           <Route path="/scanner" element={<BookScanner />} />
+          <Route path="/admin/lost-books" element={<LostBooks />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

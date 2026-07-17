@@ -6,5 +6,6 @@ public enum BorrowStatus {
     RETURNED,
     REJECTED,
     CANCELLED,
-    RESERVED
+    RESERVED,
+    LOST
 }

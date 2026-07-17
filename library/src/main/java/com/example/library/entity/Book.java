@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -23,7 +24,10 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "accession_number", nullable = false, unique = true)
+    private String accessionNumber;
+
+    @Column(nullable = false)
     private String isbn;
 
     @Column(nullable = false)
@@ -32,23 +36,42 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
-    @Column(name = "total_copies", nullable = false)
-    private int totalCopies;
-
-    @Column(name = "available_copies", nullable = false)
-    private int availableCopies;
-
     @Column(name = "publisher")
     private String publisher;
 
-    @Column(name = "price")
-    private Double price;
+    @Column(name = "edition")
+    private String edition;
+
+    @Column(name = "series")
+    private String series;
 
     @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @Column(name = "accession_numbers")
-    private String accessionNumbers;
+    @Column(name = "total_pages")
+    private Integer totalPages;
+
+    @Column(name = "price")
+    private Double price;
+
+    @Column(name = "bill_number")
+    private String billNumber;
+
+    @Column(name = "bill_date")
+    private LocalDate billDate;
+
+    @Column(name = "branch")
+    private String branch;
+
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "language")
+    private String language;
+
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private String status = "AVAILABLE";
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -60,6 +83,9 @@ public class Book {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null) {
+            status = "AVAILABLE";
+        }
     }
 
     @PreUpdate

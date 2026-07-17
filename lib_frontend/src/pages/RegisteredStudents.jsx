@@ -15,8 +15,8 @@ import {
   ClipboardList,
   Clock,
   UserCheck,
-  Download
-, Bookmark
+  Download,
+  ShieldAlert
 } from 'lucide-react'
 
 export default function RegisteredStudents() {
@@ -145,13 +145,6 @@ export default function RegisteredStudents() {
               Borrow Requests
             </button>
             <button
-              onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <Bookmark className="size-4.5" />
-              Reserve Books
-            </button>
-            <button
               onClick={() => navigate('/inventory')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
@@ -174,10 +167,17 @@ export default function RegisteredStudents() {
             </button>
             <button
               onClick={() => navigate('/admin/students')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
             >
               <UserCheck className="size-4.5" />
               Registered Students
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
             </button>
           </nav>
         </div>

@@ -20,6 +20,8 @@ export default function AdminDashboard() {
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [approvingId, setApprovingId] = useState(null)
   const [accessionNumber, setAccessionNumber] = useState('')
+  const [availableCopies, setAvailableCopies] = useState([])
+  const [copiesLoading, setCopiesLoading] = useState(false)
 
   // Redirect if not admin
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function AdminDashboard() {
   // Handle Quick Approval
   const handleApprove = async (id, accNum) => {
     if (!accNum || accNum.trim() === '') {
-      alert('Please enter an accession number.')
+      alert('Please select an accession number.')
       return
     }
     setActionLoadingId(id)
@@ -102,10 +104,27 @@ export default function AdminDashboard() {
       await loadData()
       setApprovingId(null)
       setAccessionNumber('')
+      setAvailableCopies([])
     } catch (err) {
       alert('Approval error: ' + err.message)
     } finally {
       setActionLoadingId(null)
+    }
+  }
+
+  const startApprove = async (req) => {
+    setApprovingId(req.id)
+    setAccessionNumber('')
+    setAvailableCopies([])
+    setCopiesLoading(true)
+    try {
+      const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(req.isbn)}/available-copies`)
+      setAvailableCopies(res.data || [])
+    } catch (err) {
+      alert('Could not load available copies: ' + err.message)
+      setApprovingId(null)
+    } finally {
+      setCopiesLoading(false)
     }
   }
 
@@ -125,7 +144,7 @@ export default function AdminDashboard() {
   if (!user) return null
 
   // Compute metrics
-  const totalBooksCount = books.reduce((acc, book) => acc + (book.totalCopies || 0), 0)
+  const totalBooksCount = books.length
   const liveBorrowsCount = borrowRequests.filter(req => req.status === 'APPROVED').length
   const totalCheckIns = gateLogs.filter(log => log.action === 'ENTRY').length
   const totalCheckOuts = gateLogs.filter(log => log.action === 'EXIT').length
@@ -199,6 +218,13 @@ export default function AdminDashboard() {
             >
               <UserCheck className="size-4.5" />
               Registered Students
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
             </button>
           </nav>
         </div>
@@ -427,19 +453,27 @@ export default function AdminDashboard() {
                               <div className="flex justify-end gap-1.5">
                                 {approvingId === req.id ? (
                                   <div className="flex items-center gap-1.5">
-                                    <input
-                                      type="text"
-                                      placeholder="Accession No."
-                                      maxLength={10}
-                                      value={accessionNumber}
-                                      onChange={(e) => setAccessionNumber(e.target.value.replace(/\D/g, ''))}
-                                      className="w-28 rounded-lg border border-white/20 glass-input px-2 py-1 text-[10px] text-white placeholder:text-blue-200 outline-none focus:border-blue-500 transition"
-                                      autoFocus
-                                    />
+                                    {copiesLoading ? (
+                                      <Loader2 className="size-4 animate-spin text-blue-200" />
+                                    ) : (
+                                      <select
+                                        value={accessionNumber}
+                                        onChange={(e) => setAccessionNumber(e.target.value)}
+                                        className="w-36 rounded-lg border border-white/20 bg-slate-900 px-2 py-1 text-[10px] text-white outline-none focus:border-blue-500"
+                                        autoFocus
+                                      >
+                                        <option value="" className="bg-slate-900">Select copy...</option>
+                                        {availableCopies.map((copy) => (
+                                          <option key={copy.id} value={copy.accessionNumber} className="bg-slate-900">
+                                            {copy.accessionNumber}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    )}
                                     <button
-                                      disabled={actionLoadingId === req.id}
+                                      disabled={actionLoadingId === req.id || !accessionNumber}
                                       onClick={() => handleApprove(req.id, accessionNumber)}
-                                      className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md hover:bg-blue-700 transition"
+                                      className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md hover:bg-blue-700 transition disabled:opacity-50"
                                       title="Confirm Approve"
                                     >
                                       <Check className="size-3.5" />
@@ -449,6 +483,7 @@ export default function AdminDashboard() {
                                       onClick={() => {
                                         setApprovingId(null)
                                         setAccessionNumber('')
+                                        setAvailableCopies([])
                                       }}
                                       className="flex size-7 items-center justify-center rounded-lg border border-white/20 glass-panel hover:text-white transition"
                                       title="Cancel"
@@ -460,10 +495,7 @@ export default function AdminDashboard() {
                                   <>
                                     <button
                                       disabled={actionLoadingId === req.id}
-                                      onClick={() => {
-                                        setApprovingId(req.id)
-                                        setAccessionNumber('')
-                                      }}
+                                      onClick={() => startApprove(req)}
                                       className="flex size-7 items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition"
                                       title="Approve Request"
                                     >

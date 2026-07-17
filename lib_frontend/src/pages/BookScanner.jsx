@@ -147,19 +147,18 @@ export default function BookScanner() {
   }
 
   const handleRequestBorrow = async () => {
-    if (!user || !scannedIsbn || !bookDetails) return
+    if (!user || !scannedIsbn) return
     setBorrowing(true)
     setErrorMsg('')
 
     try {
-      const endpoint = bookDetails.availableCopies < 1 ? '/api/borrow/reserve' : '/api/borrow/request'
-      await apiClient.post(endpoint, {
+      await apiClient.post('/api/borrow/request', {
         userId: user.id,
         isbn: scannedIsbn
       })
       setScanStatus('success')
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to submit request')
+      setErrorMsg(err.message || 'Failed to submit borrow request')
       setScanStatus('error')
     } finally {
       setBorrowing(false)
@@ -236,8 +235,8 @@ export default function BookScanner() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-blue-200">Availability</span>
-                  <span className="font-semibold text-green-400">
-                    {bookDetails.availableCopies} of {bookDetails.totalCopies} copies in shelf
+                  <span className={`font-semibold ${bookDetails.status === 'AVAILABLE' ? 'text-green-400' : 'text-amber-300'}`}>
+                    {bookDetails.status === 'AVAILABLE' ? 'Available' : 'Unavailable'}
                   </span>
                 </div>
               </div>
@@ -247,14 +246,10 @@ export default function BookScanner() {
               <button
                 type="button"
                 onClick={handleRequestBorrow}
-                disabled={borrowing}
-                className={`w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg active:scale-[0.98] transition disabled:opacity-50 ${
-                  bookDetails.availableCopies > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
-                }`}
+                disabled={borrowing || bookDetails.status !== 'AVAILABLE'}
+                className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-50"
               >
-                {borrowing 
-                  ? 'Submitting Request...' 
-                  : (bookDetails.availableCopies > 0 ? 'Confirm & Request Borrow' : 'Reserve Book')}
+                {borrowing ? 'Submitting Request...' : 'Confirm & Request Borrow'}
               </button>
               
               <button
@@ -274,11 +269,9 @@ export default function BookScanner() {
               <CheckCircle2 className="size-8 animate-pulse" />
             </div>
             
-            <h3 className="text-lg font-bold text-white mt-4">{bookDetails?.availableCopies < 1 ? 'Book Reserved!' : 'Borrow Request Submitted!'}</h3>
+            <h3 className="text-lg font-bold text-white mt-4">Borrow Request Submitted!</h3>
             <p className="text-xs text-blue-200 mt-2 max-w-xs leading-relaxed">
-              {bookDetails?.availableCopies < 1 
-                ? 'Your reservation has been logged. We will notify you when a copy is available.' 
-                : 'Your lending request has been logged. Please proceed to the library desk to pick up the book once the librarian approves.'}
+              Your lending request has been logged. Please proceed to the library desk to pick up the book once the librarian approves.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 w-full">

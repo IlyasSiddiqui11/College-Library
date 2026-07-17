@@ -2,7 +2,6 @@ package com.example.library.controller;
 
 import lombok.RequiredArgsConstructor;
 
-
 import com.example.library.dto.request.BorrowRequestDto;
 import com.example.library.dto.response.BorrowResponse;
 import com.example.library.service.BorrowService;
@@ -33,14 +32,18 @@ public class BorrowController {
     }
 
     @PostMapping("/return")
-    public ResponseEntity<BorrowResponse> returnBook(@RequestParam Long userId, @RequestParam String isbn, @RequestParam(required = false) String accessionNumber) {
-        BorrowResponse response = borrowService.returnBook(userId, isbn, accessionNumber);
+    public ResponseEntity<BorrowResponse> returnBook(
+            @RequestParam Long userId,
+            @RequestParam String accessionNumber) {
+        BorrowResponse response = borrowService.returnBook(userId, accessionNumber);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/extend")
-    public ResponseEntity<BorrowResponse> extendLoan(@RequestParam Long userId, @RequestParam String isbn, @RequestParam(required = false) String accessionNumber) {
-        BorrowResponse response = borrowService.extendLoan(userId, isbn, accessionNumber);
+    public ResponseEntity<BorrowResponse> extendLoan(
+            @RequestParam Long userId, 
+            @RequestParam String accessionNumber) {
+        BorrowResponse response = borrowService.extendLoan(userId, accessionNumber);
         return ResponseEntity.ok(response);
     }
 

@@ -3,32 +3,31 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
-  BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X, QrCode,
-  Clock, Bookmark,
-  UserCheck, Download
+  BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X,
+  Clock,
+  UserCheck, Download, ShieldAlert
 } from 'lucide-react'
 
 export default function BorrowRequests() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  // State
   const [borrowRequests, setBorrowRequests] = useState([])
   const [selectedRequestId, setSelectedRequestId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('PENDING')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
-  const [showAccessionInput, setShowAccessionInput] = useState(false)
   const [accessionNumber, setAccessionNumber] = useState('')
+  const [availableCopies, setAvailableCopies] = useState([])
+  const [copiesLoading, setCopiesLoading] = useState(false)
+  const [copySearch, setCopySearch] = useState('')
 
-  // Student Profile Modal State
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
 
-  // Redirect if not admin
   useEffect(() => {
     if (!user) {
       navigate('/login')
@@ -42,6 +41,15 @@ export default function BorrowRequests() {
     try {
       const response = await apiClient.get('/api/borrow')
       setBorrowRequests(response.data)
+      
+      if (response.data.length > 0 && !selectedRequestId) {
+        const pending = response.data.find((r) => r.status === 'PENDING')
+        if (pending) {
+          setSelectedRequestId(pending.id)
+        } else {
+          setSelectedRequestId(response.data[0].id)
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch lending queue:', err)
     } finally {
@@ -53,13 +61,41 @@ export default function BorrowRequests() {
     fetchRequests()
   }, [user])
 
-  // Handle Approve Action
+  const selectedReq = borrowRequests.find((req) => req.id === selectedRequestId)
+
+  useEffect(() => {
+    const loadCopies = async () => {
+      if (!selectedReq || selectedReq.status !== 'PENDING' || !selectedReq.isbn) {
+        setAvailableCopies([])
+        setAccessionNumber('')
+        setCopySearch('')
+        return
+      }
+      setCopiesLoading(true)
+      setAccessionNumber('')
+      setCopySearch('')
+      try {
+        const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(selectedReq.isbn)}/available-copies`)
+        setAvailableCopies(res.data || [])
+      } catch (err) {
+        console.error('Failed to load available copies:', err)
+        setAvailableCopies([])
+      } finally {
+        setCopiesLoading(false)
+      }
+    }
+    loadCopies()
+  }, [selectedReq?.id, selectedReq?.isbn, selectedReq?.status])
+
   const handleApprove = async (id, accNum) => {
+    if (!accNum || !accNum.trim()) {
+      alert('Please select an accession number to issue.')
+      return
+    }
     setActionLoading(true)
     try {
-      await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum || '')}`)
+      await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
       await fetchRequests()
-      setShowAccessionInput(false)
       setAccessionNumber('')
     } catch (err) {
       alert('Approval failed: ' + err.message)
@@ -68,7 +104,6 @@ export default function BorrowRequests() {
     }
   }
 
-  // Handle Reject Action
   const handleReject = async (id) => {
     setActionLoading(true)
     try {
@@ -81,7 +116,6 @@ export default function BorrowRequests() {
     }
   }
 
-  // Handle View Profile
   const handleViewProfile = async (userId) => {
     setShowProfileModal(true)
     setProfileLoading(true)
@@ -99,7 +133,6 @@ export default function BorrowRequests() {
 
   if (!user) return null
 
-  // Filter requests
   const filteredRequests = borrowRequests
     .filter((req) => {
       const q = searchQuery.toLowerCase()
@@ -113,9 +146,11 @@ export default function BorrowRequests() {
     })
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
-  // Selected request details
-  const selectedReq = borrowRequests.find((req) => req.id === selectedRequestId)
   const pendingCount = borrowRequests.filter((r) => r.status === 'PENDING').length
+
+  const filteredCopies = availableCopies.filter((copy) =>
+    (copy.accessionNumber || '').toLowerCase().includes(copySearch.toLowerCase())
+  )
 
   const handleExport = () => {
     const headers = ['Request ID', 'Book Title', 'Book Author', 'ISBN', 'Requester Name', 'Requester ID', 'Request Date', 'Due Date', 'Accession Number', 'Status', 'Approved Date', 'Returned Date', 'Rejected/Cancelled Date']
@@ -158,10 +193,8 @@ export default function BorrowRequests() {
 
   return (
     <div className="h-screen flex text-white">
-      {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
-          {/* Logo Brand */}
           <div className="flex items-center gap-2 px-6 py-6 border-b border-white/20">
             <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
             <span className="font-bold tracking-tight text-white text-base">
@@ -169,7 +202,6 @@ export default function BorrowRequests() {
             </span>
           </div>
 
-          {/* Links */}
           <nav className="flex flex-col gap-1 p-4">
             <button
               onClick={() => navigate('/admin')}
@@ -180,7 +212,7 @@ export default function BorrowRequests() {
             </button>
             <button
               onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
@@ -189,13 +221,6 @@ export default function BorrowRequests() {
                   {pendingCount}
                 </span>
               )}
-            </button>
-            <button
-              onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <Bookmark className="size-4.5" />
-              Reserve Books
             </button>
             <button
               onClick={() => navigate('/inventory')}
@@ -225,10 +250,16 @@ export default function BorrowRequests() {
               <UserCheck className="size-4.5" />
               Registered Students
             </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
+            </button>
           </nav>
         </div>
 
-        {/* User Profile Card */}
         <div className="p-4 border-t border-white/20">
           <div className="flex items-center justify-between rounded-xl glass-panel p-3">
             <div className="min-w-0">
@@ -245,7 +276,6 @@ export default function BorrowRequests() {
         </div>
       </aside>
 
-      {/* Main Split-Screen Canvas */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-8 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between flex-wrap gap-4">
@@ -253,7 +283,7 @@ export default function BorrowRequests() {
               <h1 className="text-xl font-bold tracking-tight text-white">
                 Lending Queue
               </h1>
-              <p className="text-xs text-blue-200 mt-0.5">Approve shelf picks and monitor loans</p>
+              <p className="text-xs text-blue-200 mt-0.5">Assign physical copies and monitor loans</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -302,9 +332,7 @@ export default function BorrowRequests() {
           </div>
         </header>
 
-        {/* Master-Detail Split Layout */}
         <main className="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-[1440px] mx-auto w-full">
-          {/* Left panel: Active request list (5 columns) */}
           <div className="lg:col-span-5 rounded-2xl border border-white/20 glass-panel p-5 shadow-xl flex flex-col gap-4 max-h-[640px] overflow-hidden">
             <h3 className="text-sm font-bold text-white px-1">Lending Inbox</h3>
             
@@ -321,11 +349,7 @@ export default function BorrowRequests() {
                   return (
                     <button
                       key={req.id}
-                      onClick={() => {
-                        setSelectedRequestId(req.id)
-                        setShowAccessionInput(false)
-                        setAccessionNumber('')
-                      }}
+                      onClick={() => setSelectedRequestId(req.id)}
                       className={`w-full text-left rounded-xl p-4 border transition flex gap-3 ${
                         isSelected 
                           ? 'border-blue-500 bg-blue-50/20 shadow-xl' 
@@ -337,11 +361,11 @@ export default function BorrowRequests() {
                       </div>
                       
                       <div className="min-w-0 flex-1">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-2">
                           <p className="font-bold text-white text-xs truncate max-w-[140px]">
                             {req.bookTitle}
                           </p>
-                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full border ${
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${
                             req.status === 'PENDING' 
                               ? 'bg-amber-50 text-amber-600 border-amber-200/50' 
                               : req.status === 'APPROVED'
@@ -355,8 +379,16 @@ export default function BorrowRequests() {
                             {req.status}
                           </span>
                         </div>
-                        <p className="text-[10px] text-blue-200 mt-0.5 truncate">Requester: {req.userName || `ID #${req.userId}`}</p>
-                        <p className="text-[9px] text-blue-200 mt-2 font-medium">Logged: {new Date(req.requestDate).toLocaleDateString()}</p>
+                        <p className="text-[10px] text-blue-200 mt-0.5 truncate">{req.userName || `ID #${req.userId}`}</p>
+                        <p className="text-[9px] text-blue-200 mt-1 font-mono">ISBN: {req.isbn || '—'}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <p className="text-[9px] text-blue-200 font-medium">{new Date(req.requestDate).toLocaleDateString()}</p>
+                          {req.status === 'PENDING' && (
+                            <span className="text-[9px] font-bold text-green-300">
+                              {req.availableCopies ?? 0} avail.
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                   )
@@ -365,12 +397,10 @@ export default function BorrowRequests() {
             </div>
           </div>
 
-          {/* Right panel: Details of selected request (7 columns) */}
           <div className="lg:col-span-7 rounded-2xl border border-white/20 glass-panel p-6 shadow-xl flex flex-col justify-between min-h-[480px]">
             {selectedReq ? (
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  {/* Book Section */}
                   <div className="pb-6 border-b border-white/20 flex gap-4">
                     <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                       <BookOpen className="size-6" />
@@ -385,13 +415,27 @@ export default function BorrowRequests() {
                         <span className="glass-panel text-blue-100 px-2 py-0.5 rounded-lg">
                           ISBN: {selectedReq.isbn}
                         </span>
+                        {selectedReq.edition && (
+                          <span className="glass-panel text-blue-100 px-2 py-0.5 rounded-lg">
+                            Edition: {selectedReq.edition}
+                          </span>
+                        )}
+                        {selectedReq.branch && (
+                          <span className="glass-panel text-blue-100 px-2 py-0.5 rounded-lg">
+                            Branch: {selectedReq.branch}
+                          </span>
+                        )}
+                        {selectedReq.category && (
+                          <span className="glass-panel text-blue-100 px-2 py-0.5 rounded-lg">
+                            Category: {selectedReq.category}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Requester Profile Summary */}
                   <div className="py-6 border-b border-white/20 flex flex-col gap-3">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Requester Profile</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Student Information</h4>
                     <div className="flex items-center justify-between gap-3 glass-panel p-4 rounded-xl border border-white/20">
                       <div className="flex items-center gap-3">
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
@@ -410,12 +454,11 @@ export default function BorrowRequests() {
                     </div>
                   </div>
 
-                  {/* Lending Details */}
                   <div className="py-6 flex flex-col gap-3">
                     <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Lending Schedule</h4>
                     <div className="grid grid-cols-2 gap-4 text-xs">
                       <div>
-                        <p className="text-blue-200">Request Date</p>
+                        <p className="text-blue-200">Requested Date</p>
                         <p className="font-bold text-white mt-0.5">{new Date(selectedReq.requestDate).toLocaleString()}</p>
                       </div>
                       <div>
@@ -424,16 +467,79 @@ export default function BorrowRequests() {
                       </div>
                       {selectedReq.accessionNumber && (
                         <div>
-                          <p className="text-blue-200">Accession Number</p>
+                          <p className="text-blue-200">Issued Accession</p>
                           <p className="font-bold text-amber-300 mt-0.5 font-mono">{selectedReq.accessionNumber}</p>
                         </div>
                       )}
                     </div>
                   </div>
+
+                  {selectedReq.status === 'PENDING' && (
+                    <div className="pb-6 flex flex-col gap-3">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">
+                        Available Copies ({availableCopies.length})
+                      </h4>
+                      {copiesLoading ? (
+                        <div className="flex items-center gap-2 text-xs text-blue-200 py-2">
+                          <Loader2 className="size-4 animate-spin" />
+                          Loading available copies...
+                        </div>
+                      ) : availableCopies.length === 0 ? (
+                        <p className="text-xs text-amber-300 glass-panel border border-amber-400/20 rounded-xl p-3">
+                          No available copies for this ISBN. Cannot approve until a copy is returned.
+                        </p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-blue-200" />
+                            <input
+                              type="text"
+                              placeholder="Search accession numbers..."
+                              value={copySearch}
+                              onChange={(e) => setCopySearch(e.target.value)}
+                              className="w-full rounded-xl border border-white/20 glass-input py-2.5 pl-9 pr-3 text-xs text-white placeholder:text-blue-200 outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <select
+                            value={accessionNumber}
+                            onChange={(e) => setAccessionNumber(e.target.value)}
+                            className="w-full rounded-xl border border-white/20 bg-slate-900 px-3 py-2.5 text-xs text-white outline-none focus:border-blue-500"
+                          >
+                            <option value="" className="bg-slate-900">Select accession number to issue...</option>
+                            {filteredCopies.map((copy) => (
+                              <option key={copy.id} value={copy.accessionNumber} className="bg-slate-900">
+                                {copy.accessionNumber}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 mt-1">
+                            {filteredCopies.map((copy) => (
+                              <label
+                                key={copy.id}
+                                className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-xs cursor-pointer transition ${
+                                  accessionNumber === copy.accessionNumber
+                                    ? 'border-blue-500 bg-blue-500/20 text-white'
+                                    : 'border-white/15 glass-panel text-blue-100 hover:bg-white/10'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="accession"
+                                  checked={accessionNumber === copy.accessionNumber}
+                                  onChange={() => setAccessionNumber(copy.accessionNumber)}
+                                  className="accent-blue-500"
+                                />
+                                <span className="font-mono font-bold text-amber-300">{copy.accessionNumber}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Footer Action Panel */}
-                <div className="mt-8 border-t border-white/20 pt-6 flex justify-end gap-3">
+                <div className="mt-4 border-t border-white/20 pt-6 flex justify-end gap-3">
                   {selectedReq.status === 'PENDING' ? (
                     <>
                       <button
@@ -442,56 +548,16 @@ export default function BorrowRequests() {
                         className="flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/50 px-5 py-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
                       >
                         <X className="size-4" />
-                        Decline Request
+                        Reject
                       </button>
-                      
-                      {showAccessionInput ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="Up to 10-digit Accession No."
-                            maxLength={10}
-                            value={accessionNumber}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, '')
-                              setAccessionNumber(val)
-                            }}
-                            className="w-48 rounded-xl border border-white/20 glass-input py-2.5 px-3 text-xs text-white placeholder:text-blue-200 outline-none focus:border-blue-500 transition"
-                          />
-                          <button
-                            onClick={() => {
-                              if (accessionNumber.length > 0 && accessionNumber.length <= 10) {
-                                handleApprove(selectedReq.id, accessionNumber)
-                              } else {
-                                alert('Please enter up to 10 numbers for the accession number.')
-                              }
-                            }}
-                            disabled={actionLoading}
-                            className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
-                          >
-                            <Check className="size-4" />
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => {
-                              setShowAccessionInput(false)
-                              setAccessionNumber('')
-                            }}
-                            className="p-2.5 rounded-xl border border-white/20 glass-panel text-blue-200 hover:text-white transition flex items-center justify-center"
-                          >
-                            <X className="size-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setShowAccessionInput(true)}
-                          disabled={actionLoading}
-                          className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
-                        >
-                          <Check className="size-4" />
-                          Approve Borrow Request
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleApprove(selectedReq.id, accessionNumber)}
+                        disabled={actionLoading || !accessionNumber || availableCopies.length === 0}
+                        className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <Check className="size-4" />
+                        Approve Request
+                      </button>
                     </>
                   ) : (
                     <div className="w-full flex items-center justify-between gap-2 p-4 glass-panel border border-white/20 rounded-xl">
@@ -519,7 +585,6 @@ export default function BorrowRequests() {
         </main>
       </div>
 
-      {/* Student Profile Modal */}
       {showProfileModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-2xl border border-white/20 glass-panel p-6 shadow-2xl animate-in fade-in duration-150">

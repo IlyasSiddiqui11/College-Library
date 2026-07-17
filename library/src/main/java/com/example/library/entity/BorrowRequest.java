@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-
 import com.example.library.enums.BorrowStatus;
 import jakarta.persistence.*;
 
@@ -29,8 +28,12 @@ public class BorrowRequest {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id", nullable = true)
     private Book book;
+
+    /** Denormalized ISBN so pending requests can track a title before a copy is assigned. */
+    @Column(name = "isbn")
+    private String isbn;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,6 +44,9 @@ public class BorrowRequest {
 
     @Column(name = "approved_date")
     private LocalDateTime approvedDate;
+
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
 
     @Column(name = "returned_date")
     private LocalDateTime returnedDate;
