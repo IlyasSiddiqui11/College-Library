@@ -17,6 +17,7 @@ import {
   ClipboardList,
   UserCheck,
   BookOpen
+, Bookmark
 } from 'lucide-react'
 
 export default function GateLogs() {
@@ -165,6 +166,13 @@ export default function GateLogs() {
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <Bookmark className="size-4.5" />
+              Reserve Books
             </button>
             <button
               onClick={() => navigate('/inventory')}

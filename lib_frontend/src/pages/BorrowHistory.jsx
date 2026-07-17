@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, Search, Clock, CheckCircle2, 
-  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText
+  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText, Bookmark
 } from 'lucide-react'
 
 export default function BorrowHistory() {
@@ -160,14 +160,14 @@ export default function BorrowHistory() {
 
           {/* Quick status filter pills */}
           <div className="flex gap-1.5 flex-wrap">
-            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED'].map((status) => (
+            {['ALL', 'PENDING', 'APPROVED', 'RESERVED', 'RETURNED', 'REJECTED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
                 type="button"
                 onClick={() => setFilterStatus(status)}
                 className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition ${
                   filterStatus === status
-                    ? 'bg-blue-600 text-white shadow-xl'
+                    ? (status === 'RESERVED' ? 'bg-purple-600 text-white shadow-xl' : 'bg-blue-600 text-white shadow-xl')
                     : 'glass-panel text-blue-200 hover:text-white'
                 }`}
               >
@@ -224,6 +224,14 @@ export default function BorrowHistory() {
                     </span>
                   )
                   borderClass = 'border-red-100 bg-red-50/10'
+                  break
+                case 'RESERVED':
+                  statusBadge = (
+                    <span className="flex items-center gap-1 rounded-full bg-purple-900/40 px-2 py-0.5 text-[9px] font-bold text-purple-300 border border-purple-500/40">
+                      <Bookmark className="size-2.5" /> RESERVED
+                    </span>
+                  )
+                  borderClass = 'border-purple-500/30 bg-purple-900/10'
                   break
                 case 'CANCELLED':
                   statusBadge = (
@@ -298,6 +306,16 @@ export default function BorrowHistory() {
                           </div>
                         )}
                       </div>
+
+                      {/* Info message for RESERVED items */}
+                      {item.status === 'RESERVED' && (
+                        <div className="mt-3 flex items-center gap-2 border-t border-purple-500/20 pt-2.5">
+                          <Bookmark className="size-3 text-purple-400 shrink-0" />
+                          <p className="text-[10px] text-purple-300 leading-relaxed">
+                            You&apos;re in the queue. When this book is returned, a borrow request will be auto-submitted for you.
+                          </p>
+                        </div>
+                      )}
 
                       {/* Cancel button for PENDING items */}
                       {item.status === 'PENDING' && (

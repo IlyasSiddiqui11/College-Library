@@ -48,6 +48,10 @@ public class BorrowRequest {
     @Column(name = "accession_number")
     private String accessionNumber;
 
+    @Column(name = "extension_count")
+    @Builder.Default
+    private Integer extensionCount = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

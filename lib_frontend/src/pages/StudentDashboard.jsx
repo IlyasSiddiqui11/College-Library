@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
-  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText, ChevronDown
+  GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText, ChevronDown, Bookmark
 } from 'lucide-react'
 
 export default function StudentDashboard() {
@@ -238,6 +238,9 @@ export default function StudentDashboard() {
   const pendingRequests = borrowRequests
     .filter(req => req.status === 'PENDING')
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
+  const reservedRequests = borrowRequests
+    .filter(req => req.status === 'RESERVED')
+    .sort((a, b) => new Date(a.requestDate).getTime() - new Date(b.requestDate).getTime())
 
   // Format date helper: 26 May 2026, 10:45 AM
   const formatDateFull = (dateString) => {
@@ -493,6 +496,29 @@ export default function StudentDashboard() {
                         )}
                       </button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Reserved books */}
+            {!loading && reservedRequests.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Bookmark className="size-3.5" /> My Reservations ({reservedRequests.length})
+                </p>
+                {reservedRequests.map((req) => (
+                  <div key={req.id} className="rounded-xl border border-purple-500/30 bg-purple-900/15 p-3 flex justify-between items-start text-xs gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-white truncate">{req.bookTitle}</p>
+                      <p className="text-[10px] text-blue-200 mt-0.5">ISBN: {req.isbn}</p>
+                      <p className="text-[10px] text-purple-300 mt-1 leading-relaxed">
+                        📬 You&apos;re in the queue. A borrow request will be auto-submitted when a copy is available.
+                      </p>
+                    </div>
+                    <span className="text-[9px] font-bold text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded-full border border-purple-500/40 shrink-0">
+                      RESERVED
+                    </span>
                   </div>
                 ))}
               </div>

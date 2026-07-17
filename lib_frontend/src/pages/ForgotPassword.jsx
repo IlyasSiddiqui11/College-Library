@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, AlertTriangle, Loader2, ArrowLeft } from 'lucide-react'
-import axios from 'axios'
+import { apiClient } from '../api/client'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
@@ -19,7 +19,7 @@ export default function ForgotPassword() {
     try {
       if (!email.trim()) throw new Error('Email is required')
       
-      await axios.post('http://localhost:8081/api/auth/forgot-password', { email })
+      await apiClient.post('/api/auth/forgot-password', { email })
       
       setSuccessMsg('A password reset link has been sent to your email address.')
       setEmail('')

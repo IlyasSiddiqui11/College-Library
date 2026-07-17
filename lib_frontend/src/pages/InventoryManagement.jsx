@@ -6,7 +6,8 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList, 
   Users, PlusCircle, MinusCircle, X, ScanLine, Camera, Clock,
-  UserCheck, Download
+  UserCheck, Download, Upload
+, Bookmark
 } from 'lucide-react'
 
 export default function InventoryManagement() {
@@ -34,6 +35,34 @@ export default function InventoryManagement() {
   // Scanner states
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef(null)
+
+  // Bulk Upload states
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
+
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await apiClient.post('/api/books/bulk-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      alert(`Upload complete! Successfully inserted: ${res.data.successfulInserts}. Failed: ${res.data.failedInserts}`)
+      fetchBooks()
+    } catch (err) {
+      alert(`Bulk upload failed: ${err.message}`)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
 
   const initScanner = () => {
     try {
@@ -273,6 +302,13 @@ export default function InventoryManagement() {
               Borrow Requests
             </button>
             <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <Bookmark className="size-4.5" />
+              Reserve Books
+            </button>
+            <button
               onClick={() => navigate('/inventory')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white bg-white/10 border border-white/20 text-left transition"
             >
@@ -350,6 +386,22 @@ export default function InventoryManagement() {
                   className="w-56 rounded-xl border border-white/20 glass-input py-2 pl-9 pr-4 text-xs text-white placeholder:text-blue-200 outline-none focus:border-indigo-500 focus:glass-panel transition"
                 />
               </div>
+
+              <input
+                type="file"
+                accept=".csv"
+                ref={fileInputRef}
+                onChange={handleBulkUpload}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-1 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-purple-700 active:scale-[0.98] transition disabled:opacity-70"
+              >
+                {uploading ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                Bulk Upload
+              </button>
 
               <button
                 onClick={() => setShowAddModal(true)}

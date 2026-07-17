@@ -1,0 +1,6 @@
+isbn,title,author,totalCopies,publisher,price,publicationYear,accessionNumbers
+978-0-262-13472-9,Introduction to Algorithms,Thomas H. Cormen,5,MIT Press,120.00,2009,A1,A2,A3,A4,A5
+978-0-13-110362-7,The C Programming Language,Brian W. Kernighan,10,Prentice Hall,60.00,1988,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10
+978-0-201-83595-3,The Mythical Man-Month,Frederick P. Brooks Jr.,3,Addison-Wesley,40.00,1995,C1,C2,C3
+978-0-321-35668-0,Effective Java,Joshua Bloch,7,Addison-Wesley,50.00,2008,D1,D2,D3,D4,D5,D6,D7
+978-0-13-235088-4,Clean Code,Robert C. Martin,8,Prentice Hall,55.00,2008,E1,E2,E3,E4,E5,E6,E7,E8

@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   ChevronLeft, ScanLine, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut
+, Bookmark
 } from 'lucide-react'
 
 export default function ReturnStation() {
@@ -26,7 +26,6 @@ export default function ReturnStation() {
   const barcodeInputRef = useRef(null)
   const studentInputRef = useRef(null)
   const accessionInputRef = useRef(null)
-  const scannerRef = useRef(null)
   const isProcessing = useRef(false)
 
   // Redirect if not admin
@@ -63,97 +62,6 @@ export default function ReturnStation() {
       return
     }
     processReturn(Number(studentId), isbn.trim(), accessionNumber.trim())
-  }
-
-  const initScanner = () => {
-    try {
-      const scanner = new Html5Qrcode('kiosk-camera-scanner')
-      scannerRef.current = scanner
-
-      scanner.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.UPC_A
-          ]
-        },
-        (text) => {
-          if (scannerRef.current) {
-            try {
-              scannerRef.current.stop().catch(() => { })
-            } catch (e) { }
-          }
-          handleIsbnSubmit(text)
-        },
-        () => { } // ignore scan errors
-      ).catch(err => {
-        console.error('Failed to start scanner:', err)
-        setErrorMsg('Camera access is restricted.')
-        setReturnStatus('error')
-      })
-    } catch (err) {
-      console.error('Failed to create html5-qrcode:', err)
-      setErrorMsg('Camera initialization failed.')
-      setReturnStatus('error')
-    }
-  }
-
-  const startCameraScanner = () => {
-    isProcessing.current = false
-    setErrorMsg('')
-    setReturnStatus('scanning')
-
-    setTimeout(() => {
-      if (scannerRef.current) {
-        try {
-          scannerRef.current.stop().then(() => {
-            scannerRef.current.clear()
-            initScanner()
-          }).catch(() => {
-            scannerRef.current.clear()
-            initScanner()
-          })
-        } catch (e) {
-          scannerRef.current.clear()
-          initScanner()
-        }
-      } else {
-        initScanner()
-      }
-    }, 100)
-  }
-
-  const stopCameraScanner = () => {
-    if (scannerRef.current) {
-      try {
-        scannerRef.current.stop().then(() => {
-          if (scannerRef.current) scannerRef.current.clear()
-        }).catch(() => {
-          if (scannerRef.current) scannerRef.current.clear()
-        })
-      } catch (err) {
-        console.warn('Scanner stop warning:', err)
-      }
-    }
-    setReturnStatus('idle')
-  }
-
-  // Handle scanned ISBN from camera
-  const handleIsbnSubmit = (isbnCode) => {
-    if (isProcessing.current) return
-    isProcessing.current = true
-
-    if (!studentId || !accessionNumber) {
-      setErrorMsg('Please specify Student ID and Accession Number manually before scanning the ISBN barcode.')
-      setReturnStatus('error')
-    } else {
-      processReturn(Number(studentId), isbnCode.trim(), accessionNumber.trim())
-    }
   }
   const processReturn = async (sId, isbnCode, accNum) => {
     setReturnStatus('processing')
@@ -198,6 +106,60 @@ export default function ReturnStation() {
     }
   }
 
+  const processExtend = async (sId, isbnCode, accNum) => {
+    setReturnStatus('processing')
+    setErrorMsg('')
+
+    try {
+      const response = await apiClient.post('/api/borrow/extend', null, {
+        params: {
+          userId: sId,
+          isbn: isbnCode,
+          accessionNumber: accNum
+        }
+      })
+
+      const details = response.data
+      setSuccessDetails(details)
+      setReturnStatus('extension_success')
+
+      // Add to session logs
+      setSessionHistory(prev => [
+        {
+          id: details.id,
+          title: details.bookTitle || 'Unknown Title',
+          student: details.userName || `Student #${sId}`,
+          isbn: isbnCode,
+          timestamp: new Date(),
+          isExtension: true
+        },
+        ...prev
+      ])
+
+      // Auto reset to idle after 4 seconds
+      setTimeout(() => {
+        setIsbn('')
+        setAccessionNumber('')
+        setReturnStatus('idle')
+        setSuccessDetails(null)
+      }, 4000)
+
+    } catch (err) {
+      setErrorMsg(err.message || 'Loan extension failed.')
+      setReturnStatus('error')
+    }
+  }
+
+  const handleExtendClick = (e) => {
+    e.preventDefault()
+    if (!isbn.trim() || !studentId.trim() || !accessionNumber.trim()) {
+      setErrorMsg('Please specify Student ID, Book ISBN, and Accession Number to extend loan.')
+      setReturnStatus('error')
+      return
+    }
+    processExtend(Number(studentId), isbn.trim(), accessionNumber.trim())
+  }
+
   return (
     <div className="h-screen flex text-white">
       {/* Sidebar Navigation */}
@@ -226,6 +188,13 @@ export default function ReturnStation() {
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <Bookmark className="size-4.5" />
+              Reserve Books
             </button>
             <button
               onClick={() => navigate('/inventory')}
@@ -317,7 +286,7 @@ export default function ReturnStation() {
 
                 <h2 className="text-2xl font-bold text-white">Waiting for Barcode Scan...</h2>
                 <p className="text-xs text-blue-200 max-w-sm leading-relaxed">
-                  Position the book&apos;s barcode 5-10cm below the hardware laser gun scanner, or use the camera scanning widget.
+                  Position the book&apos;s barcode 5-10cm below the hardware laser gun scanner.
                 </p>
 
                 {/* Form to capture barcode gun values */}
@@ -366,10 +335,10 @@ export default function ReturnStation() {
                   <div className="grid grid-cols-2 gap-3 mt-2">
                     <button
                       type="button"
-                      onClick={startCameraScanner}
-                      className="rounded-xl border border-white/20 py-3 text-xs font-semibold text-blue-100 hover:bg-white/10 transition"
+                      onClick={handleExtendClick}
+                      className="rounded-xl border border-blue-500 text-blue-400 py-3 text-xs font-semibold hover:bg-blue-500/10 transition"
                     >
-                      Use Camera Stream
+                      Extend Loan
                     </button>
                     <button
                       type="submit"
@@ -381,17 +350,6 @@ export default function ReturnStation() {
                 </form>
               </div>
             )}
-
-            <div className={returnStatus === 'scanning' ? 'flex flex-col items-center gap-6 text-center' : 'hidden'}>
-              <div id="kiosk-camera-scanner" className="w-full aspect-square max-w-[280px] rounded-2xl overflow-hidden border bg-black text-white" />
-              <button
-                type="button"
-                onClick={stopCameraScanner}
-                className="rounded-xl border border-white/20 glass-panel px-6 py-2.5 text-xs font-semibold text-blue-100 hover:bg-white/10 transition"
-              >
-                Cancel Camera Scan
-              </button>
-            </div>
 
             {returnStatus === 'processing' && (
               <div className="text-center py-12 flex flex-col items-center">
@@ -424,6 +382,36 @@ export default function ReturnStation() {
                   <div className="flex justify-between">
                     <span className="text-blue-200">Borrow Date</span>
                     <span>{new Date(successDetails.requestDate || successDetails.borrowDate).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <span className="text-[10px] text-blue-200 mt-4 animate-pulse">Auto-resetting kiosk stream...</span>
+              </div>
+            )}
+
+            {returnStatus === 'extension_success' && successDetails && (
+              <div className="text-center py-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+                <div className="flex size-14 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
+                  <CheckCircle2 className="size-8 animate-pulse" />
+                </div>
+
+                <h3 className="text-lg font-bold text-white">Loan Extended!</h3>
+                <p className="text-xs text-blue-200 max-w-xs leading-relaxed">
+                  Book &quot;{successDetails.bookTitle}&quot; loan has been extended by 7 days. (Extensions: {successDetails.extensionCount}/2)
+                </p>
+
+                <div className="w-full glass-panel border border-white/20/80 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
+                  <div className="flex justify-between">
+                    <span className="text-blue-200">Student</span>
+                    <span className="font-bold text-white">{successDetails.userName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-blue-200">Book ISBN</span>
+                    <span className="font-mono text-blue-100">{successDetails.isbn}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-blue-200">New Due Date</span>
+                    <span className="font-bold text-blue-400">{new Date(successDetails.dueDate).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -464,12 +452,12 @@ export default function ReturnStation() {
               ) : (
                 sessionHistory.map((item, idx) => (
                   <div key={item.id || idx} className="rounded-xl border border-white/20 glass-panel p-3 flex gap-3 text-xs">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600 font-bold text-[10px]">
-                      OK
+                    <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-[10px] ${item.isExtension ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                      {item.isExtension ? 'EXT' : 'OK'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-white truncate">{item.title}</p>
-                      <p className="text-[10px] text-blue-200 mt-0.5">By: {item.student}</p>
+                      <p className="text-[10px] text-blue-200 mt-0.5">By: {item.student} {item.isExtension && '(Extended)'}</p>
                       <p className="text-[9px] text-blue-200 mt-1 font-mono">{item.isbn}</p>
                     </div>
                   </div>

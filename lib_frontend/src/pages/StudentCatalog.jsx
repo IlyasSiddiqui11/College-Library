@@ -42,25 +42,28 @@ export default function StudentCatalog() {
     fetchBooks()
   }, [])
 
-  const handleRequestBorrow = async (isbn) => {
+  const handleRequestBorrow = async (book) => {
     if (!user || !profile) {
       setErrorMsg('Please complete your profile from the Dashboard first to borrow books.')
       return
     }
     
-    setRequestingIsbn(isbn)
+    setRequestingIsbn(book.isbn)
     setErrorMsg('')
     setSuccessMsg('')
 
     try {
-      await apiClient.post('/api/borrow/request', {
+      const endpoint = book.availableCopies < 1 ? '/api/borrow/reserve' : '/api/borrow/request'
+      const successText = book.availableCopies < 1 ? 'Book reserved! You are in the queue.' : 'Borrow request submitted! Wait for librarian approval.'
+
+      await apiClient.post(endpoint, {
         userId: user.id,
-        isbn: isbn
+        isbn: book.isbn
       })
-      setSuccessMsg('Borrow request submitted! Wait for librarian approval.')
+      setSuccessMsg(successText)
       await fetchBooks() // Refresh inventory counts
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to submit borrow request')
+      setErrorMsg(err.message || 'Failed to submit request')
     } finally {
       setRequestingIsbn(null)
       setTimeout(() => {
@@ -210,12 +213,12 @@ export default function StudentCatalog() {
                   </div>
 
                   <button
-                    onClick={() => handleRequestBorrow(book.isbn)}
-                    disabled={requestingIsbn === book.isbn || book.availableCopies < 1}
+                    onClick={() => handleRequestBorrow(book)}
+                    disabled={requestingIsbn === book.isbn}
                     className={`w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
                       book.availableCopies > 0
                         ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
-                        : 'bg-white/10 text-slate-400 cursor-not-allowed shadow-none'
+                        : 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-600/20 disabled:opacity-50'
                     }`}
                   >
                     {requestingIsbn === book.isbn ? (
@@ -226,7 +229,7 @@ export default function StudentCatalog() {
                     ) : book.availableCopies > 0 ? (
                       'Request to Borrow'
                     ) : (
-                      'Not Available'
+                      'Reserve Book'
                     )}
                   </button>
                 </div>

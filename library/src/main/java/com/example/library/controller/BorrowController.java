@@ -26,9 +26,21 @@ public class BorrowController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PostMapping("/reserve")
+    public ResponseEntity<BorrowResponse> reserveBook(@Valid @RequestBody BorrowRequestDto requestDto) {
+        BorrowResponse response = borrowService.reserveBook(requestDto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @PostMapping("/return")
     public ResponseEntity<BorrowResponse> returnBook(@RequestParam Long userId, @RequestParam String isbn, @RequestParam(required = false) String accessionNumber) {
         BorrowResponse response = borrowService.returnBook(userId, isbn, accessionNumber);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/extend")
+    public ResponseEntity<BorrowResponse> extendLoan(@RequestParam Long userId, @RequestParam String isbn, @RequestParam(required = false) String accessionNumber) {
+        BorrowResponse response = borrowService.extendLoan(userId, isbn, accessionNumber);
         return ResponseEntity.ok(response);
     }
 

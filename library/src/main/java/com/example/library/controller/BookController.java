@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.example.library.dto.request.BookCreateRequest;
 import com.example.library.dto.response.BookResponse;
+import com.example.library.dto.response.BulkUploadResponse;
+import org.springframework.web.multipart.MultipartFile;
 import com.example.library.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,12 @@ public class BookController {
     public ResponseEntity<BookResponse> addBook(@Valid @RequestBody BookCreateRequest request) {
         BookResponse response = bookService.addBook(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/bulk-upload")
+    public ResponseEntity<BulkUploadResponse> bulkUploadBooks(@RequestParam("file") MultipartFile file) {
+        BulkUploadResponse response = bookService.bulkUploadBooks(file);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

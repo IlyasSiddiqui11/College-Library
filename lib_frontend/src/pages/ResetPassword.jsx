@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, AlertTriangle, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react'
-import axios from 'axios'
+import { apiClient } from '../api/client'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -32,7 +32,7 @@ export default function ResetPassword() {
       if (password.length < 6) throw new Error('Password must be at least 6 characters')
       if (password !== confirmPassword) throw new Error('Passwords do not match')
       
-      await axios.post('http://localhost:8081/api/auth/reset-password', { 
+      await apiClient.post('/api/auth/reset-password', { 
         token, 
         newPassword: password 
       })

@@ -16,6 +16,7 @@ import RegisteredStudents from './pages/RegisteredStudents.jsx'
 import StudentCatalog from './pages/StudentCatalog.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
+import AdminReservations from './pages/AdminReservations.jsx'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/gate-logs" element={<GateLogs />} />
           <Route path="/admin/students" element={<RegisteredStudents />} />
+          <Route path="/admin/reservations" element={<AdminReservations />} />
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/catalog" element={<StudentCatalog />} />

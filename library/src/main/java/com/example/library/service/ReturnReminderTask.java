@@ -28,15 +28,20 @@ public class ReturnReminderTask {
     public void sendReturnReminders() {
         log.info("Starting scheduled return reminder task...");
 
-        // A book is due 7 days after approval.
-        // A reminder 1 day before due date means exactly 6 days after approval.
-        // So we want to find books approved 6 days ago.
-        LocalDate sixDaysAgoDate = LocalDate.now().minusDays(6);
-        LocalDateTime startOfDay = sixDaysAgoDate.atStartOfDay();
-        LocalDateTime endOfDay = sixDaysAgoDate.atTime(LocalTime.MAX);
-
-        List<BorrowRequest> upcomingDueRequests = borrowRequestRepository.findByStatusAndApprovedDateBetween(
-                BorrowStatus.APPROVED, startOfDay, endOfDay);
+        // We want to find books due tomorrow based on approved date and extension count
+        List<BorrowRequest> allApprovedRequests = borrowRequestRepository.findByStatus(BorrowStatus.APPROVED);
+        List<BorrowRequest> upcomingDueRequests = new java.util.ArrayList<>();
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        
+        for (BorrowRequest request : allApprovedRequests) {
+            if (request.getApprovedDate() != null) {
+                int extensions = request.getExtensionCount() != null ? request.getExtensionCount() : 0;
+                LocalDate dueDate = request.getApprovedDate().toLocalDate().plusDays(7 * (extensions + 1));
+                if (dueDate.equals(tomorrow)) {
+                    upcomingDueRequests.add(request);
+                }
+            }
+        }
 
         if (upcomingDueRequests.isEmpty()) {
             log.info("No books are due tomorrow. Skipping reminders.");
@@ -48,7 +53,8 @@ public class ReturnReminderTask {
         for (BorrowRequest request : upcomingDueRequests) {
             String userEmail = request.getUser().getEmail();
             if (userEmail != null && !userEmail.isBlank()) {
-                LocalDateTime dueDate = request.getApprovedDate().plusDays(7);
+                int extensions = request.getExtensionCount() != null ? request.getExtensionCount() : 0;
+                LocalDateTime dueDate = request.getApprovedDate().plusDays(7 * (extensions + 1));
                 String subject = "Reminder: Book Due Tomorrow - " + request.getBook().getTitle();
                 String body = String.format(
                         "Dear %s,\n\n" +
