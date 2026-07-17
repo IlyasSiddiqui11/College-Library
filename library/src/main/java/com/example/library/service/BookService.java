@@ -262,26 +262,53 @@ public class BookService {
                 totalProcessed++;
                 try {
                     String isbn = csvRecord.get("isbn");
-                    if (bookRepository.existsByIsbn(isbn)) {
-                        errorMessages.add("Row " + totalProcessed + ": Book with ISBN " + isbn + " already exists");
+
+                    List<String> accessionNumbers = new ArrayList<>();
+                    if (csvRecord.size() > 7) {
+                        String firstAcc = csvRecord.get(7);
+                        if (firstAcc != null && firstAcc.contains(",")) {
+                            for (String acc : firstAcc.split(",")) {
+                                if (acc != null && !acc.trim().isEmpty()) {
+                                    accessionNumbers.add(acc.trim());
+                                }
+                            }
+                        } else {
+                            for (int i = 7; i < csvRecord.size(); i++) {
+                                String acc = csvRecord.get(i);
+                                if (acc != null && !acc.trim().isEmpty()) {
+                                    accessionNumbers.add(acc.trim());
+                                }
+                            }
+                        }
+                    }
+
+                    if (accessionNumbers.isEmpty()) {
+                        errorMessages.add("Row " + totalProcessed + ": No accession numbers found");
                         failedInserts++;
                         continue;
                     }
 
-                    Book book = Book.builder()
-                            .isbn(isbn)
-                            .title(csvRecord.get("title"))
-                            .author(csvRecord.get("author"))
-                            .totalCopies(Integer.parseInt(csvRecord.get("totalCopies")))
-                            .availableCopies(Integer.parseInt(csvRecord.get("totalCopies")))
-                            .publisher(csvRecord.isMapped("publisher") ? csvRecord.get("publisher") : null)
-                            .price(csvRecord.isMapped("price") && !csvRecord.get("price").isEmpty() ? Double.parseDouble(csvRecord.get("price")) : null)
-                            .publicationYear(csvRecord.isMapped("publicationYear") && !csvRecord.get("publicationYear").isEmpty() ? Integer.parseInt(csvRecord.get("publicationYear")) : null)
-                            .accessionNumbers(csvRecord.isMapped("accessionNumbers") ? csvRecord.get("accessionNumbers") : null)
-                            .build();
+                    for (String accession : accessionNumbers) {
+                        if (bookRepository.existsByAccessionNumber(accession)) {
+                            errorMessages.add("Row " + totalProcessed + ": Book with accession number '" + accession + "' already exists");
+                            failedInserts++;
+                            continue;
+                        }
 
-                    booksToSave.add(book);
-                    successfulInserts++;
+                        Book book = Book.builder()
+                                .accessionNumber(accession)
+                                .isbn(isbn)
+                                .title(csvRecord.get("title"))
+                                .author(csvRecord.get("author"))
+                                .publisher(csvRecord.isMapped("publisher") ? csvRecord.get("publisher") : null)
+                                .price(csvRecord.isMapped("price") && !csvRecord.get("price").isEmpty() ? Double.parseDouble(csvRecord.get("price")) : null)
+                                .publicationYear(csvRecord.isMapped("publicationYear") && !csvRecord.get("publicationYear").isEmpty() ? Integer.parseInt(csvRecord.get("publicationYear")) : null)
+                                .status("AVAILABLE")
+                                .build();
+
+                        booksToSave.add(book);
+                        successfulInserts++;
+                    }
 
                     if (booksToSave.size() >= 500) {
                         bookRepository.saveAll(booksToSave);

@@ -92,8 +92,11 @@ public class BorrowService {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + dto.getUserId()));
 
-        Book book = bookRepository.findByIsbn(dto.getIsbn())
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ISBN: " + dto.getIsbn()));
+        List<Book> copies = bookRepository.findByIsbn(dto.getIsbn());
+        if (copies.isEmpty()) {
+            throw new ResourceNotFoundException("Book not found with ISBN: " + dto.getIsbn());
+        }
+        Book book = copies.get(0);
 
         boolean hasActiveRequest = borrowRequestRepository.findByUserId(user.getId()).stream()
                 .anyMatch(req -> req.getBook() != null && req.getBook().getId().equals(book.getId()) &&
@@ -185,6 +188,7 @@ public class BorrowService {
                     selectedCopy.getTitle(),
                     selectedCopy.getAuthor(),
                     selectedCopy.getIsbn(),
+                    approvedRequest.getAccessionNumber(),
                     issueDate,
                     dueDate);
         }
@@ -282,13 +286,16 @@ public class BorrowService {
                 }
             }
 
+            String accNum = returnedRequest.getAccessionNumber() != null ? returnedRequest.getAccessionNumber() : "";
+            LocalDate returnDate = returnedRequest.getReturnedDate().toLocalDate();
             borrowingService.processBookReturn(
                     userEmail,
                     returnedRequest.getUser().getName(),
                     title,
                     author,
                     isbn,
-                    returnedRequest.getReturnedDate().toLocalDate());
+                    accNum,
+                    returnDate);
         }
 
         return mapToBorrowResponse(returnedRequest, book);
