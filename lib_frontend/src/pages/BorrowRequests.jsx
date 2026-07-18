@@ -321,7 +321,8 @@ export default function BorrowRequests() {
                   { id: 'APPROVED', label: 'Pending Return' },
                   { id: 'RETURNED', label: 'Returned' },
                   { id: 'REJECTED', label: 'Rejected' },
-                  { id: 'CANCELLED', label: 'Cancelled' }
+                  { id: 'CANCELLED', label: 'Cancelled' },
+                  { id: 'LOST', label: 'Lost' }
                 ].map(f => (
                   <button
                     key={f.id}
@@ -382,6 +383,8 @@ export default function BorrowRequests() {
                               ? 'bg-green-50 text-green-600 border-green-200/50'
                               : req.status === 'REJECTED'
                               ? 'bg-red-50 text-red-600 border-red-200/50'
+                              : req.status === 'LOST'
+                              ? 'bg-red-600 text-white border-red-700/40'
                               : 'bg-slate-100 text-slate-500 border-slate-300/40'
                           }`}>
                             {req.status === 'APPROVED' ? 'ISSUED' : req.status}

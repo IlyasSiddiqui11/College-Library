@@ -424,28 +424,33 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-4">
                             {req.status === 'PENDING' && (
-                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-bold text-[9px] border border-amber-200/40">
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-amber-50 text-amber-700 font-bold text-[9px] border border-amber-200/40">
                                 PENDING
                               </span>
                             )}
                             {req.status === 'APPROVED' && (
-                              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold text-[9px] border border-blue-200/40">
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-blue-50 text-blue-700 font-bold text-[9px] border border-blue-200/40">
                                 ISSUED
                               </span>
                             )}
                             {req.status === 'RETURNED' && (
-                              <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-bold text-[9px] border border-green-200/40">
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-green-50 text-green-700 font-bold text-[9px] border border-green-200/40">
                                 RETURNED
                               </span>
                             )}
                             {req.status === 'REJECTED' && (
-                              <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 font-bold text-[9px] border border-red-200/40">
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-red-50 text-red-700 font-bold text-[9px] border border-red-200/40">
                                 REJECTED
                               </span>
                             )}
                             {req.status === 'CANCELLED' && (
-                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-bold text-[9px] border border-slate-300/40">
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-slate-100 text-slate-500 font-bold text-[9px] border border-slate-300/40">
                                 CANCELLED
+                              </span>
+                            )}
+                            {req.status === 'LOST' && (
+                              <span className="inline-block w-[72px] text-center py-0.5 rounded-sm bg-red-600 text-white font-bold text-[9px] border border-red-700/40">
+                                LOST
                               </span>
                             )}
                           </td>
@@ -508,7 +513,7 @@ export default function AdminDashboard() {
                                 )}
                               </div>
                             ) : (
-                              <span className={`text-[10px] font-semibold italic pr-1 ${req.status === 'REJECTED' || req.status === 'CANCELLED' ? 'text-red-400' : 'text-green-400'}`}>Complete</span>
+                              <span className={`text-[10px] font-semibold italic pr-1 ${req.status === 'REJECTED' || req.status === 'CANCELLED' || req.status === 'LOST' ? 'text-red-400' : 'text-green-400'}`}>Complete</span>
                             )}
                           </td>
                         </tr>

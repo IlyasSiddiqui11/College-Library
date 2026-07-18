@@ -29,6 +29,7 @@ export default function StudentDashboard() {
 
   const scannerRef = useRef(null)
   const isProcessingQr = useRef(false)
+  const profileChecked = useRef(false)  // tracks if profile was fetched at least once
 
   // Profile completion states
   const [branch, setBranch] = useState('')
@@ -102,12 +103,20 @@ export default function StudentDashboard() {
     return () => clearInterval(intervalId)
   }, [user])
 
-  // Auto trigger profile completion modal if incomplete
+  // Auto trigger profile completion modal only on initial load (not on every refresh failure)
   useEffect(() => {
-    if (user && !profile && !loading) {
-      setShowProfileModal(true)
-    } else {
-      setShowProfileModal(false)
+    if (user && !loading) {
+      // Only auto-open once when initial profile check is done
+      if (!profileChecked.current) {
+        profileChecked.current = true
+        if (!profile) {
+          setShowProfileModal(true)
+        }
+      }
+      // If profile is now filled (after completion), close modal
+      if (profile) {
+        setShowProfileModal(false)
+      }
     }
   }, [user, profile, loading])
 
