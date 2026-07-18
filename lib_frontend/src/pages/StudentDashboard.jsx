@@ -7,6 +7,7 @@ import {
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
   GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentDashboard() {
   const { user, profile, completeProfile, logout } = useAuth()
@@ -631,15 +632,12 @@ export default function StudentDashboard() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Academic Year</label>
-                  <select
+                  <CustomSelect
                     value={year}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
-                  >
-                    {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setYear(Number(val))}
+                    options={[1, 2, 3, 4].map(y => ({ value: y, label: `Year ${y}` }))}
+                    className="mt-1 w-full"
+                  />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Contact Number</label>

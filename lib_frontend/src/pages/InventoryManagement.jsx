@@ -8,6 +8,7 @@ import {
   Users, X, ScanLine, Clock, ShieldAlert,
   UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 const PAGE_SIZE = 25
 
@@ -397,26 +398,26 @@ export default function InventoryManagement() {
             ].map(({ label, value, setter, options }) => (
               <div key={label} className="flex flex-col gap-1.5 min-w-[120px]">
                 <label className="text-[10px] font-bold text-blue-200 uppercase">{label}</label>
-                <select
+                <CustomSelect
                   value={value}
-                  onChange={(e) => { setter(e.target.value); setPage(0) }}
-                  className="rounded-lg border border-white/20 glass-input px-2.5 py-1.5 text-xs text-white bg-slate-900 outline-none focus:border-indigo-500"
-                >
-                  {options.map(o => <option key={o} value={o} className="bg-slate-900 text-white">{o}</option>)}
-                </select>
+                  onChange={(val) => { setter(val); setPage(0) }}
+                  options={options}
+                  className="w-full"
+                />
               </div>
             ))}
             <div className="flex flex-col gap-1.5 min-w-[120px]">
               <label className="text-[10px] font-bold text-blue-200 uppercase">Status</label>
-              <select
+              <CustomSelect
                 value={filterStatus}
-                onChange={(e) => { setFilterStatus(e.target.value); setPage(0) }}
-                className="rounded-lg border border-white/20 glass-input px-2.5 py-1.5 text-xs text-white bg-slate-900 outline-none focus:border-indigo-500"
-              >
-                <option value="ALL" className="bg-slate-900 text-white">ALL</option>
-                <option value="AVAILABLE" className="bg-slate-900 text-white">AVAILABLE</option>
-                <option value="BORROWED" className="bg-slate-900 text-white">BORROWED</option>
-              </select>
+                onChange={(val) => { setFilterStatus(val); setPage(0) }}
+                options={[
+                  { value: 'ALL', label: 'ALL' },
+                  { value: 'AVAILABLE', label: 'AVAILABLE' },
+                  { value: 'BORROWED', label: 'BORROWED' }
+                ]}
+                className="w-full"
+              />
             </div>
             <div className="ml-auto text-xs text-blue-200 font-medium self-end pb-1">
               {filteredBooks.length} of {books.length} copies

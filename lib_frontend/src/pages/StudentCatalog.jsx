@@ -5,6 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Search, Library, Loader2, CheckCircle2, LogOut, AlertCircle, History, User, FileText
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentCatalog() {
   const { user, profile, logout } = useAuth()
@@ -173,41 +174,29 @@ export default function StudentCatalog() {
           <div className="grid grid-cols-2 gap-2 mt-1">
             <div className="flex flex-col gap-1">
               <label className="text-[9px] font-bold text-blue-200 uppercase">Branch</label>
-              <select
+              <CustomSelect
                 value={filterBranch}
-                onChange={(e) => setFilterBranch(e.target.value)}
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-[10px] text-white outline-none focus:border-blue-500"
-              >
-                {branches.map(b => (
-                  <option key={b} value={b} className="bg-slate-900 text-white">{b}</option>
-                ))}
-              </select>
+                onChange={(val) => setFilterBranch(val)}
+                options={branches}
+              />
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="text-[9px] font-bold text-blue-200 uppercase">Category</label>
-              <select
+              <CustomSelect
                 value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-[10px] text-white outline-none focus:border-blue-500"
-              >
-                {categories.map(c => (
-                  <option key={c} value={c} className="bg-slate-900 text-white">{c}</option>
-                ))}
-              </select>
+                onChange={(val) => setFilterCategory(val)}
+                options={categories}
+              />
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="text-[9px] font-bold text-blue-200 uppercase">Author</label>
-              <select
+              <CustomSelect
                 value={filterAuthor}
-                onChange={(e) => setFilterAuthor(e.target.value)}
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-[10px] text-white outline-none focus:border-blue-500"
-              >
-                {authors.map(a => (
-                  <option key={a} value={a} className="bg-slate-900 text-white">{a}</option>
-                ))}
-              </select>
+                onChange={(val) => setFilterAuthor(val)}
+                options={authors}
+              />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -223,15 +212,15 @@ export default function StudentCatalog() {
 
             <div className="flex flex-col gap-1">
               <label className="text-[9px] font-bold text-blue-200 uppercase">Availability</label>
-              <select
+              <CustomSelect
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-[10px] text-white outline-none focus:border-blue-500"
-              >
-                <option value="ALL" className="bg-slate-900 text-white">ALL</option>
-                <option value="AVAILABLE" className="bg-slate-900 text-white">Available</option>
-                <option value="BORROWED" className="bg-slate-900 text-white">Unavailable</option>
-              </select>
+                onChange={(val) => setFilterStatus(val)}
+                options={[
+                  { value: 'ALL', label: 'ALL' },
+                  { value: 'AVAILABLE', label: 'Available' },
+                  { value: 'BORROWED', label: 'Unavailable' }
+                ]}
+              />
             </div>
           </div>
 

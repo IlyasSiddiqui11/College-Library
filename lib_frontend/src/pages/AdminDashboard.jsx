@@ -7,6 +7,7 @@ import {
   Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
   UserCheck, BookMarked
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -456,19 +457,13 @@ export default function AdminDashboard() {
                                     {copiesLoading ? (
                                       <Loader2 className="size-4 animate-spin text-blue-200" />
                                     ) : (
-                                      <select
+                                      <CustomSelect
                                         value={accessionNumber}
-                                        onChange={(e) => setAccessionNumber(e.target.value)}
-                                        className="w-36 rounded-lg border border-white/20 bg-slate-900 px-2 py-1 text-[10px] text-white outline-none focus:border-blue-500"
-                                        autoFocus
-                                      >
-                                        <option value="" className="bg-slate-900">Select copy...</option>
-                                        {availableCopies.map((copy) => (
-                                          <option key={copy.id} value={copy.accessionNumber} className="bg-slate-900">
-                                            {copy.accessionNumber}
-                                          </option>
-                                        ))}
-                                      </select>
+                                        onChange={(val) => setAccessionNumber(val)}
+                                        options={availableCopies.map((copy) => ({ value: copy.accessionNumber, label: copy.accessionNumber }))}
+                                        placeholder="Select copy..."
+                                        className="w-36"
+                                      />
                                     )}
                                     <button
                                       disabled={actionLoadingId === req.id || !accessionNumber}

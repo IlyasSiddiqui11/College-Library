@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { Mail, Lock, User, BookOpen, AlertTriangle, Loader2, Eye, EyeOff } from 'lucide-react'
+import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 
 export default function StudentLogin() {
   const { login, register, user } = useAuth()
@@ -15,6 +16,7 @@ export default function StudentLogin() {
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false)
 
   React.useEffect(() => {
     if (user) {
@@ -164,7 +166,11 @@ export default function StudentLogin() {
                   Password
                 </label>
                 {!isRegister && (
-                  <button type="button" className="text-[11px] text-blue-600 hover:underline">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsForgotModalOpen(true)}
+                    className="text-[11px] text-blue-600 hover:underline"
+                  >
                     Forgot Password?
                   </button>
                 )}
@@ -232,6 +238,11 @@ export default function StudentLogin() {
           © 2026 BCOE-lib. Built on secure REST Architecture.
         </p>
       </div>
+
+      <ForgotPasswordModal 
+        isOpen={isForgotModalOpen} 
+        onClose={() => setIsForgotModalOpen(false)} 
+      />
     </div>
   )
 }
