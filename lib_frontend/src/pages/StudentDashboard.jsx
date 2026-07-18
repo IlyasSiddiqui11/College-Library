@@ -227,6 +227,22 @@ export default function StudentDashboard() {
     }
   }
 
+  // Extend borrow request
+  const [extendingId, setExtendingId] = useState(null)
+  const handleExtendRequest = async (requestId) => {
+    if (!user) return
+    setExtendingId(requestId)
+    try {
+      await apiClient.post(`/api/borrow/${requestId}/extend?userId=${user.id}`)
+      await fetchData(false)
+      alert('Book extended successfully!')
+    } catch (err) {
+      alert('Extend failed: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setExtendingId(null)
+    }
+  }
+
   if (!user) return null
 
   // Compute stats
@@ -444,6 +460,10 @@ export default function StudentDashboard() {
                       <p className="text-xs text-blue-200 mt-0.5">
                         Author: {req.bookAuthor || req.author || 'Unknown Author'}
                       </p>
+                      <div className="text-[10px] text-blue-200 mt-1 flex flex-col gap-0.5">
+                        <p>ISBN: {req.isbn || 'N/A'}</p>
+                        {req.accessionNumber && <p className="text-amber-200 font-medium font-mono">Accession No: {req.accessionNumber}</p>}
+                      </div>
                       <div className="flex items-center gap-4 mt-3 text-[11px] text-blue-200 font-medium">
                         <span className="flex items-center gap-1">
                           <Calendar className="size-3" />
@@ -458,6 +478,20 @@ export default function StudentDashboard() {
                             </span>
                           )
                         })()}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-[10px] text-blue-200">
+                          Extended: {req.extensionCount || 0}/2 times
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleExtendRequest(req.id)}
+                          disabled={extendingId === req.id || (req.extensionCount || 0) >= 2}
+                          className="rounded-lg bg-blue-600/30 border border-blue-400/30 px-3 py-1 text-xs font-bold text-blue-300 hover:bg-blue-600/50 transition disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {extendingId === req.id ? <Loader2 className="size-3 animate-spin" /> : null}
+                          Extend
+                        </button>
                       </div>
                     </div>
                   </div>

@@ -52,4 +52,20 @@ public class BorrowController {
         BorrowResponse response = borrowService.cancelBorrowRequest(requestId, userId);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{requestId}/extend")
+    public ResponseEntity<BorrowResponse> extendBorrow(
+            @PathVariable Long requestId,
+            @RequestParam Long userId) {
+        BorrowResponse response = borrowService.extendBorrow(requestId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/extend")
+    public ResponseEntity<BorrowResponse> extendBookAdmin(
+            @RequestParam Long userId,
+            @RequestParam String accessionNumber) {
+        BorrowResponse response = borrowService.extendBookAdmin(userId, accessionNumber);
+        return ResponseEntity.ok(response);
+    }
 }

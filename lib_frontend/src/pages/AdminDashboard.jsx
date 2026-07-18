@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
   Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
-  UserCheck
+  UserCheck, BookMarked
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Users className="size-4.5" />
-              Return Station Kiosk
+              Return Station
             </button>
             <button
               onClick={() => navigate('/admin/students')}
@@ -218,6 +218,13 @@ export default function AdminDashboard() {
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
           </nav>
         </div>
@@ -422,7 +429,7 @@ export default function AdminDashboard() {
                             )}
                             {req.status === 'APPROVED' && (
                               <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold text-[9px] border border-blue-200/40">
-                                APPROVED
+                                ISSUED
                               </span>
                             )}
                             {req.status === 'RETURNED' && (

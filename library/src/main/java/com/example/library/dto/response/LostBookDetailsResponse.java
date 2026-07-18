@@ -23,6 +23,7 @@ public class LostBookDetailsResponse {
     private Integer publicationYear;
     private String bookBranch;
     private String bookCategory;
+    private Double price;
 
     // Student details
     private Long studentId;

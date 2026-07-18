@@ -11,6 +11,8 @@ import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +28,10 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+
+    @Autowired
+    @Lazy
+    private BookReservationService bookReservationService;
 
     @Transactional
     public BookResponse addBook(BookCreateRequest request) {
@@ -79,6 +85,12 @@ public class BookService {
                     .build();
 
             savedBooks.add(bookRepository.save(book));
+        }
+
+        // Fulfill any pending reservations since new copies are available
+        String isbn = request.getIsbn() != null ? request.getIsbn().trim() : null;
+        if (isbn != null && !isbn.isBlank()) {
+            bookReservationService.fulfillReservation(isbn);
         }
 
         return mapToBookResponse(savedBooks.get(0));

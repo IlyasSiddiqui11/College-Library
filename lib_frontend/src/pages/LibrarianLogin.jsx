@@ -44,9 +44,6 @@ export default function LibrarianLogin() {
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center px-4 py-12"
-      style={{
-        backgroundImage: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)',
-      }}
     >
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />

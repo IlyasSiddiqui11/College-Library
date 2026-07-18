@@ -165,6 +165,25 @@ export default function BookScanner() {
     }
   }
 
+  const handleReserveBook = async () => {
+    if (!user || !scannedIsbn) return
+    setBorrowing(true)
+    setErrorMsg('')
+
+    try {
+      await apiClient.post('/api/reservations', {
+        userId: user.id,
+        isbn: scannedIsbn
+      })
+      setScanStatus('success_reserve')
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to reserve book')
+      setScanStatus('error')
+    } finally {
+      setBorrowing(false)
+    }
+  }
+
   return (
     <div className="min-h-screen w-full text-white text-white flex flex-col">
       <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/20 text-white/90 px-4 backdrop-blur-md">
@@ -245,11 +264,13 @@ export default function BookScanner() {
             <div className="flex flex-col gap-3">
               <button
                 type="button"
-                onClick={handleRequestBorrow}
-                disabled={borrowing || bookDetails.status !== 'AVAILABLE'}
-                className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-50"
+                onClick={bookDetails.status === 'AVAILABLE' ? handleRequestBorrow : handleReserveBook}
+                disabled={borrowing}
+                className={`w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg active:scale-[0.98] transition disabled:opacity-50 ${
+                  bookDetails.status === 'AVAILABLE' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-amber-600 hover:bg-amber-700'
+                }`}
               >
-                {borrowing ? 'Submitting Request...' : 'Confirm & Request Borrow'}
+                {borrowing ? 'Processing...' : (bookDetails.status === 'AVAILABLE' ? 'Confirm & Request Borrow' : 'Reserve Book')}
               </button>
               
               <button
@@ -272,6 +293,37 @@ export default function BookScanner() {
             <h3 className="text-lg font-bold text-white mt-4">Borrow Request Submitted!</h3>
             <p className="text-xs text-blue-200 mt-2 max-w-xs leading-relaxed">
               Your lending request has been logged. Please proceed to the library desk to pick up the book once the librarian approves.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => navigate('/student')}
+                className="w-full rounded-xl glass-panel py-3.5 text-xs font-semibold hover:bg-slate-700 transition"
+              >
+                Return to Dashboard
+              </button>
+              
+              <button
+                type="button"
+                onClick={startScanner}
+                className="w-full rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition"
+              >
+                Scan Another Book
+              </button>
+            </div>
+          </div>
+        )}
+
+        {scanStatus === 'success_reserve' && (
+          <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95 duration-200">
+            <div className="flex size-14 items-center justify-center rounded-full bg-green-500/10 text-green-400">
+              <CheckCircle2 className="size-8 animate-pulse" />
+            </div>
+            
+            <h3 className="text-lg font-bold text-white mt-4">Book Reserved!</h3>
+            <p className="text-xs text-blue-200 mt-2 max-w-xs leading-relaxed">
+              Your reservation has been logged. We will automatically submit a borrow request and email you when a copy becomes available.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 w-full">
