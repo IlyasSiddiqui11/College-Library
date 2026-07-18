@@ -103,6 +103,13 @@ public class BorrowService {
                     "Borrow request must be in PENDING status to be approved. Current status: " + request.getStatus());
         }
 
+        long approvedCount = borrowRequestRepository.findByUserId(request.getUser().getId()).stream()
+                .filter(req -> req.getStatus() == BorrowStatus.APPROVED)
+                .count();
+        if (approvedCount >= 2) {
+            throw new BadRequestException("Borrow limit reached: User already has 2 active borrowed books. They must return one before this request can be approved.");
+        }
+
         if (accessionNumber == null || accessionNumber.isBlank()) {
             throw new BadRequestException("Accession number is required to approve a borrow request.");
         }

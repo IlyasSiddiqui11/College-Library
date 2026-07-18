@@ -7,6 +7,7 @@ import {
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
   GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentDashboard() {
   const { user, profile, completeProfile, logout } = useAuth()
@@ -28,6 +29,7 @@ export default function StudentDashboard() {
 
   const scannerRef = useRef(null)
   const isProcessingQr = useRef(false)
+  const profileChecked = useRef(false)  // tracks if profile was fetched at least once
 
   // Profile completion states
   const [branch, setBranch] = useState('')
@@ -101,12 +103,20 @@ export default function StudentDashboard() {
     return () => clearInterval(intervalId)
   }, [user])
 
-  // Auto trigger profile completion modal if incomplete
+  // Auto trigger profile completion modal only on initial load (not on every refresh failure)
   useEffect(() => {
-    if (user && !profile && !loading) {
-      setShowProfileModal(true)
-    } else {
-      setShowProfileModal(false)
+    if (user && !loading) {
+      // Only auto-open once when initial profile check is done
+      if (!profileChecked.current) {
+        profileChecked.current = true
+        if (!profile) {
+          setShowProfileModal(true)
+        }
+      }
+      // If profile is now filled (after completion), close modal
+      if (profile) {
+        setShowProfileModal(false)
+      }
     }
   }, [user, profile, loading])
 
@@ -631,15 +641,12 @@ export default function StudentDashboard() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Academic Year</label>
-                  <select
+                  <CustomSelect
                     value={year}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
-                  >
-                    {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setYear(Number(val))}
+                    options={[1, 2, 3, 4].map(y => ({ value: y, label: `Year ${y}` }))}
+                    className="mt-1 w-full"
+                  />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Contact Number</label>

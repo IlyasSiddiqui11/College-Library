@@ -7,6 +7,7 @@ import {
   Clock,
   UserCheck, Download, ShieldAlert, BookMarked
 } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function BorrowRequests() {
   const { user, logout } = useAuth()
@@ -320,7 +321,8 @@ export default function BorrowRequests() {
                   { id: 'APPROVED', label: 'Pending Return' },
                   { id: 'RETURNED', label: 'Returned' },
                   { id: 'REJECTED', label: 'Rejected' },
-                  { id: 'CANCELLED', label: 'Cancelled' }
+                  { id: 'CANCELLED', label: 'Cancelled' },
+                  { id: 'LOST', label: 'Lost' }
                 ].map(f => (
                   <button
                     key={f.id}
@@ -381,6 +383,8 @@ export default function BorrowRequests() {
                               ? 'bg-green-50 text-green-600 border-green-200/50'
                               : req.status === 'REJECTED'
                               ? 'bg-red-50 text-red-600 border-red-200/50'
+                              : req.status === 'LOST'
+                              ? 'bg-red-600 text-white border-red-700/40'
                               : 'bg-slate-100 text-slate-500 border-slate-300/40'
                           }`}>
                             {req.status === 'APPROVED' ? 'ISSUED' : req.status}
@@ -507,18 +511,13 @@ export default function BorrowRequests() {
                               className="w-full rounded-xl border border-white/20 glass-input py-2.5 pl-9 pr-3 text-xs text-white placeholder:text-blue-200 outline-none focus:border-blue-500"
                             />
                           </div>
-                          <select
+                          <CustomSelect
                             value={accessionNumber}
-                            onChange={(e) => setAccessionNumber(e.target.value)}
-                            className="w-full rounded-xl border border-white/20 bg-slate-900 px-3 py-2.5 text-xs text-white outline-none focus:border-blue-500"
-                          >
-                            <option value="" className="bg-slate-900">Select accession number to issue...</option>
-                            {filteredCopies.map((copy) => (
-                              <option key={copy.id} value={copy.accessionNumber} className="bg-slate-900">
-                                {copy.accessionNumber}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(val) => setAccessionNumber(val)}
+                            options={filteredCopies.map((copy) => ({ value: copy.accessionNumber, label: copy.accessionNumber }))}
+                            placeholder="Select accession number to issue..."
+                            className="w-full"
+                          />
                           <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 mt-1">
                             {filteredCopies.map((copy) => (
                               <label

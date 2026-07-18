@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { Mail, Lock, AlertTriangle, Loader2, ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react'
+import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 
 export default function LibrarianLogin() {
   const { login, user } = useAuth()
@@ -12,6 +13,7 @@ export default function LibrarianLogin() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false)
 
   React.useEffect(() => {
     if (user) {
@@ -105,7 +107,11 @@ export default function LibrarianLogin() {
                 <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
                   Password
                 </label>
-                <button type="button" className="text-[11px] text-violet-600 hover:underline">
+                <button 
+                  type="button" 
+                  onClick={() => setIsForgotModalOpen(true)}
+                  className="text-[11px] text-violet-600 hover:underline"
+                >
                   Forgot Password?
                 </button>
               </div>
@@ -175,6 +181,11 @@ export default function LibrarianLogin() {
           © 2026 BCOE-lib. Admin Portal.
         </p>
       </div>
+
+      <ForgotPasswordModal 
+        isOpen={isForgotModalOpen} 
+        onClose={() => setIsForgotModalOpen(false)} 
+      />
     </div>
   )
 }

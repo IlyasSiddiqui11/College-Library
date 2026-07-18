@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.example.library.dto.request.LoginRequest;
 import com.example.library.dto.request.RegisterRequest;
+import com.example.library.dto.request.ForgotPasswordRequest;
+import com.example.library.dto.request.ResetPasswordRequest;
 import com.example.library.dto.response.AuthResponse;
 import com.example.library.dto.response.LoginResponse;
 import com.example.library.service.AuthService;
@@ -31,5 +33,17 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("Password reset link sent to email if it exists.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Password has been reset successfully.");
     }
 }

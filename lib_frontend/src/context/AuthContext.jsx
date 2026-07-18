@@ -63,6 +63,9 @@ export const AuthProvider = ({ children }) => {
       return response.data
     } catch (err) {
       setProfile(null)
+      if (err.message && err.message.includes('User not found')) {
+        logout()
+      }
       return null
     }
   }
@@ -81,6 +84,10 @@ export const AuthProvider = ({ children }) => {
       setProfile(newProfile)
       return newProfile
     } catch (err) {
+      if (err.message && err.message.includes('User not found')) {
+        logout()
+        throw new Error('Session invalid: User not found. Please log in again.')
+      }
       throw new Error(err.message || 'Failed to complete profile')
     }
   }
