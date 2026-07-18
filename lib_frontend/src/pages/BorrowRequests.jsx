@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X,
   Clock,
-  UserCheck, Download, ShieldAlert
+  UserCheck, Download, ShieldAlert, BookMarked
 } from 'lucide-react'
 
 export default function BorrowRequests() {
@@ -241,7 +241,7 @@ export default function BorrowRequests() {
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Users className="size-4.5" />
-              Return Station Kiosk
+              Return Station
             </button>
             <button
               onClick={() => navigate('/admin/students')}
@@ -256,6 +256,13 @@ export default function BorrowRequests() {
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
           </nav>
         </div>
@@ -376,7 +383,7 @@ export default function BorrowRequests() {
                               ? 'bg-red-50 text-red-600 border-red-200/50'
                               : 'bg-slate-100 text-slate-500 border-slate-300/40'
                           }`}>
-                            {req.status}
+                            {req.status === 'APPROVED' ? 'ISSUED' : req.status}
                           </span>
                         </div>
                         <p className="text-[10px] text-blue-200 mt-0.5 truncate">{req.userName || `ID #${req.userId}`}</p>

@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import {
   ChevronLeft, ScanLine, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
-  Library, ClipboardList, BookOpen, Clock, Users, LogOut
+  Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
 } from 'lucide-react'
 
 export default function ReturnStation() {
@@ -101,6 +101,55 @@ export default function ReturnStation() {
     }
   }
 
+  const processExtend = async (e) => {
+    e.preventDefault()
+    if (!studentId.trim() || !accessionNumber.trim()) {
+      setErrorMsg('Please specify both Student ID and Accession Number.')
+      setReturnStatus('error')
+      return
+    }
+
+    setReturnStatus('processing')
+    setErrorMsg('')
+
+    try {
+      const response = await apiClient.post('/api/borrow/extend', null, {
+        params: {
+          userId: studentId.trim(),
+          accessionNumber: accessionNumber.trim()
+        }
+      })
+
+      const details = response.data
+      setSuccessDetails({...details, isExtension: true})
+      setReturnStatus('success')
+
+      // Add to session logs
+      setSessionHistory(prev => [
+        {
+          id: 'ext-' + details.id,
+          title: details.bookTitle || 'Unknown Title',
+          student: details.userName || `Student #${studentId}`,
+          accessionNumber: accessionNumber.trim(),
+          timestamp: new Date(),
+          isExtension: true
+        },
+        ...prev
+      ])
+
+      // Auto reset to idle after 4 seconds
+      setTimeout(() => {
+        setAccessionNumber('')
+        setReturnStatus('idle')
+        setSuccessDetails(null)
+      }, 4000)
+
+    } catch (err) {
+      setErrorMsg(err.message || (err.response?.data?.message) || 'Lending extension processing failed.')
+      setReturnStatus('error')
+    }
+  }
+
   if (!user) return null
 
   return (
@@ -151,7 +200,7 @@ export default function ReturnStation() {
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
             >
               <Users className="size-4.5" />
-              Return Station Kiosk
+              Return Station
             </button>
             <button
               onClick={() => navigate('/admin/students')}
@@ -166,6 +215,13 @@ export default function ReturnStation() {
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
           </nav>
         </div>
@@ -262,12 +318,21 @@ export default function ReturnStation() {
                       />
                     </div>
 
-                    <button
-                      type="submit"
-                      className="w-full rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition mt-2"
-                    >
-                      Process Return
-                    </button>
+                    <div className="flex gap-3 mt-2">
+                      <button
+                        type="button"
+                        onClick={processExtend}
+                        className="flex-1 rounded-xl bg-indigo-600 py-3 text-xs font-semibold text-white hover:bg-indigo-700 transition"
+                      >
+                        Extend Loan
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                      >
+                        Process Return
+                      </button>
+                    </div>
                   </form>
                 </div>
               )}
@@ -286,9 +351,11 @@ export default function ReturnStation() {
                     <CheckCircle2 className="size-8 animate-pulse" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-white">Return Successful!</h3>
+                  <h3 className="text-lg font-bold text-white">{successDetails.isExtension ? 'Extension Successful!' : 'Return Successful!'}</h3>
                   <p className="text-xs text-blue-200 max-w-xs leading-relaxed">
-                    Book &quot;{successDetails.bookTitle}&quot; has been checked back in. Inventory copy status reverted to AVAILABLE.
+                    {successDetails.isExtension 
+                      ? `Book "${successDetails.bookTitle}" has been extended successfully.` 
+                      : `Book "${successDetails.bookTitle}" has been checked back in. Inventory copy status reverted to AVAILABLE.`}
                   </p>
 
                   <div className="w-full glass-panel border border-white/20 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
@@ -335,7 +402,7 @@ export default function ReturnStation() {
           {/* Kiosk Session History Sidebar */}
           <aside className="w-full max-w-sm shrink-0 border-t lg:border-t-0 lg:border-l border-white/20 glass-panel p-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-bold text-white mb-4">Kiosk Session Returns</h3>
+              <h3 className="text-sm font-bold text-white mb-4">Kiosk Session Activity</h3>
 
               <div className="flex flex-col gap-3 max-h-[480px] overflow-y-auto pr-1">
                 {sessionHistory.length === 0 ? (
@@ -343,8 +410,8 @@ export default function ReturnStation() {
                 ) : (
                   sessionHistory.map((item, idx) => (
                     <div key={item.id || idx} className="rounded-xl border border-white/20 glass-panel p-3 flex gap-3 text-xs">
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600 font-bold text-[10px]">
-                        OK
+                      <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-[10px] ${item.isExtension ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'}`}>
+                        {item.isExtension ? 'EXT' : 'OK'}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-white truncate">{item.title}</p>

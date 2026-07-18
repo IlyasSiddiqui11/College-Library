@@ -17,7 +17,8 @@ import {
   ClipboardList,
   UserCheck,
   BookOpen,
-  ShieldAlert
+  ShieldAlert,
+  BookMarked
 } from 'lucide-react'
 
 export default function GateLogs() {
@@ -186,7 +187,7 @@ export default function GateLogs() {
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
             >
               <Users className="size-4.5" />
-              Return Station Kiosk
+              Return Station
             </button>
             <button
               onClick={() => navigate('/admin/students')}
@@ -201,6 +202,13 @@ export default function GateLogs() {
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+            >
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
           </nav>
         </div>

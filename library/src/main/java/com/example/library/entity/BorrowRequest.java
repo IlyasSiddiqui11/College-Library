@@ -60,6 +60,10 @@ public class BorrowRequest {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "extension_count", columnDefinition = "integer default 0")
+    @Builder.Default
+    private Integer extensionCount = 0;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

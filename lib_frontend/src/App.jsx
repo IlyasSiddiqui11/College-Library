@@ -16,6 +16,7 @@ import RegisteredStudents from './pages/RegisteredStudents.jsx'
 import StudentCatalog from './pages/StudentCatalog.jsx'
 import BookDetails from './pages/BookDetails.jsx'
 import LostBooks from './pages/LostBooks.jsx'
+import BookReservations from './pages/BookReservations.jsx'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/returns" element={<ReturnStation />} />
           <Route path="/scanner" element={<BookScanner />} />
           <Route path="/admin/lost-books" element={<LostBooks />} />
+          <Route path="/admin/reservations" element={<BookReservations />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
