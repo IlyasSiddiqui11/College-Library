@@ -16,6 +16,8 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
 
     List<BorrowRequest> findByStatus(BorrowStatus status);
 
+    List<BorrowRequest> findByBookId(Long bookId);
+
     Optional<BorrowRequest> findFirstByUserIdAndBookIsbnAndStatusOrderByRequestDateDesc(Long userId, String isbn,
             BorrowStatus status);
 

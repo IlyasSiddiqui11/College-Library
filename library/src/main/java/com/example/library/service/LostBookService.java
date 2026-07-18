@@ -57,6 +57,7 @@ public class LostBookService {
                                 .publicationYear(book.getPublicationYear())
                                 .bookBranch(book.getBranch())
                                 .bookCategory(book.getCategory())
+                                .price(book.getPrice())
                                 .studentId(borrowRequest.getUser().getId())
                                 .studentName(borrowRequest.getUser().getName())
                                 .studentEmail(borrowRequest.getUser().getEmail())
@@ -103,6 +104,7 @@ public class LostBookService {
                                 .edition(book.getEdition())
                                 .series(book.getSeries())
                                 .publicationYear(book.getPublicationYear())
+                                .price(book.getPrice())
                                 .branch(book.getBranch())
                                 .category(book.getCategory())
                                 .studentName(borrowRequest.getUser().getName())
@@ -126,13 +128,19 @@ public class LostBookService {
                 // 1. Save LostBook record
                 LostBook savedLostBook = lostBookRepository.save(lostBook);
 
-                // 2. Update Borrow Request status to LOST and disassociate from the book to
-                // allow deletion
+                // 2. Update APPROVED Borrow Request status to LOST
                 borrowRequest.setStatus(BorrowStatus.LOST);
-                borrowRequest.setBook(null);
                 borrowRequestRepository.save(borrowRequest);
 
-                // 3. Delete physical book record completely from Book table
+                // 3. Disassociate ALL borrow requests (any status) from this physical book
+                //    to avoid FK constraint violations on delete
+                List<BorrowRequest> allLinked = borrowRequestRepository.findByBookId(book.getId());
+                for (BorrowRequest req : allLinked) {
+                        req.setBook(null);
+                }
+                borrowRequestRepository.saveAll(allLinked);
+
+                // 4. Delete physical book record completely from Book table
                 bookRepository.delete(book);
 
                 return savedLostBook;

@@ -16,6 +16,8 @@ import com.example.library.repository.LostBookRepository;
 import com.example.library.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +33,10 @@ public class BorrowService {
     private final UserRepository userRepository;
     private final BorrowingService borrowingService;
     private final LostBookRepository lostBookRepository;
+    
+    @Autowired
+    @Lazy
+    private BookReservationService bookReservationService;
 
     @Transactional
     public BorrowResponse submitBorrowRequest(BorrowRequestDto dto) {
@@ -178,6 +184,12 @@ public class BorrowService {
         request.setStatus(BorrowStatus.REJECTED);
         BorrowRequest rejectedRequest = borrowRequestRepository.save(request);
 
+        // If a request is rejected, a copy might be available now or was available before
+        String resolvedIsbn = resolveIsbn(rejectedRequest);
+        if (resolvedIsbn != null) {
+            bookReservationService.fulfillReservation(resolvedIsbn);
+        }
+
         return mapToBorrowResponse(rejectedRequest, book);
     }
 
@@ -205,6 +217,12 @@ public class BorrowService {
 
         request.setStatus(BorrowStatus.CANCELLED);
         BorrowRequest cancelledRequest = borrowRequestRepository.save(request);
+
+        // If a request is cancelled, a copy might be available now or was available before
+        String resolvedIsbn = resolveIsbn(cancelledRequest);
+        if (resolvedIsbn != null) {
+            bookReservationService.fulfillReservation(resolvedIsbn);
+        }
 
         return mapToBorrowResponse(cancelledRequest, book);
     }
@@ -255,7 +273,40 @@ public class BorrowService {
                     returnedRequest.getReturnedDate().toLocalDate());
         }
 
+        // Fulfill any pending reservations for this ISBN since a copy is now available
+        String resolvedIsbn = book != null ? book.getIsbn() : resolveIsbn(request);
+        if (resolvedIsbn != null) {
+            bookReservationService.fulfillReservation(resolvedIsbn);
+        }
+
         return mapToBorrowResponse(returnedRequest, book);
+    }
+
+    @Transactional
+    public BorrowResponse extendBookAdmin(Long userId, String accessionNumber) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        BorrowRequest request = borrowRequestRepository
+                .findFirstByUserIdAndAccessionNumberAndStatusOrderByRequestDateDesc(user.getId(), accessionNumber,
+                        BorrowStatus.APPROVED)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active approved borrow request found for student ID: " + userId
+                                + " and Accession Number: " + accessionNumber));
+
+        if (request.getExtensionCount() >= 2) {
+            throw new BadRequestException("This book has already been extended the maximum number of times (2)");
+        }
+
+        LocalDateTime newDueDate = request.getDueDate() != null 
+            ? request.getDueDate().plusDays(7) 
+            : request.getApprovedDate().plusDays(14);
+            
+        request.setDueDate(newDueDate);
+        request.setExtensionCount(request.getExtensionCount() + 1);
+        
+        BorrowRequest saved = borrowRequestRepository.save(request);
+        return mapToBorrowResponse(saved, saved.getBook());
     }
 
     @Transactional(readOnly = true)
@@ -277,6 +328,34 @@ public class BorrowService {
         return borrowRequestRepository.findByUserId(userId).stream()
                 .map(req -> mapToBorrowResponse(req, req.getBook()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BorrowResponse extendBorrow(Long requestId, Long userId) {
+        BorrowRequest request = borrowRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found"));
+
+        if (!request.getUser().getId().equals(userId)) {
+            throw new BadRequestException("You can only extend your own borrowed books");
+        }
+
+        if (request.getStatus() != BorrowStatus.APPROVED) {
+            throw new BadRequestException("Only approved (active) borrows can be extended");
+        }
+
+        if (request.getExtensionCount() >= 2) {
+            throw new BadRequestException("You can only extend a book up to 2 times");
+        }
+
+        LocalDateTime newDueDate = request.getDueDate() != null 
+            ? request.getDueDate().plusDays(7) 
+            : request.getApprovedDate().plusDays(7).plusDays(7);
+            
+        request.setDueDate(newDueDate);
+        request.setExtensionCount(request.getExtensionCount() + 1);
+        
+        BorrowRequest saved = borrowRequestRepository.save(request);
+        return mapToBorrowResponse(saved, saved.getBook());
     }
 
     private String resolveIsbn(BorrowRequest request) {
@@ -363,6 +442,7 @@ public class BorrowService {
                 .updatedAt(request.getUpdatedAt())
                 .accessionNumber(request.getAccessionNumber())
                 .availableCopies(availableCopies)
+                .extensionCount(request.getExtensionCount())
                 .build();
     }
 }

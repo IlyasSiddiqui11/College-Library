@@ -12,7 +12,9 @@ export default function BorrowHistory() {
   const navigate = useNavigate()
 
   // State
+  const [activeTab, setActiveTab] = useState('history') // 'history' or 'reservations'
   const [borrowRequests, setBorrowRequests] = useState([])
+  const [reservations, setReservations] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
@@ -29,10 +31,14 @@ export default function BorrowHistory() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      const response = await apiClient.get(`/api/borrow/user/${user.id}`)
-      setBorrowRequests(response.data)
+      const [historyRes, resRes] = await Promise.all([
+        apiClient.get(`/api/borrow/user/${user.id}`),
+        apiClient.get(`/api/reservations/user/${user.id}`)
+      ])
+      setBorrowRequests(historyRes.data)
+      setReservations(resRes.data)
     } catch (err) {
-      console.error('Error fetching borrowing history:', err)
+      console.error('Error fetching data:', err)
     } finally {
       if (showLoading) setLoading(false)
     }
@@ -52,6 +58,20 @@ export default function BorrowHistory() {
     setCancellingId(requestId)
     try {
       await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
+      await fetchHistory(false)
+    } catch (err) {
+      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
+  const handleCancelReservation = async (resId) => {
+    if (!user) return
+    if (!window.confirm('Are you sure you want to cancel this reservation?')) return
+    setCancellingId(resId)
+    try {
+      await apiClient.delete(`/api/reservations/${resId}?userId=${user.id}`)
       await fetchHistory(false)
     } catch (err) {
       alert('Cancel failed: ' + (err.response?.data?.message || err.message))
@@ -84,9 +104,20 @@ export default function BorrowHistory() {
     })
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
+  // Filtered reservations
+  const activeReservations = reservations
+    .filter(r => r.status === 'PENDING')
+    .filter(r => {
+      const title = r.bookTitle?.toLowerCase() || ''
+      const query = searchQuery.toLowerCase()
+      return title.includes(query) || r.isbn?.includes(query)
+    })
+    .sort((a, b) => new Date(a.reservationDate).getTime() - new Date(b.reservationDate).getTime())
+
   // Compute Stats
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
+  const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-white pb-32">
@@ -123,27 +154,47 @@ export default function BorrowHistory() {
         </section>
 
         {/* Dynamic Statistics Grid */}
-        <section className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-white/20 glass-panel p-4 shadow-xl backdrop-blur-md flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Award className="size-5" />
+        <section className="grid grid-cols-3 gap-3">
+          <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Award className="size-4" />
             </div>
-            <div>
-              <p className="text-lg font-bold text-white">{totalRead}</p>
-              <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Books Returned</p>
-            </div>
+            <p className="text-lg font-bold text-white">{totalRead}</p>
+            <p className="text-[9px] text-blue-200 font-bold uppercase tracking-wider">Returned</p>
           </div>
 
-          <div className="rounded-2xl border border-white/20 glass-panel p-4 shadow-xl backdrop-blur-md flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-              <BookMarked className="size-5" />
+          <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+              <BookOpen className="size-4" />
             </div>
-            <div>
-              <p className="text-lg font-bold text-white">{currentReading}</p>
-              <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Active Borrows</p>
+            <p className="text-lg font-bold text-white">{currentReading}</p>
+            <p className="text-[9px] text-blue-200 font-bold uppercase tracking-wider">Active Borrows</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <BookMarked className="size-4" />
             </div>
+            <p className="text-lg font-bold text-white">{pendingReservations}</p>
+            <p className="text-[9px] text-blue-200 font-bold uppercase tracking-wider">Reservations</p>
           </div>
         </section>
+
+        {/* Tabs */}
+        <div className="flex rounded-xl bg-white/10 p-1 backdrop-blur-md">
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:text-white'}`}
+          >
+            Borrow History
+          </button>
+          <button
+            onClick={() => setActiveTab('reservations')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'reservations' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:text-white'}`}
+          >
+            Active Reservations
+          </button>
+        </div>
 
         {/* Search & Filter Controls */}
         <section className="rounded-2xl border border-white/20 glass-panel p-4 shadow-xl backdrop-blur-md flex flex-col gap-3">
@@ -159,22 +210,24 @@ export default function BorrowHistory() {
           </div>
 
           {/* Quick status filter pills */}
-          <div className="flex gap-1.5 flex-wrap">
-            {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED', 'LOST'].map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setFilterStatus(status)}
-                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition ${
-                  filterStatus === status
-                    ? 'bg-blue-600 text-white shadow-xl'
-                    : 'glass-panel text-blue-200 hover:text-white'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
+          {activeTab === 'history' && (
+            <div className="flex gap-1.5 flex-wrap">
+              {['ALL', 'PENDING', 'APPROVED', 'RETURNED', 'REJECTED', 'CANCELLED', 'LOST'].map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => setFilterStatus(status)}
+                  className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition ${
+                    filterStatus === status
+                      ? 'bg-blue-600 text-white shadow-xl'
+                      : 'glass-panel text-blue-200 hover:text-white'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* List Feed */}
@@ -184,13 +237,18 @@ export default function BorrowHistory() {
               <Loader2 className="size-8 text-blue-500 animate-spin" />
               <span className="text-xs text-blue-200 mt-3">Syncing history catalog...</span>
             </div>
-          ) : filteredItems.length === 0 ? (
+          ) : activeTab === 'history' && filteredItems.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/20 glass-panel px-4 py-12 text-center">
               <p className="text-sm font-semibold text-blue-100">No matching logs found</p>
               <p className="text-xs text-blue-200 mt-1">Try adjusting your filters or checking a different keyword.</p>
             </div>
+          ) : activeTab === 'reservations' && activeReservations.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-white/20 glass-panel px-4 py-12 text-center">
+              <p className="text-sm font-semibold text-blue-100">No active reservations found</p>
+              <p className="text-xs text-blue-200 mt-1">You don't have any pending book reservations.</p>
+            </div>
           ) : (
-            filteredItems.map((item) => {
+            (activeTab === 'history' ? filteredItems : activeReservations).map((item) => {
               // Status Styling
               let statusBadge = null
               let borderClass = 'border-white/20 glass-panel'
@@ -267,31 +325,58 @@ export default function BorrowHistory() {
                       
                       <div className="mt-3 flex flex-col gap-1 border-t border-white/20 pt-2.5 text-[10px] font-medium text-blue-200">
                         <div className="flex justify-between">
-                          <span>ISBN</span>
-                          <span className="font-mono text-blue-100">{item.isbn}</span>
+                          <span>Book Name</span>
+                          <span className="text-blue-100 font-semibold truncate max-w-[180px]">{item.bookTitle || 'Unknown Title'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Borrow Date</span>
-                          <span>{formatDate(item.approvedDate || item.requestDate)}</span>
+                          <span>ISBN</span>
+                          <span className="font-mono text-blue-100">{item.isbn || 'N/A'}</span>
                         </div>
-                        {item.dueDate && item.status !== 'REJECTED' && item.status !== 'RETURNED' && item.status !== 'CANCELLED' && (() => {
-                          const isOverdue = new Date(item.dueDate) < new Date()
-                          return (
+                        {activeTab === 'history' ? (
+                          <>
+                            {item.accessionNumber && (
+                              <div className="flex justify-between">
+                                <span>Accession No</span>
+                                <span className="font-mono text-amber-100 font-bold">{item.accessionNumber}</span>
+                              </div>
+                            )}
                             <div className="flex justify-between">
-                              <span className={`font-semibold ${isOverdue ? 'text-red-400' : 'text-amber-200'}`}>
-                                {isOverdue ? '⚠ Overdue!' : 'Due Date'}
-                              </span>
-                              <span className={`font-bold ${isOverdue ? 'text-red-400' : 'text-amber-300'}`}>
-                                {formatDate(item.dueDate)}
-                              </span>
+                              <span>Borrow Date</span>
+                              <span>{formatDate(item.approvedDate || item.requestDate)}</span>
                             </div>
-                          )
-                        })()}
-                        {item.status === 'RETURNED' && (
-                          <div className="flex justify-between">
-                            <span>Returned On</span>
-                            <span className="text-green-600">{formatDate(item.returnedDate)}</span>
-                          </div>
+                            {item.dueDate && item.status !== 'REJECTED' && item.status !== 'RETURNED' && item.status !== 'CANCELLED' && item.status !== 'LOST' && (() => {
+                              const isOverdue = new Date(item.dueDate) < new Date()
+                              return (
+                                <div className="flex justify-between">
+                                  <span className={`font-semibold ${isOverdue ? 'text-red-400' : 'text-amber-200'}`}>
+                                    {isOverdue ? '⚠ Overdue!' : 'Due Date'}
+                                  </span>
+                                  <span className={`font-bold ${isOverdue ? 'text-red-400' : 'text-amber-300'}`}>
+                                    {formatDate(item.dueDate)}
+                                  </span>
+                                </div>
+                              )
+                            })()}
+                            {item.status === 'RETURNED' && (
+                              <div className="flex justify-between">
+                                <span>Returned On</span>
+                                <span className="text-green-600">{formatDate(item.returnedDate)}</span>
+                              </div>
+                            )}
+                            {(item.extensionCount > 0) && (
+                              <div className="flex justify-between">
+                                <span>Extended</span>
+                                <span className="text-blue-100">{item.extensionCount} times</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between">
+                              <span>Reserved On</span>
+                              <span>{formatDate(item.reservationDate)}</span>
+                            </div>
+                          </>
                         )}
                       </div>
 
@@ -300,7 +385,7 @@ export default function BorrowHistory() {
                         <div className="mt-3 flex justify-end border-t border-white/10 pt-2.5">
                           <button
                             type="button"
-                            onClick={() => handleCancelRequest(item.id)}
+                            onClick={() => activeTab === 'history' ? handleCancelRequest(item.id) : handleCancelReservation(item.id)}
                             disabled={cancellingId === item.id}
                             className="flex items-center gap-1.5 rounded-full bg-red-500/15 border border-red-400/25 px-3 py-1.5 text-[10px] font-bold text-red-300 hover:bg-red-500/25 transition disabled:opacity-50"
                           >
@@ -309,7 +394,7 @@ export default function BorrowHistory() {
                             ) : (
                               <XCircle className="size-3" />
                             )}
-                            {cancellingId === item.id ? 'Cancelling...' : 'Cancel Request'}
+                            {cancellingId === item.id ? 'Cancelling...' : (activeTab === 'history' ? 'Cancel Request' : 'Cancel Reservation')}
                           </button>
                         </div>
                       )}

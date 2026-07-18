@@ -78,4 +78,52 @@ public class BorrowingService {
         // Reusing your clean EmailService
         emailService.sendEmail(studentEmail, subject, body);
     }
+
+    public void processBookReservationEmail(String studentEmail, String studentName, String bookTitle, String isbn) {
+        String subject = "Book Reservation Confirmed";
+        String body = """
+            Dear %s,
+            
+            This is to confirm that your reservation for the following book has been successfully placed.
+            
+            Book Details:
+            ----------------------------------------
+            Title       : %s
+            ISBN        : %s
+            ----------------------------------------
+            
+            You will be notified automatically once a copy becomes available, and a borrow request will be generated for you.
+            
+            Thank you for using the College Library Management System.
+            
+            Best Regards,
+            College Library
+            """.formatted(studentName, bookTitle, isbn);
+
+        emailService.sendEmail(studentEmail, subject, body);
+    }
+
+    public void processReservationFulfilledEmail(String studentEmail, String studentName, String bookTitle, String isbn) {
+        String subject = "Reserved Book Now Available";
+        String body = """
+            Dear %s,
+            
+            Good news! The book you reserved is now available.
+            
+            Book Details:
+            ----------------------------------------
+            Title       : %s
+            ISBN        : %s
+            ----------------------------------------
+            
+            An automatic borrow request has been generated for you. Please visit the library to collect your book so that the admin can approve and issue it to you.
+            
+            Thank you for using the College Library Management System.
+            
+            Best Regards,
+            College Library
+            """.formatted(studentName, bookTitle, isbn);
+
+        emailService.sendEmail(studentEmail, subject, body);
+    }
 }

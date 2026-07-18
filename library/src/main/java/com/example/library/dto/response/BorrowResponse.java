@@ -37,4 +37,5 @@ public class BorrowResponse {
     private String accessionNumber;
     /** Count of currently AVAILABLE physical copies for this ISBN (admin lending UI). */
     private Long availableCopies;
+    private Integer extensionCount;
 }

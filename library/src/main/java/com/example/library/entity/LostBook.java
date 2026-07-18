@@ -58,6 +58,9 @@ public class LostBook {
     @Column(name = "category")
     private String category;
 
+    @Column(name = "price")
+    private Double price;
+
     @Column(name = "student_name")
     private String studentName;
 

@@ -76,6 +76,33 @@ export default function StudentCatalog() {
     }
   }
 
+  const handleReserveBook = async (isbn) => {
+    if (!user || !profile) {
+      setErrorMsg('Please complete your profile from the Dashboard first to reserve books.')
+      return
+    }
+
+    setRequestingIsbn(isbn)
+    setErrorMsg('')
+    setSuccessMsg('')
+
+    try {
+      await apiClient.post('/api/reservations', {
+        userId: user.id,
+        isbn: isbn
+      })
+      setSuccessMsg('Book reserved successfully! You will be notified when it becomes available.')
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to reserve book')
+    } finally {
+      setRequestingIsbn(null)
+      setTimeout(() => {
+        setSuccessMsg('')
+        setErrorMsg('')
+      }, 5000)
+    }
+  }
+
   if (!user) return null
 
   const branches = ['ALL', ...new Set(books.map(b => b.branch).filter(Boolean))]
@@ -312,12 +339,12 @@ export default function StudentCatalog() {
                     </button>
 
                     <button
-                      onClick={() => handleRequestBorrow(book.isbn)}
-                      disabled={requestingIsbn === book.isbn || !isAvailable}
+                      onClick={() => isAvailable ? handleRequestBorrow(book.isbn) : handleReserveBook(book.isbn)}
+                      disabled={requestingIsbn === book.isbn}
                       className={`w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
                         isAvailable
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
-                          : 'bg-white/10 text-slate-400 cursor-not-allowed shadow-none'
+                          : 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-600/20 disabled:opacity-50'
                       }`}
                     >
                       {requestingIsbn === book.isbn ? (
@@ -328,7 +355,7 @@ export default function StudentCatalog() {
                       ) : isAvailable ? (
                         'Request to Borrow'
                       ) : (
-                        'Not Available'
+                        'Reserve Book'
                       )}
                     </button>
                   </div>

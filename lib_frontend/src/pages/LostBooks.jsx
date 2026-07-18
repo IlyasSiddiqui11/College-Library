@@ -15,7 +15,8 @@ import {
   ShieldAlert,
   UserCheck,
   Users,
-  RefreshCw
+  RefreshCw,
+  BookMarked
 } from 'lucide-react'
 
 function exportToCsv(rows, filename) {
@@ -143,9 +144,9 @@ export default function LostBooks() {
 
   const getExportRows = () => {
     const headers = [
-      'Accession Number', 'ISBN', 'Title', 'Author',
-      'Student Name', 'Student Email', 'Student Branch', 'Student Year',
-      'Borrow Date', 'Due Date', 'Reason', 'Remarks', 'Reported By', 'Reported At'
+      'Accession', 'ISBN', 'Title', 'Author',
+      'Student Name', 'Student Email', 'Branch', 'Year',
+      'Borrow Date', 'Due Date', 'Reason', 'Remarks', 'Price', 'Reported By', 'Reported At'
     ]
     const rows = filteredLostBooks.map(item => [
       item.accessionNumber || '',
@@ -160,6 +161,7 @@ export default function LostBooks() {
       item.dueDate ? new Date(item.dueDate).toLocaleDateString() : '',
       item.reason || '',
       item.remarks || '',
+      item.price || '',
       item.reportedByAdmin || '',
       item.reportedAt ? new Date(item.reportedAt).toLocaleString() : ''
     ])
@@ -191,6 +193,7 @@ export default function LostBooks() {
               { path: '/returns', icon: Users, label: 'Return Station' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books', active: true },
+              { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
             ].map(({ path, icon: Icon, label, active }) => (
               <button
                 key={path}
@@ -297,6 +300,7 @@ export default function LostBooks() {
                     <p><span className="text-blue-300">Accession:</span> <span className="font-mono text-amber-300 font-bold">{details.accessionNumber}</span></p>
                     {details.bookBranch && <p><span className="text-blue-300">Branch:</span> {details.bookBranch}</p>}
                     {details.bookCategory && <p><span className="text-blue-300">Category:</span> {details.bookCategory}</p>}
+                    {details.price != null && <p><span className="text-blue-300">Price:</span> ₹{details.price}</p>}
                   </div>
                 </div>
 
@@ -379,6 +383,7 @@ export default function LostBooks() {
                     <th className="pb-3 pr-3">Student</th>
                     <th className="pb-3 pr-3">Borrow</th>
                     <th className="pb-3 pr-3">Reason</th>
+                    <th className="pb-3 pr-3">Price</th>
                     <th className="pb-3">Reported</th>
                   </tr>
                 </thead>
@@ -398,6 +403,7 @@ export default function LostBooks() {
                         </td>
                         <td className="py-3 pr-3 text-blue-200 whitespace-nowrap">{formatDt(item.borrowDate)}</td>
                         <td className="py-3 pr-3 text-blue-100 max-w-[100px] truncate" title={item.reason}>{item.reason}</td>
+                        <td className="py-3 pr-3 text-green-300 font-semibold whitespace-nowrap">{item.price != null ? `₹${item.price}` : 'N/A'}</td>
                         <td className="py-3 text-blue-200 whitespace-nowrap">{formatFull(item.reportedAt)}</td>
                       </tr>
                     ))

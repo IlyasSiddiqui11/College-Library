@@ -6,7 +6,7 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList,
   Users, X, ScanLine, Clock, ShieldAlert,
-  UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine
+  UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
 } from 'lucide-react'
 
 const PAGE_SIZE = 25
@@ -313,6 +313,7 @@ export default function InventoryManagement() {
               { path: '/returns', icon: Users, label: 'Return Station' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
+              { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
             ].map(({ path, icon: Icon, label, active }) => (
               <button
                 key={path}
@@ -501,13 +502,6 @@ export default function InventoryManagement() {
                                   title="Edit Copy"
                                 >
                                   <PencilLine className="size-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteCopy(book.id, book.accessionNumber)}
-                                  className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-white/10 transition"
-                                  title="Delete Copy"
-                                >
-                                  <Trash2 className="size-4" />
                                 </button>
                               </div>
                             )}
