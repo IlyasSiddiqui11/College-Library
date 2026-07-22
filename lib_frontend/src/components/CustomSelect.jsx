@@ -33,7 +33,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between rounded-lg border border-white/20 glass-input px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 bg-slate-900/50 backdrop-blur-md"
+        className="w-full flex items-center justify-between rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500"
       >
         <span className="truncate mr-2">
           {selectedOption ? selectedOption.label : placeholder}
@@ -42,10 +42,10 @@ export default function CustomSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-white/20 glass-panel shadow-xl bg-slate-900/95 backdrop-blur-xl">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 glass-panel shadow-xl">
           <ul className="py-1">
             {normalizedOptions.length === 0 ? (
-              <li className="px-3 py-2 text-xs text-blue-200">No options</li>
+              <li className="px-3 py-2 text-xs text-slate-500">No options</li>
             ) : (
               normalizedOptions.map((opt, idx) => (
                 <li
@@ -54,8 +54,8 @@ export default function CustomSelect({
                     onChange(opt.value)
                     setIsOpen(false)
                   }}
-                  className={`cursor-pointer px-3 py-2 text-xs text-white transition hover:bg-blue-600/50 ${
-                    value === opt.value ? 'bg-blue-600/30 font-bold' : ''
+                  className={`cursor-pointer px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 ${
+                    value === opt.value ? 'bg-blue-50 font-bold text-blue-700' : ''
                   }`}
                 >
                   {opt.label}
