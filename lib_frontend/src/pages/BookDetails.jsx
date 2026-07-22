@@ -92,18 +92,18 @@ export default function BookDetails() {
     : []
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col text-white pb-20">
-      <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
+    <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-20">
+      <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 hover:text-white transition"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition"
           >
             <ChevronLeft className="size-4" />
             Catalog
           </button>
-          <span className="text-sm font-bold tracking-wider uppercase text-blue-400">Book Details</span>
+          <span className="text-sm font-bold tracking-wider uppercase text-blue-600">Book Details</span>
           <div className="size-6 opacity-0" />
         </div>
       </header>
@@ -111,32 +111,32 @@ export default function BookDetails() {
       <main className="mx-auto w-full max-w-md px-4 pt-6 flex flex-col gap-5">
         {loading ? (
           <div className="flex flex-col items-center py-16">
-            <Loader2 className="size-8 animate-spin text-blue-400" />
-            <p className="text-xs text-blue-200 mt-3">Loading details...</p>
+            <Loader2 className="size-8 animate-spin text-blue-600" />
+            <p className="text-xs text-slate-500 mt-3">Loading details...</p>
           </div>
         ) : !book ? (
-          <div className="rounded-2xl border border-dashed border-white/20 glass-panel px-4 py-12 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
             <BookOpen className="size-8 text-blue-200/50 mx-auto mb-3" />
-            <p className="text-sm font-bold text-blue-100">Book not found</p>
-            <p className="text-xs text-blue-200 mt-1">{errorMsg || 'This title is not in the catalog.'}</p>
+            <p className="text-sm font-bold text-slate-600">Book not found</p>
+            <p className="text-xs text-slate-500 mt-1">{errorMsg || 'This title is not in the catalog.'}</p>
           </div>
         ) : (
           <>
-            <section className="rounded-2xl border border-white/20 glass-panel p-5 shadow-xl flex flex-col gap-4">
+            <section className="rounded-2xl border border-slate-200 glass-panel p-5 shadow-xl flex flex-col gap-4">
               <div className="flex gap-4">
-                <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-400 border border-blue-500/20">
+                <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 border border-blue-200">
                   <Library className="size-8" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-lg font-bold text-white leading-snug">{book.title}</h1>
-                  <p className="text-xs text-blue-200 mt-1">{book.author || 'Unknown Author'}</p>
+                  <h1 className="text-lg font-bold text-slate-900 leading-snug">{book.title}</h1>
+                  <p className="text-xs text-slate-500 mt-1">{book.author || 'Unknown Author'}</p>
                   <div className="mt-2">
                     {isAvailable ? (
-                      <span className="text-[10px] font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-md border border-green-400/20">
+                      <span className="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-md border border-green-400/20">
                         Available
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/20">
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
                         Unavailable
                       </span>
                     )}
@@ -144,25 +144,25 @@ export default function BookDetails() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 border-t border-white/10 pt-4">
+              <div className="flex flex-col gap-2.5 border-t border-slate-200 pt-4">
                 {detailRows.map((row) => (
                   <div key={row.label} className="grid grid-cols-3 gap-2 text-xs">
-                    <span className="text-blue-300 font-semibold">{row.label}</span>
-                    <span className="col-span-2 text-white font-medium break-words">{row.value}</span>
+                    <span className="text-slate-400 font-semibold">{row.label}</span>
+                    <span className="col-span-2 text-slate-900 font-medium break-words">{row.value}</span>
                   </div>
                 ))}
               </div>
             </section>
 
             {errorMsg && (
-              <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 flex items-center gap-2">
-                <AlertCircle className="size-4 text-red-400 shrink-0" />
+              <div className="rounded-xl border border-red-500/50 bg-red-100 p-3 flex items-center gap-2">
+                <AlertCircle className="size-4 text-red-600 shrink-0" />
                 <p className="text-xs font-medium text-red-200">{errorMsg}</p>
               </div>
             )}
             {successMsg && (
-              <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-3 flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-400 shrink-0" />
+              <div className="rounded-xl border border-green-500/50 bg-green-100 p-3 flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-green-600 shrink-0" />
                 <p className="text-xs font-medium text-green-200">{successMsg}</p>
               </div>
             )}
@@ -173,7 +173,7 @@ export default function BookDetails() {
               className={`w-full rounded-xl py-3.5 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
                 isAvailable
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
-                  : 'bg-white/10 text-slate-400 cursor-not-allowed shadow-none'
+                  : 'bg-slate-50 text-slate-400 cursor-not-allowed shadow-none'
               }`}
             >
               {requesting ? (
