@@ -497,7 +497,7 @@ export default function StudentDashboard() {
                           type="button"
                           onClick={() => handleExtendRequest(req.id)}
                           disabled={extendingId === req.id || (req.extensionCount || 0) >= 2}
-                          className="rounded-lg bg-blue-600/30 border border-blue-400/30 px-3 py-1 text-xs font-bold text-slate-400 hover:bg-blue-600/50 transition disabled:opacity-50 flex items-center gap-1"
+                          className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow hover:bg-blue-700 transition disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none flex items-center gap-1"
                         >
                           {extendingId === req.id ? <Loader2 className="size-3 animate-spin" /> : null}
                           Extend

@@ -239,6 +239,7 @@ public class BookService {
                 .branch(representative.getBranch())
                 .category(representative.getCategory())
                 .language(representative.getLanguage())
+                .totalPages(representative.getTotalPages())
                 .availability(available > 0 ? "Available" : "Unavailable")
                 .availableCopies(available)
                 .totalCopies(copies.size())

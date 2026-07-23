@@ -20,6 +20,7 @@ public class BookCatalogResponse {
     private String branch;
     private String category;
     private String language;
+    private Integer totalPages;
     /** "Available" if at least one copy is AVAILABLE, otherwise "Unavailable" */
     private String availability;
     private long availableCopies;

@@ -132,8 +132,6 @@ export default function BorrowRequests() {
     }
   }
 
-  if (!user) return null
-
   const filteredRequests = borrowRequests
     .filter((req) => {
       const q = searchQuery.toLowerCase()
@@ -146,6 +144,22 @@ export default function BorrowRequests() {
       return matchesSearch && matchesStatus
     })
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
+
+  // Auto-select first item when filter changes if current selection is invalid
+  useEffect(() => {
+    if (!loading) {
+      if (filteredRequests.length > 0) {
+        const isSelectedValid = filteredRequests.some(r => r.id === selectedRequestId);
+        if (!isSelectedValid) {
+          setSelectedRequestId(filteredRequests[0].id);
+        }
+      } else {
+        setSelectedRequestId(null);
+      }
+    }
+  }, [filterStatus, searchQuery, borrowRequests, loading]);
+
+  if (!user) return null
 
   const pendingCount = borrowRequests.filter((r) => r.status === 'PENDING').length
 
@@ -487,6 +501,18 @@ export default function BorrowRequests() {
                         <div>
                           <p className="text-slate-500">Issued Accession</p>
                           <p className="font-bold text-amber-600 mt-0.5 font-mono">{selectedReq.accessionNumber}</p>
+                        </div>
+                      )}
+                      {selectedReq.dueDate && (
+                        <div>
+                          <p className="text-slate-500">Due Date</p>
+                          <p className="font-bold text-red-600 mt-0.5">{new Date(selectedReq.dueDate).toLocaleString()}</p>
+                        </div>
+                      )}
+                      {selectedReq.extensionCount !== undefined && selectedReq.extensionCount > 0 && (
+                        <div>
+                          <p className="text-slate-500">Extensions Used</p>
+                          <p className="font-bold text-blue-600 mt-0.5">{selectedReq.extensionCount} / 2 Times</p>
                         </div>
                       )}
                     </div>
