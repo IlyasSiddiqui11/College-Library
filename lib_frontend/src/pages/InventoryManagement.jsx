@@ -123,6 +123,32 @@ export default function InventoryManagement() {
     setIsScanning(false)
   }
 
+  // Auto-fetch book details when ISBN is entered
+  useEffect(() => {
+    const fetchBookDetails = async () => {
+      if (editingBook || !isbn || isbn.trim().length < 10) return;
+      try {
+        const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(isbn.trim())}/details`);
+        if (res.data) {
+          if (!title) setTitle(res.data.title || '');
+          if (!author) setAuthor(res.data.author || '');
+          if (!publisher) setPublisher(res.data.publisher || '');
+          if (!edition) setEdition(res.data.edition || '');
+          if (!series) setSeries(res.data.series || '');
+          if (!publicationYear) setPublicationYear(res.data.publicationYear || '');
+          if (!category) setCategory(res.data.category || '');
+          if (!totalPages) setTotalPages(res.data.totalPages || '');
+          if (!language) setLanguage(res.data.language || '');
+        }
+      } catch (err) {
+        // Ignore errors, meaning the book isn't found in the catalog
+      }
+    };
+    
+    const timeoutId = setTimeout(fetchBookDetails, 500); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [isbn, editingBook, title, author, publisher, edition, series, publicationYear, category, totalPages, language]);
+
   const closeModal = () => {
     stopScanning()
     setShowAddModal(false)
@@ -299,9 +325,9 @@ export default function InventoryManagement() {
   return (
     <div className="h-screen flex text-slate-900">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
+      <aside className="w-64 border-r border-slate-300 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-300">
             <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
             <span className="font-bold tracking-tight text-slate-900 text-base">BCOE-lib</span>
           </div>
@@ -329,7 +355,7 @@ export default function InventoryManagement() {
             ))}
           </nav>
         </div>
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-slate-300">
           <div className="flex items-center justify-between rounded-xl glass-panel p-3">
             <div className="min-w-0">
               <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
@@ -345,7 +371,7 @@ export default function InventoryManagement() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Header */}
-        <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-6 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-slate-300 glass-panel px-6 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">Catalog Inventory</h1>
@@ -360,13 +386,13 @@ export default function InventoryManagement() {
                   placeholder="Search accession, ISBN, title, author, publisher..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setPage(0) }}
-                  className="w-72 rounded-xl border border-slate-200 glass-input py-2 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition"
+                  className="w-72 rounded-xl border border-slate-300 glass-input py-2 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition"
                 />
               </div>
               <button
                 onClick={fetchBooks}
                 disabled={loading}
-                className="flex items-center gap-1 rounded-xl border border-slate-200 glass-panel px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition disabled:opacity-60"
+                className="flex items-center gap-1 rounded-xl border border-slate-300 glass-panel px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition disabled:opacity-60"
                 title="Refresh"
               >
                 <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -374,7 +400,7 @@ export default function InventoryManagement() {
               <button
                 onClick={handleExport}
                 disabled={loading || filteredBooks.length === 0}
-                className="flex items-center gap-1 rounded-xl border border-slate-200 glass-panel px-3 py-2 text-xs font-bold text-green-600 hover:bg-slate-100 transition disabled:opacity-60"
+                className="flex items-center gap-1 rounded-xl border border-slate-300 glass-panel px-3 py-2 text-xs font-bold text-green-600 hover:bg-slate-100 transition disabled:opacity-60"
               >
                 <Download className="size-3.5" />
                 Export
@@ -392,7 +418,7 @@ export default function InventoryManagement() {
 
         <main className="flex-1 p-6 flex flex-col gap-4">
           {/* Filters */}
-          <div className="rounded-xl border border-slate-200 glass-panel p-4 flex flex-wrap gap-4 items-end">
+          <div className="rounded-xl border border-slate-300 glass-panel p-4 flex flex-wrap gap-4 items-end">
             {[
               { label: 'Branch', value: filterBranch, setter: setFilterBranch, options: branches },
               { label: 'Category', value: filterCategory, setter: setFilterCategory, options: categories },
@@ -427,11 +453,11 @@ export default function InventoryManagement() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl border border-slate-200 glass-panel shadow-xl overflow-hidden">
+          <div className="rounded-2xl border border-slate-300 glass-panel shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse min-w-[1200px]">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider bg-slate-100">
+                  <tr className="border-b border-slate-300 text-slate-500 uppercase tracking-wider bg-slate-100">
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Accession No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">ISBN</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Title</th>
@@ -464,7 +490,7 @@ export default function InventoryManagement() {
                       const formatDt = (dt) => dt ? new Date(dt).toLocaleDateString() : '—'
 
                       return (
-                        <tr key={book.id} className="border-b border-slate-200 hover:bg-slate-50 transition">
+                        <tr key={book.id} className="border-b border-slate-300 hover:bg-slate-50 transition">
                           <td className="py-3 px-3 font-bold text-amber-600 font-mono whitespace-nowrap">{book.accessionNumber}</td>
                           <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">{book.isbn}</td>
                           <td className="py-3 px-3 font-semibold text-slate-900 max-w-[160px] truncate">{book.title}</td>
@@ -519,7 +545,7 @@ export default function InventoryManagement() {
 
             {/* Pagination */}
             {pageCount > 1 && (
-              <div className="border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+              <div className="border-t border-slate-300 px-6 py-3 flex items-center justify-between">
                 <span className="text-xs text-slate-500">
                   Page {page + 1} of {pageCount} &nbsp;•&nbsp; {filteredBooks.length} records
                 </span>
@@ -527,14 +553,14 @@ export default function InventoryManagement() {
                   <button
                     onClick={() => setPage(p => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition disabled:opacity-40"
+                    className="p-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition disabled:opacity-40"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
                   <button
                     onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
                     disabled={page >= pageCount - 1}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition disabled:opacity-40"
+                    className="p-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition disabled:opacity-40"
                   >
                     <ChevronRight className="size-4" />
                   </button>
@@ -548,9 +574,9 @@ export default function InventoryManagement() {
       {/* Add Asset Modal - Wide, Two Column */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-5xl rounded-2xl border border-slate-200 glass-panel shadow-2xl animate-in fade-in duration-150 my-auto">
+          <div className="w-full max-w-5xl rounded-2xl border border-slate-300 glass-panel shadow-2xl animate-in fade-in duration-150 my-auto">
             {/* Modal Header */}
-            <div className="flex justify-between items-center px-8 py-5 border-b border-slate-200">
+            <div className="flex justify-between items-center px-8 py-5 border-b border-slate-300">
               <div>
                 <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                   {editingBook ? <PencilLine className="size-5 text-blue-500" /> : <Plus className="size-5 text-blue-500" />}
@@ -577,7 +603,7 @@ export default function InventoryManagement() {
                   <div id="modal-camera-scanner" className="w-full h-full" />
                 </div>
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Align book barcode inside the frame</p>
-                <button type="button" onClick={stopScanning} className="rounded-xl border border-slate-200 glass-panel px-5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                <button type="button" onClick={stopScanning} className="rounded-xl border border-slate-300 glass-panel px-5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
                   Cancel Scan
                 </button>
               </div>
@@ -587,8 +613,8 @@ export default function InventoryManagement() {
                   {/* Left Column */}
                   <div className="flex flex-col gap-5">
                     {/* Book Details Group */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">📚 Book Details</h4>
+                    <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">📚 Book Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2">
                           <label className="text-[10px] font-bold text-slate-500 uppercase">ISBN <span className="text-red-600">*</span></label>
@@ -596,10 +622,10 @@ export default function InventoryManagement() {
                             <input
                               type="text" required placeholder="e.g. 9780123456789" value={isbn}
                               onChange={(e) => setIsbn(e.target.value)}
-                              className="flex-1 rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500"
+                              className="flex-1 rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500"
                             />
                             <button type="button" onClick={startScanning}
-                              className="flex shrink-0 items-center justify-center rounded-lg bg-blue-50/10 px-3 text-blue-600 hover:bg-blue-50/20 transition border border-slate-200"
+                              className="flex shrink-0 items-center justify-center rounded-lg bg-blue-50/10 px-3 text-blue-600 hover:bg-blue-50/20 transition border border-slate-300"
                               title="Scan ISBN">
                               <ScanLine className="size-4" />
                             </button>
@@ -609,74 +635,74 @@ export default function InventoryManagement() {
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Title <span className="text-red-600">*</span></label>
                           <input type="text" required placeholder="e.g. Introduction to Algorithms" value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Author <span className="text-red-600">*</span></label>
                           <input type="text" required placeholder="e.g. Thomas H. Cormen" value={author}
                             onChange={(e) => setAuthor(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Publisher</label>
                           <input type="text" placeholder="e.g. MIT Press" value={publisher}
                             onChange={(e) => setPublisher(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Edition</label>
                           <input type="text" placeholder="e.g. 4th Edition" value={edition}
                             onChange={(e) => setEdition(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Series</label>
                           <input type="text" placeholder="e.g. Vol 1" value={series}
                             onChange={(e) => setSeries(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Publication Year</label>
                           <input type="number" placeholder="e.g. 2022" value={publicationYear}
                             onChange={(e) => setPublicationYear(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Total Pages</label>
                           <input type="number" placeholder="e.g. 1312" value={totalPages}
                             onChange={(e) => setTotalPages(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Language</label>
                           <input type="text" placeholder="e.g. English" value={language}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                       </div>
                     </div>
 
                     {/* Purchase Details Group */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">🧾 Purchase Details</h4>
+                    <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">🧾 Purchase Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Price (₹)</label>
                           <input type="number" step="0.01" placeholder="e.g. 799.00" value={price}
                             onChange={(e) => setPrice(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Bill Number</label>
                           <input type="text" placeholder="e.g. BILL-2024" value={billNumber}
                             onChange={(e) => setBillNumber(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div className="col-span-2">
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Bill Date</label>
                           <input type="date" value={billDate}
                             onChange={(e) => setBillDate(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                       </div>
                     </div>
@@ -685,20 +711,20 @@ export default function InventoryManagement() {
                   {/* Right Column */}
                   <div className="flex flex-col gap-5">
                     {/* Library Details Group */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">🏛️ Library Details</h4>
+                    <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">🏛️ Library Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Branch</label>
                           <input type="text" placeholder="e.g. CSE" value={branch}
                             onChange={(e) => setBranch(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Category</label>
                           <input type="text" placeholder="e.g. Reference" value={category}
                             onChange={(e) => setCategory(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         {!editingBook ? (
                           <div className="col-span-2">
@@ -706,7 +732,7 @@ export default function InventoryManagement() {
                             <input
                               type="number" required min={1} value={quantity}
                               onChange={handleQuantityChange}
-                              className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-bold text-base"
+                              className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-bold text-base"
                             />
                             <p className="text-[10px] text-slate-400 mt-1.5">Entering the quantity will generate accession number fields below.</p>
                           </div>
@@ -717,7 +743,7 @@ export default function InventoryManagement() {
                               type="text"
                               value={accessionNumbersList[0] || ''}
                               onChange={(e) => setAccessionNumbersList([e.target.value])}
-                              className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-mono"
+                              className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-mono"
                             />
                             <p className="text-[10px] text-slate-400 mt-1.5">The accession number is preserved while editing.</p>
                           </div>
@@ -727,8 +753,8 @@ export default function InventoryManagement() {
 
                     {/* Accession Numbers Group */}
                     {!editingBook && (
-                      <div className="rounded-xl border border-slate-200 bg-slate-100 p-5 flex flex-col gap-3">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">
+                      <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-3">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">
                           🏷️ Accession Numbers ({quantity} {quantity === 1 ? 'copy' : 'copies'})
                         </h4>
                         <div className="flex flex-col gap-3 max-h-[280px] overflow-y-auto pr-1">
@@ -745,7 +771,7 @@ export default function InventoryManagement() {
                                   next[idx] = e.target.value
                                   setAccessionNumbersList(next)
                                 }}
-                                className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-mono"
+                                className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500 font-mono"
                               />
                             </div>
                           ))}
@@ -756,9 +782,9 @@ export default function InventoryManagement() {
                 </div>
 
                 {/* Submit */}
-                <div className="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5">
+                <div className="mt-6 flex justify-end gap-3 border-t border-slate-300 pt-5">
                   <button type="button" onClick={closeModal}
-                    className="rounded-xl border border-slate-200 glass-panel px-6 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                    className="rounded-xl border border-slate-300 glass-panel px-6 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
                     Cancel
                   </button>
                   <button type="submit" disabled={saving}

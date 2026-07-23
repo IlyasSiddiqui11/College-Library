@@ -97,7 +97,7 @@ export default function AdminFines() {
     .reduce((sum, f) => sum + (f.totalFine || 0), 0)
 
   const handleExport = () => {
-    const headers = ['Fine ID', 'Student', 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date']
+    const headers = ['Fine ID', 'Student', 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date']
     const csvRows = [
       headers.join(','),
       ...filteredFines.map(fine => {
@@ -108,6 +108,7 @@ export default function AdminFines() {
           `"${(fine.bookTitle || '').replace(/"/g, '""')}"`,
           `"${fine.delayDays || 0}"`,
           `"${fine.delayAmount || 0}"`,
+          `"${fine.lostBookAmount || 0}"`,
           `"${fine.totalFine || 0}"`,
           `"${fine.status}"`,
           `"${fine.verifiedBy || ''}"`,
