@@ -336,7 +336,7 @@ public class BorrowService {
             String isbn = book != null ? book.getIsbn() : resolveIsbn(request);
 
             if (book == null && request.getAccessionNumber() != null) {
-                LostBook lost = lostBookRepository.findByAccessionNumber(request.getAccessionNumber()).orElse(null);
+                LostBook lost = lostBookRepository.findFirstByAccessionNumberOrderByReportedAtDesc(request.getAccessionNumber()).orElse(null);
                 if (lost != null) {
                     title = lost.getTitle();
                     author = lost.getAuthor();
@@ -446,7 +446,7 @@ public class BorrowService {
             return request.getBook().getIsbn().trim();
         }
         if (request.getAccessionNumber() != null) {
-            LostBook lost = lostBookRepository.findByAccessionNumber(request.getAccessionNumber()).orElse(null);
+            LostBook lost = lostBookRepository.findFirstByAccessionNumberOrderByReportedAtDesc(request.getAccessionNumber()).orElse(null);
             if (lost != null && lost.getIsbn() != null) {
                 return lost.getIsbn().trim();
             }
@@ -485,7 +485,7 @@ public class BorrowService {
             branch = book.getBranch();
             category = book.getCategory();
         } else if (request.getAccessionNumber() != null) {
-            LostBook lost = lostBookRepository.findByAccessionNumber(request.getAccessionNumber()).orElse(null);
+            LostBook lost = lostBookRepository.findFirstByAccessionNumberOrderByReportedAtDesc(request.getAccessionNumber()).orElse(null);
             if (lost != null) {
                 bookId = lost.getBookId();
                 bookTitle = lost.getTitle();
