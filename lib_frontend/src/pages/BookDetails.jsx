@@ -62,7 +62,8 @@ export default function BookDetails() {
       const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(book.isbn)}/details`)
       setBook(res.data)
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to submit borrow request')
+      const msg = err.message || (err.response?.data?.message) || 'Failed to submit borrow request';
+      setErrorMsg(msg)
     } finally {
       setRequesting(false)
       setTimeout(() => {
@@ -154,16 +155,42 @@ export default function BookDetails() {
               </div>
             </section>
 
-            {errorMsg && (
+            {errorMsg && !errorMsg.includes('Borrow Request Blocked') && (
               <div className="rounded-xl border border-red-500/50 bg-red-100 p-3 flex items-center gap-2">
                 <AlertCircle className="size-4 text-red-600 shrink-0" />
-                <p className="text-xs font-medium text-red-200">{errorMsg}</p>
+                <p className="text-xs font-medium text-red-700">{errorMsg}</p>
+              </div>
+            )}
+
+            {errorMsg && errorMsg.includes('Borrow Request Blocked') && (
+              <div className="rounded-xl border border-red-200 glass-panel p-5 shadow-xl bg-white flex flex-col gap-3 animate-in zoom-in-95">
+                <div className="flex items-center gap-2 text-red-600 border-b border-red-100 pb-2">
+                  <AlertCircle className="size-5" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider">Borrow Request Blocked</h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  {errorMsg.replace('Borrow Request Blocked: ', '')}
+                </p>
+                <div className="mt-2 flex gap-3">
+                   <button
+                    onClick={() => setErrorMsg('')}
+                    className="flex-1 text-[10px] font-bold text-slate-500 bg-slate-100 py-2 rounded-lg hover:bg-slate-200 transition"
+                   >
+                     Dismiss
+                   </button>
+                   <button
+                    onClick={() => navigate('/student/profile')}
+                    className="flex-1 text-[10px] font-bold text-white bg-red-600 py-2 rounded-lg shadow-md hover:bg-red-700 transition"
+                   >
+                     View Fines
+                   </button>
+                </div>
               </div>
             )}
             {successMsg && (
               <div className="rounded-xl border border-green-500/50 bg-green-100 p-3 flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-600 shrink-0" />
-                <p className="text-xs font-medium text-green-200">{successMsg}</p>
+                <p className="text-xs font-medium text-green-700">{successMsg}</p>
               </div>
             )}
 

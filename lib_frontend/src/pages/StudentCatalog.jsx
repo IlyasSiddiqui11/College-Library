@@ -206,7 +206,7 @@ export default function StudentCatalog() {
                 value={filterTitle}
                 onChange={(e) => setFilterTitle(e.target.value)}
                 placeholder="Filter by title"
-                className="rounded-lg border border-slate-200 bg-slate-900 px-2 py-1.5 text-[10px] text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[10px] text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500"
               />
             </div>
 
@@ -235,13 +235,13 @@ export default function StudentCatalog() {
         {errorMsg && (
           <div className="rounded-xl border border-red-500/50 bg-red-100 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
             <AlertCircle className="size-4 text-red-600 shrink-0" />
-            <p className="text-xs font-medium text-red-200">{errorMsg}</p>
+            <p className="text-xs font-medium text-red-700">{errorMsg}</p>
           </div>
         )}
         {successMsg && (
           <div className="rounded-xl border border-green-500/50 bg-green-100 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
             <CheckCircle2 className="size-4 text-green-600 shrink-0" />
-            <p className="text-xs font-medium text-green-200">{successMsg}</p>
+            <p className="text-xs font-medium text-green-700">{successMsg}</p>
           </div>
         )}
 
@@ -360,7 +360,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
@@ -369,7 +369,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-slate-900 shadow-lg transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
           >
             <FileText className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
@@ -378,7 +378,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -387,7 +387,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Profile</span>

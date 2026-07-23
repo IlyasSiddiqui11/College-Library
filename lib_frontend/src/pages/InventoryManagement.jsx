@@ -7,7 +7,7 @@ import {
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList,
   Users, X, ScanLine, Clock, ShieldAlert,
   UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
-} from 'lucide-react'
+, Banknote} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
 const PAGE_SIZE = 25
@@ -312,6 +312,8 @@ export default function InventoryManagement() {
               { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory', active: true },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
+
+              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },

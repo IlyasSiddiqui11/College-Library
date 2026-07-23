@@ -90,7 +90,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                !isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-slate-500 hover:text-blue-600'
+                !isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
               }`}
             >
               Sign In
@@ -103,7 +103,7 @@ export default function StudentLogin() {
                 setSuccessMsg(null)
               }}
               className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                isRegister ? 'bg-white text-blue-600 shadow-xl' : 'text-slate-500 hover:text-blue-600'
+                isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
               }`}
             >
               Register
