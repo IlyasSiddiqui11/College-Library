@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface LostBookRepository extends JpaRepository<LostBook, Long> {
-    Optional<LostBook> findByAccessionNumber(String accessionNumber);
+    Optional<LostBook> findFirstByAccessionNumberOrderByReportedAtDesc(String accessionNumber);
 }

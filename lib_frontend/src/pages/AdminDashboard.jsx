@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
   Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
-  UserCheck, BookMarked
+  UserCheck, BookMarked, Banknote
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
@@ -205,6 +205,13 @@ export default function AdminDashboard() {
             >
               <Users className="size-4.5" />
               Return Station
+            </button>
+            <button
+              onClick={() => navigate('/admin/fines')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Banknote className="size-4.5" />
+              Fine Management
             </button>
             <button
               onClick={() => navigate('/admin/students')}

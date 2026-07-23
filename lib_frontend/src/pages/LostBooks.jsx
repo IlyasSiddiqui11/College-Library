@@ -16,7 +16,8 @@ import {
   UserCheck,
   Users,
   RefreshCw,
-  BookMarked
+  BookMarked,
+  Banknote
 } from 'lucide-react'
 
 function exportToCsv(rows, filename) {
@@ -191,6 +192,8 @@ export default function LostBooks() {
               { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory' },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
+
+              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books', active: true },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
@@ -275,14 +278,14 @@ export default function LostBooks() {
             </div>
 
             {errorMsg && (
-              <div className="rounded-xl border border-red-500/30 bg-red-100 p-3 text-xs text-red-200 flex items-start gap-2">
+              <div className="rounded-xl border border-red-500/30 bg-red-100 p-3 text-xs text-red-700 flex items-start gap-2">
                 <AlertCircle className="size-4 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="rounded-xl border border-green-500/30 bg-green-100 p-3 text-xs text-green-200 flex items-start gap-2">
+              <div className="rounded-xl border border-green-500/30 bg-green-100 p-3 text-xs text-green-700 flex items-start gap-2">
                 <CheckCircle2 className="size-4 shrink-0 mt-0.5" />
                 <span>{successMsg}</span>
               </div>

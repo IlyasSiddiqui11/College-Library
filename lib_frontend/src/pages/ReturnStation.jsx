@@ -6,7 +6,7 @@ import {
   ChevronLeft, ScanLine, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
-} from 'lucide-react'
+, Banknote} from 'lucide-react'
 
 export default function ReturnStation() {
   const { user, logout } = useAuth()
@@ -201,6 +201,13 @@ export default function ReturnStation() {
             >
               <Users className="size-4.5" />
               Return Station
+            </button>
+            <button
+              onClick={() => navigate('/admin/fines')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Banknote className="size-4.5" />
+              Fine Management
             </button>
             <button
               onClick={() => navigate('/admin/students')}

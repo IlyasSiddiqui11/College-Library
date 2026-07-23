@@ -374,19 +374,19 @@ export default function StudentDashboard() {
           >
             <ScanLine className="size-7" />
             <div>
-              <p className="font-semibold text-slate-900">Scan Book</p>
-              <p className="text-[11px] text-slate-600 mt-0.5">Borrow instantly by scanning shelf ISBN</p>
+              <p className="font-semibold text-white">Scan Book</p>
+              <p className="text-[11px] text-blue-100 mt-0.5">Borrow instantly by scanning shelf ISBN</p>
             </div>
           </button>
 
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 p-5 text-left text-slate-900 shadow-md shadow-teal-600/10 hover:shadow-lg transition active:scale-[0.98]"
+            className="flex h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 p-5 text-left text-white shadow-md shadow-teal-600/10 hover:shadow-lg transition active:scale-[0.98]"
           >
             <Library className="size-7" />
             <div>
-              <p className="font-semibold text-slate-900">Digital Catalog</p>
+              <p className="font-semibold text-white">Digital Catalog</p>
               <p className="text-[11px] text-teal-100 mt-0.5">Search and request books online</p>
             </div>
           </button>
@@ -698,7 +698,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-slate-900 shadow-lg transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
@@ -707,7 +707,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
@@ -716,7 +716,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -725,7 +725,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-blue-600 hover:bg-slate-100 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Profile</span>
