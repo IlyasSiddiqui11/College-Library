@@ -24,7 +24,7 @@ export default function Home() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-              <span className="hidden font-bold text-slate-900 sm:inline">
+              <span className="font-bold text-slate-900">
                 BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
               </span>
             </div>

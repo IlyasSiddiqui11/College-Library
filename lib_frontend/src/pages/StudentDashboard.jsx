@@ -582,7 +582,7 @@ export default function StudentDashboard() {
       {/* Floating QR Modal */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl border border-slate-200 text-slate-900 p-6 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white text-slate-900 p-6 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-end">
               <button 
                 type="button" 
