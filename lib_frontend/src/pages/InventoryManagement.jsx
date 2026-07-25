@@ -334,15 +334,14 @@ export default function InventoryManagement() {
           <nav className="flex flex-col gap-1 p-4">
             {[
               { path: '/admin', icon: Library, label: 'Overview' },
+              { path: '/inventory', icon: BookOpen, label: 'Catalogue Inventory', active: true },
               { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
-              { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory', active: true },
-              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
-
-              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
-              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
+              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
+              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
+              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
             ].map(({ path, icon: Icon, label, active }) => (
               <button
                 key={path}
@@ -374,7 +373,7 @@ export default function InventoryManagement() {
         <header className="sticky top-0 z-20 border-b border-slate-300 glass-panel px-6 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">Catalog Inventory</h1>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">Catalogue Inventory</h1>
               <p className="text-xs text-slate-500 mt-0.5">Manage all physical book copies</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">

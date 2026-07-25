@@ -139,6 +139,13 @@ export default function RegisteredStudents() {
               Overview
             </button>
             <button
+              onClick={() => navigate('/inventory')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookOpen className="size-4.5" />
+              Catalogue Inventory
+            </button>
+            <button
               onClick={() => navigate('/lending')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
@@ -146,11 +153,18 @@ export default function RegisteredStudents() {
               Borrow Requests
             </button>
             <button
-              onClick={() => navigate('/inventory')}
+              onClick={() => navigate('/returns')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
-              <BookOpen className="size-4.5" />
-              Catalog Inventory
+              <Users className="size-4.5" />
+              Return Station
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
             </button>
             <button
               onClick={() => navigate('/admin/gate-logs')}
@@ -160,11 +174,11 @@ export default function RegisteredStudents() {
               Gate Logs
             </button>
             <button
-              onClick={() => navigate('/returns')}
+              onClick={() => navigate('/admin/reservations')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
-              <Users className="size-4.5" />
-              Return Station
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
             <button
               onClick={() => navigate('/admin/fines')}
@@ -179,20 +193,6 @@ export default function RegisteredStudents() {
             >
               <UserCheck className="size-4.5" />
               Registered Students
-            </button>
-            <button
-              onClick={() => navigate('/admin/lost-books')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <ShieldAlert className="size-4.5" />
-              Lost Books
-            </button>
-            <button
-              onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <BookMarked className="size-4.5" />
-              Book Reservations
             </button>
           </nav>
         </div>

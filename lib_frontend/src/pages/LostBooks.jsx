@@ -114,7 +114,7 @@ export default function LostBooks() {
         remarks: remarks.trim(),
         reportedByAdmin: user?.name || 'Admin'
       })
-      setSuccessMsg('Book copy marked as LOST and removed from catalog inventory.')
+      setSuccessMsg('Book copy marked as LOST and removed from catalogue inventory.')
       setReason(''); setRemarks(''); setDetails(null); setAccessionNumber('')
       await fetchLostBooks()
     } catch (err) {
@@ -188,15 +188,14 @@ export default function LostBooks() {
           <nav className="flex flex-col gap-1 p-4">
             {[
               { path: '/admin', icon: Library, label: 'Overview' },
+              { path: '/inventory', icon: BookOpen, label: 'Catalogue Inventory' },
               { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
-              { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory' },
-              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
-
-              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
-              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books', active: true },
+              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
+              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
+              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
             ].map(({ path, icon: Icon, label, active }) => (
               <button
                 key={path}
