@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, User, Mail, Phone, GraduationCap, 
-  MapPin, Clock, Loader2, Save, Edit2, History, FileText
+  MapPin, Clock, Loader2, Save, Edit2, History, FileText, Banknote, CheckCircle2
 } from 'lucide-react'
 
 export default function StudentProfile() {
@@ -27,6 +27,7 @@ export default function StudentProfile() {
 
   // Statistics & status
   const [borrowRequests, setBorrowRequests] = useState([])
+  const [fines, setFines] = useState([])
   const [attendanceStatus, setAttendanceStatus] = useState({
     insideLibrary: false,
     entryTime: null,
@@ -69,6 +70,10 @@ export default function StudentProfile() {
       // 4. Get gate attendance status
       const statusRes = await apiClient.get(`/api/gate/status/${user.id}`)
       setAttendanceStatus(statusRes.data)
+
+      // 5. Get fine history
+      const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
+      setFines(finesRes.data || [])
     } catch (err) {
       console.error('Error loading profile details:', err)
       if (showLoading) setErrorMsg('Failed to sync profile data. Please try again.')
@@ -153,14 +158,14 @@ export default function StudentProfile() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col text-white pb-32">
+    <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 hover:text-white transition"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition"
           >
             <ChevronLeft className="size-4" />
             Dashboard
@@ -180,24 +185,24 @@ export default function StudentProfile() {
         {loading ? (
           <div className="flex flex-col items-center py-20 text-center">
             <Loader2 className="size-8 text-blue-500 animate-spin" />
-            <span className="text-xs text-blue-200 mt-3">Syncing profile registration details...</span>
+            <span className="text-xs text-slate-500 mt-3">Syncing profile registration details...</span>
           </div>
         ) : (
           <>
             {/* Header Avatar and Basic Info */}
-            <section className="rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md flex flex-col items-center gap-4 text-center">
+            <section className="rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md flex flex-col items-center gap-4 text-center">
               <div className="flex size-20 items-center justify-center rounded-3xl bg-blue-600 text-white font-bold text-3xl shadow-xl shadow-blue-600/10">
                 {name?.slice(0, 2).toUpperCase() || 'ST'}
               </div>
               <div>
-                <h1 className="text-xl font-extrabold text-white">{name}</h1>
-                <p className="text-xs text-blue-200 mt-0.5">{user.email}</p>
+                <h1 className="text-xl font-extrabold text-slate-900">{name}</h1>
+                <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-panel border border-white/20 text-[10px] font-bold text-blue-100 uppercase tracking-wide">
-                <Clock className="size-3 text-blue-200" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-panel border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wide">
+                <Clock className="size-3 text-slate-500" />
                 Library Status: {' '}
-                <span className={attendanceStatus.insideLibrary ? 'text-green-600 animate-pulse' : 'text-blue-200'}>
+                <span className={attendanceStatus.insideLibrary ? 'text-green-600 animate-pulse' : 'text-slate-500'}>
                   {attendanceStatus.insideLibrary ? 'INSIDE' : 'OUTSIDE'}
                 </span>
               </div>
@@ -217,24 +222,24 @@ export default function StudentProfile() {
 
             {/* Profile Statistics Grid */}
             <section className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl text-center">
-                <p className="text-base font-extrabold text-white">{totalBorrowedCount}</p>
-                <p className="text-[8px] font-bold text-blue-200 uppercase mt-0.5">Total Loans</p>
+              <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl text-center">
+                <p className="text-base font-extrabold text-slate-900">{totalBorrowedCount}</p>
+                <p className="text-[8px] font-bold text-slate-500 uppercase mt-0.5">Total Loans</p>
               </div>
-              <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl text-center">
+              <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl text-center">
                 <p className="text-base font-extrabold text-blue-600">{activeBorrowsCount}</p>
-                <p className="text-[8px] font-bold text-blue-200 uppercase mt-0.5">Active</p>
+                <p className="text-[8px] font-bold text-slate-500 uppercase mt-0.5">Active</p>
               </div>
-              <div className="rounded-2xl border border-white/20 glass-panel p-3 shadow-xl text-center">
+              <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl text-center">
                 <p className="text-base font-extrabold text-green-600">{returnedCount}</p>
-                <p className="text-[8px] font-bold text-blue-200 uppercase mt-0.5">Returned</p>
+                <p className="text-[8px] font-bold text-slate-500 uppercase mt-0.5">Returned</p>
               </div>
             </section>
 
             {/* Profile Details Form Card */}
-            <section className="rounded-2xl border border-white/20 glass-panel p-5 shadow-xl backdrop-blur-md">
-              <div className="flex justify-between items-center pb-4 border-b border-white/20 mb-5">
-                <h3 className="text-xs font-bold text-blue-200 uppercase tracking-wider">Academic Details</h3>
+            <section className="rounded-2xl border border-slate-200 glass-panel p-5 shadow-xl backdrop-blur-md">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-5">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Academic Details</h3>
                 {!isEditing && (
                   <button
                     onClick={() => setIsEditing(true)}
@@ -248,8 +253,8 @@ export default function StudentProfile() {
               <form onSubmit={handleSaveProfile} className="flex flex-col gap-4">
                 {/* Full Name */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="size-3 text-blue-200 shrink-0" /> Full Name
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="size-3 text-slate-500 shrink-0" /> Full Name
                   </label>
                   <input
                     type="text"
@@ -258,40 +263,40 @@ export default function StudentProfile() {
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   />
                 </div>
 
                 {/* Student ID (Read Only) */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="size-3 text-blue-200 shrink-0" /> Student ID
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="size-3 text-slate-500 shrink-0" /> Student ID
                   </label>
                   <input
                     type="text"
                     disabled
                     value={user.id || 'N/A'}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-panel/40 px-3.5 py-3 text-xs text-blue-200 outline-none border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-panel/40 px-3.5 py-3 text-xs text-slate-500 outline-none border-slate-200 transition"
                   />
                 </div>
 
                 {/* Email (Read Only) */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <Mail className="size-3 text-blue-200 shrink-0" /> Email Address
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail className="size-3 text-slate-500 shrink-0" /> Email Address
                   </label>
                   <input
                     type="email"
                     disabled
                     value={user.email}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-panel/40 px-3.5 py-3 text-xs text-blue-200 outline-none border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-panel/40 px-3.5 py-3 text-xs text-slate-500 outline-none border-slate-200 transition"
                   />
                 </div>
 
                 {/* Contact Phone */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <Phone className="size-3 text-blue-200 shrink-0" /> Phone Number
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Phone className="size-3 text-slate-500 shrink-0" /> Phone Number
                   </label>
                   <input
                     type="tel"
@@ -300,14 +305,14 @@ export default function StudentProfile() {
                     placeholder="e.g. +1 555-0199"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   />
                 </div>
 
                 {/* Branch */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <GraduationCap className="size-3 text-blue-200 shrink-0" /> Academic Branch
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <GraduationCap className="size-3 text-slate-500 shrink-0" /> Academic Branch
                   </label>
                   <input
                     type="text"
@@ -316,31 +321,31 @@ export default function StudentProfile() {
                     placeholder="e.g. Mechanical Engineering"
                     value={branch}
                     onChange={(e) => setBranch(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   />
                 </div>
 
                 {/* Year */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <GraduationCap className="size-3 text-blue-200 shrink-0" /> Academic Year
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <GraduationCap className="size-3 text-slate-500 shrink-0" /> Academic Year
                   </label>
                   <select
                     disabled={!isEditing}
                     value={year}
                     onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   >
                     {[1, 2, 3, 4].map(y => (
-                      <option key={y} value={y} className="bg-slate-900 text-white">Year {y}</option>
+                      <option key={y} value={y} className="bg-white text-slate-900">Year {y}</option>
                     ))}
                   </select>
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="text-[10px] font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <MapPin className="size-3 text-blue-200 shrink-0" /> Residential Address
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="size-3 text-slate-500 shrink-0" /> Residential Address
                   </label>
                   <textarea
                     required
@@ -349,7 +354,7 @@ export default function StudentProfile() {
                     placeholder="Dormitory Block, Room #, City"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-white/20 glass-input px-3.5 py-3 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 resize-none transition"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 resize-none transition"
                   />
                 </div>
 
@@ -361,7 +366,7 @@ export default function StudentProfile() {
                         setIsEditing(false)
                         loadProfileData()
                       }}
-                      className="flex-1 rounded-xl border border-white/20 py-3 text-xs font-bold text-blue-100 hover:bg-white/10 transition"
+                      className="flex-1 rounded-xl border border-slate-200 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
                     >
                       Cancel
                     </button>
@@ -385,16 +390,66 @@ export default function StudentProfile() {
                 )}
               </form>
             </section>
+
+            {/* Fine History Section */}
+            <section className="rounded-2xl border border-slate-200 glass-panel p-5 shadow-xl backdrop-blur-md overflow-hidden">
+              <div className="flex items-center gap-2 pb-4 border-b border-slate-200 mb-4">
+                <Banknote className="size-4 text-blue-600" />
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fine History</h3>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {fines.length === 0 ? (
+                  <div className="text-center py-6">
+                    <CheckCircle2 className="size-8 text-green-400 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs text-slate-500">You have no recorded fines.</p>
+                  </div>
+                ) : (
+                  fines.map(fine => (
+                    <div key={fine.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3">
+                        <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold tracking-wider ${
+                          fine.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                          fine.status === 'UNPAID' ? 'bg-red-100 text-red-700' :
+                          'bg-amber-100 text-amber-700'
+                        }`}>
+                          {fine.status}
+                        </span>
+                      </div>
+                      <div className="pr-16">
+                        <p className="text-sm font-bold text-slate-900 truncate" title={fine.bookTitle}>{fine.bookTitle}</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Acc#: {fine.accessionNumber}</p>
+                      </div>
+                      
+                      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200/60 pt-3">
+                        <div>
+                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Delayed By</p>
+                          <p className="text-xs font-semibold text-slate-700">{fine.delayDays} Days</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Fine</p>
+                          <p className="text-xs font-bold text-red-600">₹{fine.totalFine}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Date Generated</p>
+                          <p className="text-[10px] font-medium text-slate-600">{formatDateFull(fine.createdAt)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
           </>
         )}
       </main>
 
       <nav className="fixed bottom-4 left-4 right-4 z-30 mx-auto max-w-sm">
-        <div className="flex items-center justify-around rounded-full border border-white/20 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
+        <div className="flex items-center justify-around rounded-full border border-slate-200 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
@@ -403,7 +458,7 @@ export default function StudentProfile() {
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
@@ -412,7 +467,7 @@ export default function StudentProfile() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -421,7 +476,7 @@ export default function StudentProfile() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-white shadow-lg transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>

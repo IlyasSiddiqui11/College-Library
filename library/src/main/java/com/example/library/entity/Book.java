@@ -69,6 +69,12 @@ public class Book {
     @Column(name = "language")
     private String language;
 
+    @Column(name = "source")
+    private String source;
+
+    @Column(name = "classification_number")
+    private String classificationNumber;
+
     @Column(name = "status", nullable = false)
     @Builder.Default
     private String status = "AVAILABLE";

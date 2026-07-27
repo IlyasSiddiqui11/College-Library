@@ -44,4 +44,6 @@ public class BookCreateRequest {
     private String branch;
     private String category;
     private String language;
+    private String source;
+    private String classificationNumber;
 }
