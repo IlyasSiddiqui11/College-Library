@@ -21,8 +21,8 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     boolean existsByUserIdAndStatusIn(Long userId, List<FineStatus> statuses);
 
     @Query("SELECT f FROM Fine f LEFT JOIN f.borrowRequest br LEFT JOIN br.book bk WHERE " +
-           "(:status IS NULL OR f.status = :status) AND " +
-           "(:search IS NULL OR LOWER(f.user.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "(:#{#status == null} = true OR f.status = :status) AND " +
+           "(:#{#search == null} = true OR LOWER(f.user.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(f.user.email) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR (bk IS NOT NULL AND LOWER(bk.title) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "OR LOWER(br.isbn) LIKE LOWER(CONCAT('%', :search, '%')))")
