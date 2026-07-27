@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [books, setBooks] = useState([])
   const [borrowRequests, setBorrowRequests] = useState([])
   const [gateLogs, setGateLogs] = useState([])
+  const [dashboardOverview, setDashboardOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [approvingId, setApprovingId] = useState(null)
@@ -44,33 +45,14 @@ export default function AdminDashboard() {
       const borrowRes = await apiClient.get('/api/borrow')
       setBorrowRequests(borrowRes.data)
 
-      // 3. Fetch gate logs
-      const gateRes = await apiClient.get('/api/gate/logs')
+      // 3. Fetch dashboard overview
+      const dashboardRes = await apiClient.get('/api/dashboard/today')
+      setDashboardOverview(dashboardRes.data)
+
+      // 4. Update gate logs for the live feed (already present in dashboardData)
+      const gateLogsResponse = dashboardRes.data.todaysGateActivity || []
       
       // Flatten sessions into individual entry and exit actions for the dashboard feed
-      const flatLogs = []
-      gateRes.data.forEach((log) => {
-        // Entry action
-        flatLogs.push({
-          id: log.id * 2,
-          userId: log.userId,
-          userName: log.userName,
-          action: 'ENTRY',
-          timestamp: log.entryTime
-        })
-        
-        // Exit action
-        if (log.exitTime) {
-          flatLogs.push({
-            id: log.id * 2 + 1,
-            userId: log.userId,
-            userName: log.userName,
-            action: 'EXIT',
-            timestamp: log.exitTime
-          })
-        }
-      })
-      
       // Sort flat logs by timestamp desc
       flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       setGateLogs(flatLogs)
@@ -144,12 +126,15 @@ export default function AdminDashboard() {
 
   if (!user) return null
 
-  // Compute metrics
-  const totalBooksCount = books.length
-  const liveBorrowsCount = borrowRequests.filter(req => req.status === 'APPROVED').length
-  const totalCheckIns = gateLogs.filter(log => log.action === 'ENTRY').length
-  const totalCheckOuts = gateLogs.filter(log => log.action === 'EXIT').length
+  // Compute metrics from old lists for backwards compatibility with unchanged components
   const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
+
+  // Dashboard Overview Metrics
+  const todaysEntries = dashboardOverview?.todaysEntries || 0
+  const todaysExits = dashboardOverview?.todaysExits || 0
+  const studentsCurrentlyInside = dashboardOverview?.studentsCurrentlyInside || 0
+  const todaysBorrowRequests = dashboardOverview?.todaysBorrowRequests || 0
+  const totalLostBooks = dashboardOverview?.totalLostBooks || 0
 
   return (
     <div className="h-screen flex text-slate-900">
@@ -294,31 +279,31 @@ export default function AdminDashboard() {
             <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  <Library className="size-5" />
+                  <Users className="size-5" />
                 </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                  LIVE
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                  TODAY
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Total Inventory</p>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Check-Ins</p>
               <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : totalBooksCount}
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysEntries}
               </h3>
             </div>
 
             {/* Stat 2 */}
             <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                  <ClipboardList className="size-5" />
+                <div className="flex size-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <LogOut className="size-5" />
                 </div>
-                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
-                  ACTIVE
+                <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+                  TODAY
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Live Borrows</p>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Check-Outs</p>
               <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : liveBorrowsCount}
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysExits}
               </h3>
             </div>
 
@@ -328,29 +313,29 @@ export default function AdminDashboard() {
                 <div className="flex size-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
                   <Users className="size-5" />
                 </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                  IN
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full animate-pulse">
+                  LIVE
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Total Check-Ins</p>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Currently Inside</p>
               <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : totalCheckIns}
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : studentsCurrentlyInside}
               </h3>
             </div>
 
-            {/* Stat Check-Outs */}
+            {/* Stat 4 */}
             <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                  <LogOut className="size-5" />
+                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                  <ClipboardList className="size-5" />
                 </div>
-                <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
-                  OUT
+                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
+                  TODAY
                 </span>
               </div>
-              <p className="text-sm font-semibold text-slate-500 mt-4">Total Check-Outs</p>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Borrow Requests</p>
               <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : totalCheckOuts}
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysBorrowRequests}
               </h3>
             </div>
 

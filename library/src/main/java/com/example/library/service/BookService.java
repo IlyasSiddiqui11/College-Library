@@ -81,6 +81,8 @@ public class BookService {
                     .branch(request.getBranch())
                     .category(request.getCategory())
                     .language(request.getLanguage())
+                    .source(request.getSource())
+                    .classificationNumber(request.getClassificationNumber())
                     .status("AVAILABLE")
                     .build();
 
@@ -205,6 +207,8 @@ public class BookService {
         book.setBranch(request.getBranch());
         book.setCategory(request.getCategory());
         book.setLanguage(request.getLanguage());
+        book.setSource(request.getSource());
+        book.setClassificationNumber(request.getClassificationNumber());
 
         return mapToBookResponse(bookRepository.save(book));
     }
@@ -264,6 +268,8 @@ public class BookService {
                 .branch(book.getBranch())
                 .category(book.getCategory())
                 .language(book.getLanguage())
+                .source(book.getSource())
+                .classificationNumber(book.getClassificationNumber())
                 .status(book.getStatus())
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
