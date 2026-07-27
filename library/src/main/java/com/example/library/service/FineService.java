@@ -53,7 +53,7 @@ public class FineService {
         return fineRepository.save(fine);
     }
 
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    @Transactional
     public Fine generateLostBookFine(BorrowRequest request, Double bookPrice) {
         long delayDays = 0;
         if (request.getDueDate() != null && java.time.LocalDateTime.now().isAfter(request.getDueDate())) {
@@ -64,10 +64,6 @@ public class FineService {
         java.math.BigDecimal delayAmount = fineRate.multiply(java.math.BigDecimal.valueOf(delayDays));
         java.math.BigDecimal lostBookAmount = bookPrice != null ? java.math.BigDecimal.valueOf(bookPrice) : java.math.BigDecimal.ZERO;
         java.math.BigDecimal totalFine = delayAmount.add(lostBookAmount);
-        
-        if (totalFine.compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            return null;
-        }
 
         Fine fine = Fine.builder()
                 .user(request.getUser())

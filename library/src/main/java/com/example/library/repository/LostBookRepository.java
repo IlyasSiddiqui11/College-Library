@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface LostBookRepository extends JpaRepository<LostBook, Long> {
     Optional<LostBook> findFirstByAccessionNumberOrderByReportedAtDesc(String accessionNumber);
+    java.util.List<LostBook> findAllByOrderByReportedAtDesc();
+    long count();
 }

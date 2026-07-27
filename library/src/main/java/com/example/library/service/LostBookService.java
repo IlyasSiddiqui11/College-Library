@@ -141,19 +141,11 @@ public class LostBookService {
                 borrowRequest.setStatus(BorrowStatus.LOST);
                 borrowRequestRepository.save(borrowRequest);
 
-                // 3. Disassociate ALL borrow requests (any status) from this physical book
-                //    to avoid FK constraint violations on delete
-                List<BorrowRequest> allLinked = borrowRequestRepository.findByBookId(book.getId());
-                for (BorrowRequest req : allLinked) {
-                        req.setBook(null);
-                }
-                borrowRequestRepository.saveAll(allLinked);
+                // 3. Update physical book status to LOST
+                book.setStatus("LOST");
+                bookRepository.save(book);
 
-                // 4. Delete physical book record completely from Book table
-                bookRepository.delete(book);
-                bookRepository.flush();
-
-                // 5. Generate fine AFTER the book is deleted so the transaction is clean
+                // 4. Generate fine
                 try {
                         fineService.generateLostBookFine(borrowRequest, bookPrice);
                 } catch (Exception e) {

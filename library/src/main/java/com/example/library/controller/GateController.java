@@ -49,4 +49,20 @@ public class GateController {
         List<GateLogResponse> response = gateLogService.getLogsByUserId(userId);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<List<GateLogResponse>> getLogsByMonth(
+            @RequestParam int year, 
+            @RequestParam int month) {
+        List<GateLogResponse> response = gateLogService.getLogsByMonth(year, month);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/monthly/stats")
+    public ResponseEntity<com.example.library.dto.response.MonthlyGateStatsResponse> getMonthlyStats(
+            @RequestParam int year, 
+            @RequestParam int month) {
+        com.example.library.dto.response.MonthlyGateStatsResponse response = gateLogService.getMonthlyStats(year, month);
+        return ResponseEntity.ok(response);
+    }
 }

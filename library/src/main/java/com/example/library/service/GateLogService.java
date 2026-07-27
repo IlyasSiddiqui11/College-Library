@@ -109,6 +109,37 @@ public class GateLogService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<GateLogResponse> getLogsByMonth(int year, int month) {
+        java.time.LocalDateTime start = java.time.LocalDateTime.of(year, month, 1, 0, 0);
+        java.time.LocalDateTime end = start.plusMonths(1).minusNanos(1);
+        return gateLogRepository.findAllByEntryTimeBetweenOrderByEntryTimeDesc(start, end).stream()
+                .map(this::mapToGateLogResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public com.example.library.dto.response.MonthlyGateStatsResponse getMonthlyStats(int year, int month) {
+        java.time.LocalDateTime start = java.time.LocalDateTime.of(year, month, 1, 0, 0);
+        java.time.LocalDateTime end = start.plusMonths(1).minusNanos(1);
+        List<GateLog> logs = gateLogRepository.findAllByEntryTimeBetweenOrderByEntryTimeDesc(start, end);
+        
+        long totalEntries = logs.size();
+        long totalExits = logs.stream().filter(l -> l.getExitTime() != null).count();
+        long studentsInside = gateLogRepository.countByExitTimeIsNull();
+        
+        int daysInMonth = java.time.YearMonth.of(year, month).lengthOfMonth();
+        long averageDaily = totalEntries / daysInMonth;
+        
+        return com.example.library.dto.response.MonthlyGateStatsResponse.builder()
+                .totalEntries(totalEntries)
+                .totalExits(totalExits)
+                .studentsCurrentlyInside(studentsInside)
+                .averageDailyVisitors(averageDaily)
+                .totalGateLogs(totalEntries) // Assuming total logs = total entries
+                .build();
+    }
+
     private GateLogResponse mapToGateLogResponse(GateLog log) {
         User user = log.getUser();
         String userEmail = user.getEmail();

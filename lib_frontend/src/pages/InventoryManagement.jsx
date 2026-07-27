@@ -39,6 +39,8 @@ export default function InventoryManagement() {
   const [branch, setBranch] = useState('')
   const [category, setCategory] = useState('')
   const [language, setLanguage] = useState('')
+  const [source, setSource] = useState('')
+  const [classificationNumber, setClassificationNumber] = useState('')
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
@@ -139,6 +141,8 @@ export default function InventoryManagement() {
           if (!category) setCategory(res.data.category || '');
           if (!totalPages) setTotalPages(res.data.totalPages || '');
           if (!language) setLanguage(res.data.language || '');
+          if (!source) setSource(res.data.source || '');
+          if (!classificationNumber) setClassificationNumber(res.data.classificationNumber || '');
         }
       } catch (err) {
         // Ignore errors, meaning the book isn't found in the catalog
@@ -147,7 +151,7 @@ export default function InventoryManagement() {
     
     const timeoutId = setTimeout(fetchBookDetails, 500); // Debounce
     return () => clearTimeout(timeoutId);
-  }, [isbn, editingBook, title, author, publisher, edition, series, publicationYear, category, totalPages, language]);
+  }, [isbn, editingBook, title, author, publisher, edition, series, publicationYear, category, totalPages, language, source, classificationNumber]);
 
   const closeModal = () => {
     stopScanning()
@@ -156,6 +160,7 @@ export default function InventoryManagement() {
     setIsbn(''); setTitle(''); setAuthor(''); setPublisher(''); setEdition('')
     setSeries(''); setPublicationYear(''); setTotalPages(''); setPrice('')
     setBillNumber(''); setBillDate(''); setBranch(''); setCategory(''); setLanguage('')
+    setSource(''); setClassificationNumber('');
     setQuantity(1); setAccessionNumbersList(['']); setErrorMsg(null)
   }
 
@@ -180,6 +185,8 @@ export default function InventoryManagement() {
     setBranch(book.branch || '')
     setCategory(book.category || '')
     setLanguage(book.language || '')
+    setSource(book.source || '')
+    setClassificationNumber(book.classificationNumber || '')
     setQuantity(1)
     setAccessionNumbersList([book.accessionNumber || ''])
     setErrorMsg(null)
@@ -219,7 +226,8 @@ export default function InventoryManagement() {
           price: price ? parseFloat(price) : null,
           billNumber: billNumber.trim(),
           billDate: billDate || null,
-          branch: branch.trim(), category: category.trim(), language: language.trim()
+          branch: branch.trim(), category: category.trim(), language: language.trim(),
+          source: source.trim(), classificationNumber: classificationNumber.trim()
         })
       } else {
         const filledAccessions = accessionNumbersList.map(a => a.trim()).filter(Boolean)
@@ -234,7 +242,8 @@ export default function InventoryManagement() {
           price: price ? parseFloat(price) : null,
           billNumber: billNumber.trim(),
           billDate: billDate || null,
-          branch: branch.trim(), category: category.trim(), language: language.trim()
+          branch: branch.trim(), category: category.trim(), language: language.trim(),
+          source: source.trim(), classificationNumber: classificationNumber.trim()
         })
       }
       closeModal(); fetchBooks()
@@ -287,8 +296,8 @@ export default function InventoryManagement() {
   const paginatedBooks = filteredBooks.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const handleExport = () => {
-    const headers = ['ID', 'Accession Number', 'ISBN', 'Title', 'Author', 'Publisher', 'Edition', 'Series',
-      'Publication Year', 'Total Pages', 'Price', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
+    const headers = ['ID', 'Accession Number', 'ISBN', 'Title', 'Author', 'Publisher', 'Publication Year', 'Edition', 'Series',
+      'Total Pages', 'Source', 'Classification Number', 'Price', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
     const csvRows = [
       headers.join(','),
       ...filteredBooks.map(book => [
@@ -298,10 +307,12 @@ export default function InventoryManagement() {
         `"${(book.title || '').replace(/"/g, '""')}"`,
         `"${(book.author || '').replace(/"/g, '""')}"`,
         `"${(book.publisher || '').replace(/"/g, '""')}"`,
+        `"${book.publicationYear || ''}"`,
         `"${(book.edition || '').replace(/"/g, '""')}"`,
         `"${(book.series || '').replace(/"/g, '""')}"`,
-        `"${book.publicationYear || ''}"`,
         `"${book.totalPages || ''}"`,
+        `"${(book.source || '').replace(/"/g, '""')}"`,
+        `"${(book.classificationNumber || '').replace(/"/g, '""')}"`,
         `"${book.price || ''}"`,
         `"${book.billNumber || ''}"`,
         `"${book.billDate || ''}"`,
@@ -334,15 +345,14 @@ export default function InventoryManagement() {
           <nav className="flex flex-col gap-1 p-4">
             {[
               { path: '/admin', icon: Library, label: 'Overview' },
+              { path: '/inventory', icon: BookOpen, label: 'Catalogue Inventory', active: true },
               { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
-              { path: '/inventory', icon: BookOpen, label: 'Catalog Inventory', active: true },
-              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/returns', icon: Users, label: 'Return Station' },
-
-              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
-              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' },
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
+              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
+              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
+              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
             ].map(({ path, icon: Icon, label, active }) => (
               <button
                 key={path}
@@ -374,7 +384,7 @@ export default function InventoryManagement() {
         <header className="sticky top-0 z-20 border-b border-slate-300 glass-panel px-6 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">Catalog Inventory</h1>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">Catalogue Inventory</h1>
               <p className="text-xs text-slate-500 mt-0.5">Manage all physical book copies</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -442,7 +452,8 @@ export default function InventoryManagement() {
                 options={[
                   { value: 'ALL', label: 'ALL' },
                   { value: 'AVAILABLE', label: 'AVAILABLE' },
-                  { value: 'BORROWED', label: 'BORROWED' }
+                  { value: 'BORROWED', label: 'BORROWED' },
+                  { value: 'LOST', label: 'LOST' }
                 ]}
                 className="w-full"
               />
@@ -463,10 +474,12 @@ export default function InventoryManagement() {
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Title</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Author</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Publisher</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Pub. Year</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Edition</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Series</th>
-                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Pub. Year</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Pages</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Source</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Class. No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Price</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill Date</th>
@@ -487,6 +500,7 @@ export default function InventoryManagement() {
                   ) : (
                     paginatedBooks.map((book) => {
                       const isBorrowed = book.status === 'BORROWED'
+                      const isLost = book.status === 'LOST'
                       const formatDt = (dt) => dt ? new Date(dt).toLocaleDateString() : '—'
 
                       return (
@@ -496,10 +510,12 @@ export default function InventoryManagement() {
                           <td className="py-3 px-3 font-semibold text-slate-900 max-w-[160px] truncate">{book.title}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.author || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.publisher || '—'}</td>
+                          <td className="py-3 px-3 text-slate-600">{book.publicationYear || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.edition || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.series || '—'}</td>
-                          <td className="py-3 px-3 text-slate-600">{book.publicationYear || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.totalPages || '—'}</td>
+                          <td className="py-3 px-3 text-slate-600">{book.source || '—'}</td>
+                          <td className="py-3 px-3 text-slate-600">{book.classificationNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.price != null ? `₹${book.price}` : '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billDate || '—'}</td>
@@ -507,7 +523,9 @@ export default function InventoryManagement() {
                           <td className="py-3 px-3 text-slate-600">{book.category || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.language || '—'}</td>
                           <td className="py-3 px-3 text-center">
-                            {isBorrowed ? (
+                            {isLost ? (
+                              <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold text-[9px] border border-red-200 whitespace-nowrap">LOST</span>
+                            ) : isBorrowed ? (
                               <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold text-[9px] border border-blue-200 whitespace-nowrap">BORROWED</span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-bold text-[9px] border border-green-200 whitespace-nowrap">AVAILABLE</span>
@@ -724,6 +742,18 @@ export default function InventoryManagement() {
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Category</label>
                           <input type="text" placeholder="e.g. Reference" value={category}
                             onChange={(e) => setCategory(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Source</label>
+                          <input type="text" placeholder="e.g. Donated" value={source}
+                            onChange={(e) => setSource(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Classification Number</label>
+                          <input type="text" placeholder="e.g. 005.1" value={classificationNumber}
+                            onChange={(e) => setClassificationNumber(e.target.value)}
                             className="mt-1 w-full rounded-lg border border-slate-300 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500" />
                         </div>
                         {!editingBook ? (

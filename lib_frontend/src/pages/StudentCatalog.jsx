@@ -39,7 +39,7 @@ export default function StudentCatalog() {
       setBooks(res.data)
     } catch (err) {
       console.error('Failed to fetch books:', err)
-      setErrorMsg('Failed to load catalog inventory.')
+      setErrorMsg('Failed to load catalogue inventory.')
     } finally {
       setLoading(false)
     }

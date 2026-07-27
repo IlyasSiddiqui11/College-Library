@@ -29,6 +29,10 @@ export default function GateLogs() {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('ALL')
+  
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [monthlyStats, setMonthlyStats] = useState(null)
 
   // Admin-only page
   useEffect(() => {
@@ -40,16 +44,19 @@ export default function GateLogs() {
   // Fetch gate logs
   useEffect(() => {
     fetchLogs()
-  }, [])
+  }, [selectedMonth, selectedYear])
 
   const fetchLogs = async () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await apiClient.get('/api/gate/logs')
+      const [logsRes, statsRes] = await Promise.all([
+        apiClient.get(`/api/gate/monthly?year=${selectedYear}&month=${selectedMonth}`),
+        apiClient.get(`/api/gate/monthly/stats?year=${selectedYear}&month=${selectedMonth}`)
+      ])
       
       // Map sessions into a single row with entry and exit times
-      const sessionLogs = response.data.map((log) => ({
+      const sessionLogs = logsRes.data.map((log) => ({
         id: log.id,
         userId: log.userId,
         userName: log.userName,
@@ -64,6 +71,7 @@ export default function GateLogs() {
       // Sort by entryTime descending
       sessionLogs.sort((a, b) => new Date(b.entryTime).getTime() - new Date(a.entryTime).getTime())
       setLogs(sessionLogs)
+      setMonthlyStats(statsRes.data)
     } catch (err) {
       setError(err.message || 'Failed to fetch gate logs')
     } finally {
@@ -103,13 +111,10 @@ export default function GateLogs() {
     return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
   }
 
-  const todayLogs = logs.filter(
-    (l) =>
-      new Date(l.entryTime).toDateString() === new Date().toDateString()
-  )
-  
-  // Currently inside: number of logs that have status === 'INSIDE'
-  const currentlyInside = logs.filter(l => l.status === 'INSIDE').length
+  // Monthly stats fallback
+  const totalEntries = monthlyStats?.totalEntries || logs.length
+  const avgDaily = monthlyStats?.averageDailyVisitors || 0
+  const insideCount = monthlyStats?.studentsCurrentlyInside || logs.filter(l => l.status === 'INSIDE').length
 
   const handleExport = () => {
     const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
@@ -162,6 +167,13 @@ export default function GateLogs() {
               Overview
             </button>
             <button
+              onClick={() => navigate('/inventory')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookOpen className="size-4.5" />
+              Catalogue Inventory
+            </button>
+            <button
               onClick={() => navigate('/lending')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
@@ -169,11 +181,18 @@ export default function GateLogs() {
               Borrow Requests
             </button>
             <button
-              onClick={() => navigate('/inventory')}
+              onClick={() => navigate('/returns')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
-              <BookOpen className="size-4.5" />
-              Catalog Inventory
+              <Users className="size-4.5" />
+              Return Station
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
             </button>
             <button
               onClick={() => navigate('/admin/gate-logs')}
@@ -183,11 +202,11 @@ export default function GateLogs() {
               Gate Logs
             </button>
             <button
-              onClick={() => navigate('/returns')}
+              onClick={() => navigate('/admin/reservations')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
-              <Users className="size-4.5" />
-              Return Station
+              <BookMarked className="size-4.5" />
+              Book Reservations
             </button>
             <button
               onClick={() => navigate('/admin/fines')}
@@ -202,20 +221,6 @@ export default function GateLogs() {
             >
               <UserCheck className="size-4.5" />
               Registered Students
-            </button>
-            <button
-              onClick={() => navigate('/admin/lost-books')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <ShieldAlert className="size-4.5" />
-              Lost Books
-            </button>
-            <button
-              onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <BookMarked className="size-4.5" />
-              Book Reservations
             </button>
           </nav>
         </div>
@@ -276,26 +281,14 @@ export default function GateLogs() {
           </div>
 
           {/* Analytics Cards */}
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-4">
             <div className="rounded-xl border border-slate-200 glass-panel p-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total Students</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-900">{totalStudents}</p>
+                  <p className="text-sm font-medium text-slate-600">Total Entries (Month)</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{totalEntries}</p>
                 </div>
                 <div className="rounded-lg bg-blue-100 p-3 text-blue-600">
-                  <Users className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 glass-panel p-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Currently Inside</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-900">{currentlyInside}</p>
-                </div>
-                <div className="rounded-lg bg-green-100 p-3 text-green-600">
                   <LogIn className="h-6 w-6" />
                 </div>
               </div>
@@ -304,10 +297,34 @@ export default function GateLogs() {
             <div className="rounded-xl border border-slate-200 glass-panel p-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Today's Entries</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-900">{todayLogs.filter(l => l.action === 'ENTRY').length}</p>
+                  <p className="text-sm font-medium text-slate-600">Currently Inside</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{insideCount}</p>
+                </div>
+                <div className="rounded-lg bg-green-100 p-3 text-green-600">
+                  <Users className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 glass-panel p-6 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Unique Students</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{totalStudents}</p>
                 </div>
                 <div className="rounded-lg bg-purple-100 p-3 text-purple-600">
+                  <UserCheck className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="rounded-xl border border-slate-200 glass-panel p-6 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Avg. Daily Visitors</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{avgDaily}</p>
+                </div>
+                <div className="rounded-lg bg-orange-100 p-3 text-orange-600">
                   <Clock className="h-6 w-6" />
                 </div>
               </div>
@@ -328,6 +345,24 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium transition glass-panel text-slate-700 border border-slate-200 focus:outline-none focus:border-blue-500"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                  <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('default', { month: 'long' })}</option>
+                ))}
+              </select>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium transition glass-panel text-slate-700 border border-slate-200 focus:outline-none focus:border-blue-500"
+              >
+                {[2023, 2024, 2025, 2026, 2027].map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
               {['ALL', 'INSIDE', 'OUTSIDE'].map((type) => (
                 <button
                   key={type}
