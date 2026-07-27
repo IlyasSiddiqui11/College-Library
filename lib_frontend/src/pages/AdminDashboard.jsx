@@ -5,7 +5,7 @@ import { apiClient } from '../api/client.js'
 import { 
   BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
   Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
-  UserCheck, BookMarked
+  UserCheck, BookMarked, Banknote
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [books, setBooks] = useState([])
   const [borrowRequests, setBorrowRequests] = useState([])
   const [gateLogs, setGateLogs] = useState([])
+  const [dashboardOverview, setDashboardOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [approvingId, setApprovingId] = useState(null)
@@ -44,33 +45,14 @@ export default function AdminDashboard() {
       const borrowRes = await apiClient.get('/api/borrow')
       setBorrowRequests(borrowRes.data)
 
-      // 3. Fetch gate logs
-      const gateRes = await apiClient.get('/api/gate/logs')
+      // 3. Fetch dashboard overview
+      const dashboardRes = await apiClient.get('/api/dashboard/today')
+      setDashboardOverview(dashboardRes.data)
+
+      // 4. Update gate logs for the live feed (already present in dashboardData)
+      const gateLogsResponse = dashboardRes.data.todaysGateActivity || []
       
       // Flatten sessions into individual entry and exit actions for the dashboard feed
-      const flatLogs = []
-      gateRes.data.forEach((log) => {
-        // Entry action
-        flatLogs.push({
-          id: log.id * 2,
-          userId: log.userId,
-          userName: log.userName,
-          action: 'ENTRY',
-          timestamp: log.entryTime
-        })
-        
-        // Exit action
-        if (log.exitTime) {
-          flatLogs.push({
-            id: log.id * 2 + 1,
-            userId: log.userId,
-            userName: log.userName,
-            action: 'EXIT',
-            timestamp: log.exitTime
-          })
-        }
-      })
-      
       // Sort flat logs by timestamp desc
       flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       setGateLogs(flatLogs)
@@ -144,22 +126,25 @@ export default function AdminDashboard() {
 
   if (!user) return null
 
-  // Compute metrics
-  const totalBooksCount = books.length
-  const liveBorrowsCount = borrowRequests.filter(req => req.status === 'APPROVED').length
-  const totalCheckIns = gateLogs.filter(log => log.action === 'ENTRY').length
-  const totalCheckOuts = gateLogs.filter(log => log.action === 'EXIT').length
+  // Compute metrics from old lists for backwards compatibility with unchanged components
   const pendingRequests = borrowRequests.filter(req => req.status === 'PENDING')
 
+  // Dashboard Overview Metrics
+  const todaysEntries = dashboardOverview?.todaysEntries || 0
+  const todaysExits = dashboardOverview?.todaysExits || 0
+  const studentsCurrentlyInside = dashboardOverview?.studentsCurrentlyInside || 0
+  const todaysBorrowRequests = dashboardOverview?.todaysBorrowRequests || 0
+  const totalLostBooks = dashboardOverview?.totalLostBooks || 0
+
   return (
-    <div className="h-screen flex text-white">
+    <div className="h-screen flex text-slate-900">
       {/* Admin Sidebar Navigation */}
-      <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
+      <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
           {/* Logo Brand */}
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-white/20">
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
             <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-            <span className="font-bold tracking-tight text-white text-base">
+            <span className="font-bold tracking-tight text-slate-900 text-base">
               BCOE-lib
             </span>
           </div>
@@ -174,8 +159,15 @@ export default function AdminDashboard() {
               Overview
             </button>
             <button
+              onClick={() => navigate('/inventory')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookOpen className="size-4.5" />
+              Catalogue Inventory
+            </button>
+            <button
               onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
@@ -186,60 +178,60 @@ export default function AdminDashboard() {
               )}
             </button>
             <button
-              onClick={() => navigate('/inventory')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <BookOpen className="size-4.5" />
-              Catalog Inventory
-            </button>
-            <button
-              onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <Clock className="size-4.5" />
-              Gate Logs
-            </button>
-            <button
               onClick={() => navigate('/returns')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <Users className="size-4.5" />
               Return Station
             </button>
             <button
-              onClick={() => navigate('/admin/students')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <UserCheck className="size-4.5" />
-              Registered Students
-            </button>
-            <button
               onClick={() => navigate('/admin/lost-books')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
             </button>
             <button
+              onClick={() => navigate('/admin/gate-logs')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Clock className="size-4.5" />
+              Gate Logs
+            </button>
+            <button
               onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+            <button
+              onClick={() => navigate('/admin/fines')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Banknote className="size-4.5" />
+              Fine Management
+            </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
             </button>
           </nav>
         </div>
 
         {/* User Card & Logout */}
-        <div className="p-4 border-t border-white/20">
+        <div className="p-4 border-t border-slate-200">
           <div className="flex items-center justify-between rounded-xl glass-panel p-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user.name}</p>
-              <p className="text-[10px] text-blue-200 font-medium">Administrator</p>
+              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+              <p className="text-[10px] text-slate-500 font-medium">Administrator</p>
             </div>
             <button
               onClick={logout}
-              className="p-1.5 rounded-lg text-blue-200 hover:text-red-600 hover:bg-red-50 transition"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
               title="Sign Out"
             >
               <LogOut className="size-4" />
@@ -251,19 +243,19 @@ export default function AdminDashboard() {
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Header App Bar */}
-        <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-8 py-4 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-8 py-4 backdrop-blur-md">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 System Overview
               </h1>
-              <p className="text-xs text-blue-200 mt-0.5">Live academic catalog and gate metrics</p>
+              <p className="text-xs text-slate-500 mt-0.5">Live academic catalog and gate metrics</p>
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => loadData(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-white/20 px-3.5 py-2 text-xs font-bold text-blue-100 hover:bg-white/10 active:scale-[0.98] transition"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 active:scale-[0.98] transition"
               >
                 <RefreshCw className="size-3.5" />
                 Sync
@@ -284,71 +276,71 @@ export default function AdminDashboard() {
           {/* Stat Metrics Row */}
           <section className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Stat 1 */}
-            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  <Library className="size-5" />
+                  <Users className="size-5" />
                 </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                  LIVE
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                  TODAY
                 </span>
               </div>
-              <p className="text-sm font-semibold text-blue-200 mt-4">Total Inventory</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalBooksCount}
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Check-Ins</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysEntries}
               </h3>
             </div>
 
             {/* Stat 2 */}
-            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
-              <div className="flex items-center justify-between">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                  <ClipboardList className="size-5" />
-                </div>
-                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
-                  ACTIVE
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-blue-200 mt-4">Live Borrows</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : liveBorrowsCount}
-              </h3>
-            </div>
-
-            {/* Stat 3 */}
-            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
-              <div className="flex items-center justify-between">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
-                  <Users className="size-5" />
-                </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                  IN
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-blue-200 mt-4">Total Check-Ins</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalCheckIns}
-              </h3>
-            </div>
-
-            {/* Stat Check-Outs */}
-            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
                   <LogOut className="size-5" />
                 </div>
                 <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
-                  OUT
+                  TODAY
                 </span>
               </div>
-              <p className="text-sm font-semibold text-blue-200 mt-4">Total Check-Outs</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : totalCheckOuts}
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Check-Outs</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysExits}
+              </h3>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
+                  <Users className="size-5" />
+                </div>
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full animate-pulse">
+                  LIVE
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Currently Inside</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : studentsCurrentlyInside}
               </h3>
             </div>
 
             {/* Stat 4 */}
-            <div className="relative rounded-2xl border border-white/20 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+            <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                  <ClipboardList className="size-5" />
+                </div>
+                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
+                  TODAY
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-slate-500 mt-4">Today's Borrow Requests</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : todaysBorrowRequests}
+              </h3>
+            </div>
+
+            {/* Stat 4 */}
+            <div className="relative rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md overflow-hidden">
               <div className="flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
                   <ShieldAlert className="size-5" />
@@ -359,20 +351,20 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-sm font-semibold text-blue-200 mt-4">Requests Awaiting</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {loading ? <Loader2 className="size-5 animate-spin text-blue-200" /> : pendingRequests.length}
+              <p className="text-sm font-semibold text-slate-500 mt-4">Requests Awaiting</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <Loader2 className="size-5 animate-spin text-slate-500" /> : pendingRequests.length}
               </h3>
             </div>
           </section>
 
           {/* Master-Detail Layout */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 rounded-2xl border border-white/20 glass-panel p-6 shadow-xl flex flex-col gap-6">
+            <div className="lg:col-span-8 rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl flex flex-col gap-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-white">Review Queue</h3>
-                  <p className="text-xs text-blue-200 mt-0.5">Asset borrow requests awaiting administrative approval</p>
+                  <h3 className="text-base font-bold text-slate-900">Review Queue</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Asset borrow requests awaiting administrative approval</p>
                 </div>
                 <button
                   onClick={() => navigate('/lending')}
@@ -385,7 +377,7 @@ export default function AdminDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-white/20 text-blue-200 font-bold uppercase tracking-wider">
+                    <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                       <th className="pb-3 font-semibold">Requester</th>
                       <th className="pb-3 font-semibold">Asset Title</th>
                       <th className="pb-3 font-semibold">Date</th>
@@ -397,12 +389,12 @@ export default function AdminDashboard() {
                     {loading ? (
                       <tr>
                         <td colSpan={5} className="py-8 text-center">
-                          <Loader2 className="size-6 animate-spin text-blue-200 mx-auto" />
+                          <Loader2 className="size-6 animate-spin text-slate-500 mx-auto" />
                         </td>
                       </tr>
                     ) : borrowRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center text-blue-200 font-medium">
+                        <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
                           No borrow requests logged in queue.
                         </td>
                       </tr>
@@ -411,15 +403,15 @@ export default function AdminDashboard() {
                         .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
                         .slice(0, 5)
                         .map((req) => (
-                        <tr key={req.id} className="border-b border-slate-50 hover:bg-white/10 transition">
-                          <td className="py-4 font-bold text-white">
+                        <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-100 transition">
+                          <td className="py-4 font-bold text-slate-900">
                             {req.userName || `Student #${req.userId}`}
                           </td>
                           <td className="py-4">
-                            <p className="font-bold text-white max-w-[200px] truncate">{req.bookTitle}</p>
-                            <p className="text-[10px] text-blue-200">ISBN: {req.isbn}</p>
+                            <p className="font-bold text-slate-900 max-w-[200px] truncate">{req.bookTitle}</p>
+                            <p className="text-[10px] text-slate-500">ISBN: {req.isbn}</p>
                           </td>
-                          <td className="py-4 text-blue-200">
+                          <td className="py-4 text-slate-500">
                             {new Date(req.requestDate).toLocaleDateString()}
                           </td>
                           <td className="py-4">
@@ -460,7 +452,7 @@ export default function AdminDashboard() {
                                 {approvingId === req.id ? (
                                   <div className="flex items-center gap-1.5">
                                     {copiesLoading ? (
-                                      <Loader2 className="size-4 animate-spin text-blue-200" />
+                                      <Loader2 className="size-4 animate-spin text-slate-500" />
                                     ) : (
                                       <CustomSelect
                                         value={accessionNumber}
@@ -485,7 +477,7 @@ export default function AdminDashboard() {
                                         setAccessionNumber('')
                                         setAvailableCopies([])
                                       }}
-                                      className="flex size-7 items-center justify-center rounded-lg border border-white/20 glass-panel hover:text-white transition"
+                                      className="flex size-7 items-center justify-center rounded-lg border border-slate-200 glass-panel hover:text-blue-600 transition"
                                       title="Cancel"
                                     >
                                       <X className="size-3.5" />
@@ -513,7 +505,7 @@ export default function AdminDashboard() {
                                 )}
                               </div>
                             ) : (
-                              <span className={`text-[10px] font-semibold italic pr-1 ${req.status === 'REJECTED' || req.status === 'CANCELLED' || req.status === 'LOST' ? 'text-red-400' : 'text-green-400'}`}>Complete</span>
+                              <span className={`text-[10px] font-semibold italic pr-1 ${req.status === 'REJECTED' || req.status === 'CANCELLED' || req.status === 'LOST' ? 'text-red-600' : 'text-green-600'}`}>Complete</span>
                             )}
                           </td>
                         </tr>
@@ -525,19 +517,19 @@ export default function AdminDashboard() {
             </div>
 
             {/* Real-time Gate Monitor */}
-            <div className="lg:col-span-4 rounded-2xl border border-white/20 glass-panel p-6 shadow-xl flex flex-col gap-6">
+            <div className="lg:col-span-4 rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl flex flex-col gap-6">
               <div>
-                <h3 className="text-base font-bold text-white">Gate Monitor</h3>
-                <p className="text-xs text-blue-200 mt-0.5">Real-time scan feeds from entrance</p>
+                <h3 className="text-base font-bold text-slate-900">Gate Monitor</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Real-time scan feeds from entrance</p>
               </div>
 
               <div className="flex-1 overflow-y-auto max-h-[360px] pr-2 flex flex-col gap-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="size-5 animate-spin text-blue-200" />
+                    <Loader2 className="size-5 animate-spin text-slate-500" />
                   </div>
                 ) : gateLogs.length === 0 ? (
-                  <p className="text-blue-200 text-xs text-center py-4">No recent entry logs.</p>
+                  <p className="text-slate-500 text-xs text-center py-4">No recent entry logs.</p>
                 ) : (
                   gateLogs.slice(0, 10).map((log, idx) => (
                     <div key={log.id || idx} className="flex items-start gap-3 p-3 glass-panel rounded-xl">
@@ -547,13 +539,13 @@ export default function AdminDashboard() {
                         {log.action === 'ENTRY' ? 'IN' : 'OUT'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-white">
+                        <p className="text-xs font-bold text-slate-900">
                           {log.userName || `Student ID #${log.userId}`}
                         </p>
-                        <p className="text-[10px] text-blue-200 mt-0.5">
+                        <p className="text-[10px] text-slate-500 mt-0.5">
                           {log.action === 'ENTRY' ? 'Checked into Library' : 'Checked out of Library'}
                         </p>
-                        <p className="text-[9px] text-blue-200 mt-1">
+                        <p className="text-[9px] text-slate-500 mt-1">
                           {new Date(log.timestamp).toLocaleString()}
                         </p>
                       </div>

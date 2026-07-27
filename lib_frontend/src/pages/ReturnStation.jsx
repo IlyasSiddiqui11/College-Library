@@ -6,7 +6,7 @@ import {
   ChevronLeft, ScanLine, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
-} from 'lucide-react'
+, Banknote} from 'lucide-react'
 
 export default function ReturnStation() {
   const { user, logout } = useAuth()
@@ -153,14 +153,14 @@ export default function ReturnStation() {
   if (!user) return null
 
   return (
-    <div className="h-screen flex text-white">
+    <div className="h-screen flex text-slate-900">
       {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-white/20 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
+      <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
           {/* Logo Brand */}
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-white/20">
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
             <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-            <span className="font-bold tracking-tight text-white text-base">
+            <span className="font-bold tracking-tight text-slate-900 text-base">
               BCOE-lib
             </span>
           </div>
@@ -169,31 +169,24 @@ export default function ReturnStation() {
           <nav className="flex flex-col gap-1 p-4">
             <button
               onClick={() => navigate('/admin')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <Library className="size-4.5" />
               Overview
             </button>
             <button
+              onClick={() => navigate('/inventory')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookOpen className="size-4.5" />
+              Catalogue Inventory
+            </button>
+            <button
               onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <ClipboardList className="size-4.5" />
               Borrow Requests
-            </button>
-            <button
-              onClick={() => navigate('/inventory')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <BookOpen className="size-4.5" />
-              Catalog Inventory
-            </button>
-            <button
-              onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <Clock className="size-4.5" />
-              Gate Logs
             </button>
             <button
               onClick={() => navigate('/returns')}
@@ -203,39 +196,53 @@ export default function ReturnStation() {
               Return Station
             </button>
             <button
-              onClick={() => navigate('/admin/students')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
-            >
-              <UserCheck className="size-4.5" />
-              Registered Students
-            </button>
-            <button
               onClick={() => navigate('/admin/lost-books')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <ShieldAlert className="size-4.5" />
               Lost Books
             </button>
             <button
+              onClick={() => navigate('/admin/gate-logs')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Clock className="size-4.5" />
+              Gate Logs
+            </button>
+            <button
               onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-100 hover:bg-white/10 hover:text-white text-left transition"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+            <button
+              onClick={() => navigate('/admin/fines')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Banknote className="size-4.5" />
+              Fine Management
+            </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
             </button>
           </nav>
         </div>
 
         {/* User Profile Card */}
-        <div className="p-4 border-t border-white/20">
+        <div className="p-4 border-t border-slate-200">
           <div className="flex items-center justify-between rounded-xl glass-panel p-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user.name}</p>
-              <p className="text-[10px] text-blue-200 font-medium">Administrator</p>
+              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+              <p className="text-[10px] text-slate-500 font-medium">Administrator</p>
             </div>
             <button
               onClick={logout}
-              className="p-1.5 rounded-lg text-blue-200 hover:text-red-600 hover:bg-red-50 transition"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
               title="Sign Out"
             >
               <LogOut className="size-4" />
@@ -247,12 +254,12 @@ export default function ReturnStation() {
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Kiosk Header */}
-        <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/20 glass-panel px-6 shadow-xl backdrop-blur-md">
+        <header className="sticky top-0 z-20 flex h-16 items-center border-b border-slate-200 glass-panel px-6 shadow-xl backdrop-blur-md">
           <div className="flex w-full items-center justify-between">
             <button
               type="button"
               onClick={() => navigate('/admin')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 hover:text-white transition"
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition"
             >
               <ChevronLeft className="size-4" />
               Admin Overview
@@ -262,7 +269,7 @@ export default function ReturnStation() {
               <div className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white">
                 <Laptop className="size-4" />
               </div>
-              <span className="font-bold tracking-tight text-white text-sm">
+              <span className="font-bold tracking-tight text-slate-900 text-sm">
                 Return Station
               </span>
             </div>
@@ -279,21 +286,21 @@ export default function ReturnStation() {
               {/* Status Views */}
               {returnStatus === 'idle' && (
                 <div className="text-center flex flex-col items-center gap-4">
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-600/10 text-blue-600">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
                     <ScanLine className="size-8 animate-pulse" />
                   </div>
 
-                  <h2 className="text-2xl font-bold text-white">Scan or Enter Return Info</h2>
-                  <p className="text-xs text-blue-200 max-w-sm leading-relaxed">
+                  <h2 className="text-2xl font-bold text-slate-900">Scan or Enter Return Info</h2>
+                  <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
                     Scan the book's accession barcode with the hardware gun scanner, or manually type the details below.
                   </p>
 
                   {/* Form to capture student ID and Accession number */}
-                  <form onSubmit={handleFormSubmit} className="w-full glass-panel bg-white/5 border border-white/20 p-6 rounded-2xl shadow-xl text-left flex flex-col gap-4 mt-4">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Return Station Input</h4>
+                  <form onSubmit={handleFormSubmit} className="w-full glass-panel bg-slate-100 border border-slate-200 p-6 rounded-2xl shadow-xl text-left flex flex-col gap-4 mt-4">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Return Station Input</h4>
 
                     <div>
-                      <label className="text-[10px] font-bold text-blue-200 uppercase">Student User ID</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Student User ID</label>
                       <input
                         ref={studentInputRef}
                         type="text"
@@ -301,12 +308,12 @@ export default function ReturnStation() {
                         placeholder="Enter Student ID (e.g. 1)"
                         value={studentId}
                         onChange={(e) => setStudentId(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2.5 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel"
+                        className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2.5 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-blue-200 uppercase">Accession Number</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Accession Number</label>
                       <input
                         ref={accessionInputRef}
                         type="text"
@@ -314,7 +321,7 @@ export default function ReturnStation() {
                         placeholder="Click here & scan barcode / enter Accession No."
                         value={accessionNumber}
                         onChange={(e) => setAccessionNumber(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/20 glass-input px-3 py-2.5 text-xs text-white outline-none focus:border-indigo-500 focus:glass-panel"
+                        className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2.5 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel"
                       />
                     </div>
 
@@ -340,40 +347,40 @@ export default function ReturnStation() {
               {returnStatus === 'processing' && (
                 <div className="text-center py-12 flex flex-col items-center">
                   <Loader2 className="size-10 text-blue-500 animate-spin" />
-                  <h3 className="font-bold text-white mt-4 text-sm">Processing Kiosk Return...</h3>
-                  <p className="text-xs text-blue-200 mt-1">Syncing transactions and updating inventory database</p>
+                  <h3 className="font-bold text-slate-900 mt-4 text-sm">Processing Kiosk Return...</h3>
+                  <p className="text-xs text-slate-500 mt-1">Syncing transactions and updating inventory database</p>
                 </div>
               )}
 
               {returnStatus === 'success' && successDetails && (
                 <div className="text-center py-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
-                  <div className="flex size-14 items-center justify-center rounded-full bg-green-500/10 text-green-500">
+                  <div className="flex size-14 items-center justify-center rounded-full bg-green-100 text-green-500">
                     <CheckCircle2 className="size-8 animate-pulse" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-white">{successDetails.isExtension ? 'Extension Successful!' : 'Return Successful!'}</h3>
-                  <p className="text-xs text-blue-200 max-w-xs leading-relaxed">
+                  <h3 className="text-lg font-bold text-slate-900">{successDetails.isExtension ? 'Extension Successful!' : 'Return Successful!'}</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
                     {successDetails.isExtension 
                       ? `Book "${successDetails.bookTitle}" has been extended successfully.` 
                       : `Book "${successDetails.bookTitle}" has been checked back in. Inventory copy status reverted to AVAILABLE.`}
                   </p>
 
-                  <div className="w-full glass-panel border border-white/20 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
+                  <div className="w-full glass-panel border border-slate-200 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
                     <div className="flex justify-between">
-                      <span className="text-blue-200">Student</span>
-                      <span className="font-bold text-white">{successDetails.userName}</span>
+                      <span className="text-slate-500">Student</span>
+                      <span className="font-bold text-slate-900">{successDetails.userName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-blue-200">Accession Number</span>
-                      <span className="font-mono text-blue-100 font-bold">{successDetails.accessionNumber}</span>
+                      <span className="text-slate-500">Accession Number</span>
+                      <span className="font-mono text-slate-600 font-bold">{successDetails.accessionNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-blue-200">Borrow Date</span>
+                      <span className="text-slate-500">Borrow Date</span>
                       <span>{new Date(successDetails.requestDate || successDetails.borrowDate).toLocaleDateString()}</span>
                     </div>
                   </div>
 
-                  <span className="text-[10px] text-blue-200 mt-4 animate-pulse">Auto-resetting kiosk screen...</span>
+                  <span className="text-[10px] text-slate-500 mt-4 animate-pulse">Auto-resetting kiosk screen...</span>
                 </div>
               )}
 
@@ -382,7 +389,7 @@ export default function ReturnStation() {
                   <div className="flex size-12 items-center justify-center rounded-full bg-red-50 text-red-500">
                     <AlertCircle className="size-6" />
                   </div>
-                  <h3 className="font-bold text-white">Kiosk Return Blocked</h3>
+                  <h3 className="font-bold text-slate-900">Kiosk Return Blocked</h3>
                   <p className="text-xs text-red-600 bg-red-50 p-3 rounded-xl max-w-sm font-medium">
                     {errorMsg || 'An unknown error occurred while submitting.'}
                   </p>
@@ -400,23 +407,23 @@ export default function ReturnStation() {
           </main>
 
           {/* Kiosk Session History Sidebar */}
-          <aside className="w-full max-w-sm shrink-0 border-t lg:border-t-0 lg:border-l border-white/20 glass-panel p-6 flex flex-col justify-between">
+          <aside className="w-full max-w-sm shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 glass-panel p-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-bold text-white mb-4">Kiosk Session Activity</h3>
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Kiosk Session Activity</h3>
 
               <div className="flex flex-col gap-3 max-h-[480px] overflow-y-auto pr-1">
                 {sessionHistory.length === 0 ? (
-                  <p className="text-blue-200 text-xs py-4 text-center">No books returned in this session.</p>
+                  <p className="text-slate-500 text-xs py-4 text-center">No books returned in this session.</p>
                 ) : (
                   sessionHistory.map((item, idx) => (
-                    <div key={item.id || idx} className="rounded-xl border border-white/20 glass-panel p-3 flex gap-3 text-xs">
+                    <div key={item.id || idx} className="rounded-xl border border-slate-200 glass-panel p-3 flex gap-3 text-xs">
                       <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg font-bold text-[10px] ${item.isExtension ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'}`}>
                         {item.isExtension ? 'EXT' : 'OK'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-white truncate">{item.title}</p>
-                        <p className="text-[10px] text-blue-200 mt-0.5">By: {item.student}</p>
-                        <p className="text-[9px] text-amber-300 mt-1 font-mono">Acc: {item.accessionNumber}</p>
+                        <p className="font-bold text-slate-900 truncate">{item.title}</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">By: {item.student}</p>
+                        <p className="text-[9px] text-amber-600 mt-1 font-mono">Acc: {item.accessionNumber}</p>
                       </div>
                     </div>
                   ))
@@ -424,11 +431,11 @@ export default function ReturnStation() {
               </div>
             </div>
 
-            <div className="border-t border-white/20 pt-4 mt-6">
-              <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Station Status</p>
+            <div className="border-t border-slate-200 pt-4 mt-6">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Station Status</p>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-200">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Kiosk Online
                 </span>
               </div>

@@ -25,6 +25,14 @@ public class BorrowController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/return/preview")
+    public ResponseEntity<com.example.library.dto.response.ReturnPreviewResponse> previewReturn(
+            @RequestParam Long userId,
+            @RequestParam String accessionNumber) {
+        com.example.library.dto.response.ReturnPreviewResponse response = borrowService.previewReturn(userId, accessionNumber);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/return")
     public ResponseEntity<BorrowResponse> returnBook(
             @RequestParam Long userId,

@@ -39,7 +39,7 @@ export default function StudentCatalog() {
       setBooks(res.data)
     } catch (err) {
       console.error('Failed to fetch books:', err)
-      setErrorMsg('Failed to load catalog inventory.')
+      setErrorMsg('Failed to load catalogue inventory.')
     } finally {
       setLoading(false)
     }
@@ -134,18 +134,18 @@ export default function StudentCatalog() {
   })
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col text-white pb-32">
-      <header className="sticky top-0 z-20 border-b border-white/20 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
+    <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
+      <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="BCOE-lib" className="h-8 w-8 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-            <span className="text-xl font-bold tracking-tight text-white">BCOE-lib</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">BCOE-lib</span>
           </div>
           <button
             type="button"
             onClick={logout}
             aria-label="Logout"
-            className="flex size-9 items-center justify-center rounded-full glass-panel text-blue-100 hover:bg-red-50 hover:text-red-600 transition"
+            className="flex size-9 items-center justify-center rounded-full glass-panel text-slate-600 hover:bg-red-50 hover:text-red-600 transition"
           >
             <LogOut className="size-4" />
           </button>
@@ -153,27 +153,27 @@ export default function StudentCatalog() {
       </header>
 
       <main className="mx-auto w-full max-w-md px-4 pt-6 flex flex-col gap-6">
-        <section className="flex flex-col gap-3 glass-panel p-5 rounded-2xl border border-white/20 shadow-xl">
-          <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Library className="size-6 text-blue-400" />
+        <section className="flex flex-col gap-3 glass-panel p-5 rounded-2xl border border-slate-200 shadow-xl">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <Library className="size-6 text-blue-600" />
             Library Catalog
           </h1>
-          <p className="text-xs text-blue-200">Browse book titles and request a copy from the library.</p>
+          <p className="text-xs text-slate-500">Browse book titles and request a copy from the library.</p>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               placeholder="Search by title, author, isbn, branch..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-white/20 glass-input py-3 pl-10 pr-4 text-xs text-white placeholder:text-blue-200 outline-none focus:border-blue-500 transition"
+              className="w-full rounded-xl border border-slate-200 glass-input py-3 pl-10 pr-4 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 transition"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2 mt-1">
             <div className="flex flex-col gap-1">
-              <label className="text-[9px] font-bold text-blue-200 uppercase">Branch</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Branch</label>
               <CustomSelect
                 value={filterBranch}
                 onChange={(val) => setFilterBranch(val)}
@@ -182,7 +182,7 @@ export default function StudentCatalog() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[9px] font-bold text-blue-200 uppercase">Category</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Category</label>
               <CustomSelect
                 value={filterCategory}
                 onChange={(val) => setFilterCategory(val)}
@@ -191,7 +191,7 @@ export default function StudentCatalog() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[9px] font-bold text-blue-200 uppercase">Author</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Author</label>
               <CustomSelect
                 value={filterAuthor}
                 onChange={(val) => setFilterAuthor(val)}
@@ -200,18 +200,18 @@ export default function StudentCatalog() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[9px] font-bold text-blue-200 uppercase">Title</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Title</label>
               <input
                 type="text"
                 value={filterTitle}
                 onChange={(e) => setFilterTitle(e.target.value)}
                 placeholder="Filter by title"
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-[10px] text-white placeholder:text-blue-200 outline-none focus:border-blue-500"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[10px] text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500"
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[9px] font-bold text-blue-200 uppercase">Availability</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Availability</label>
               <CustomSelect
                 value={filterStatus}
                 onChange={(val) => setFilterStatus(val)}
@@ -224,43 +224,43 @@ export default function StudentCatalog() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-2.5">
+          <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-100 px-3 py-2.5">
             <span className="shrink-0 text-base">📋</span>
-            <div className="text-[10px] text-blue-200 leading-relaxed">
-              <span className="font-bold text-blue-100">Rules:</span> Max <span className="font-bold text-white">2 books</span> active &nbsp;•&nbsp; Duration: <span className="font-bold text-white">7 days</span>
+            <div className="text-[10px] text-slate-500 leading-relaxed">
+              <span className="font-bold text-slate-600">Rules:</span> Max <span className="font-bold text-slate-900">2 books</span> active &nbsp;•&nbsp; Duration: <span className="font-bold text-slate-900">7 days</span>
             </div>
           </div>
         </section>
 
         {errorMsg && (
-          <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-            <AlertCircle className="size-4 text-red-400 shrink-0" />
-            <p className="text-xs font-medium text-red-200">{errorMsg}</p>
+          <div className="rounded-xl border border-red-500/50 bg-red-100 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
+            <AlertCircle className="size-4 text-red-600 shrink-0" />
+            <p className="text-xs font-medium text-red-700">{errorMsg}</p>
           </div>
         )}
         {successMsg && (
-          <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-            <CheckCircle2 className="size-4 text-green-400 shrink-0" />
-            <p className="text-xs font-medium text-green-200">{successMsg}</p>
+          <div className="rounded-xl border border-green-500/50 bg-green-100 p-3 flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
+            <CheckCircle2 className="size-4 text-green-600 shrink-0" />
+            <p className="text-xs font-medium text-green-700">{successMsg}</p>
           </div>
         )}
 
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Catalog</h2>
-            <span className="text-xs font-semibold text-blue-200">{filteredBooks.length} Titles</span>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Catalog</h2>
+            <span className="text-xs font-semibold text-slate-500">{filteredBooks.length} Titles</span>
           </div>
 
           {loading ? (
             <div className="flex flex-col items-center py-12">
-              <Loader2 className="size-8 animate-spin text-blue-400" />
-              <p className="text-xs text-blue-200 mt-3 font-medium">Loading catalog...</p>
+              <Loader2 className="size-8 animate-spin text-blue-600" />
+              <p className="text-xs text-slate-500 mt-3 font-medium">Loading catalog...</p>
             </div>
           ) : filteredBooks.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/20 glass-panel px-4 py-12 text-center">
+            <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
               <BookOpen className="size-8 text-blue-200/50 mx-auto mb-3" />
-              <p className="text-sm font-bold text-blue-100">No books found</p>
-              <p className="text-xs text-blue-200 mt-1">Try different filters or search terms</p>
+              <p className="text-sm font-bold text-slate-600">No books found</p>
+              <p className="text-xs text-slate-500 mt-1">Try different filters or search terms</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -270,44 +270,44 @@ export default function StudentCatalog() {
                 return (
                   <div
                     key={book.isbn}
-                    className="rounded-2xl border border-white/20 glass-panel p-5 shadow-xl backdrop-blur-md flex flex-col gap-4"
+                    className="rounded-2xl border border-slate-200 glass-panel p-5 shadow-xl backdrop-blur-md flex flex-col gap-4"
                   >
                     <button
                       type="button"
                       onClick={() => navigate(`/catalog/${encodeURIComponent(book.isbn)}`)}
                       className="flex gap-4 text-left w-full"
                     >
-                      <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-400 border border-blue-500/20">
+                      <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 border border-blue-200">
                         <BookOpen className="size-7" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-white text-base leading-tight truncate">
+                        <h4 className="font-bold text-slate-900 text-base leading-tight truncate">
                           {book.title}
                         </h4>
-                        <p className="text-xs text-blue-200 mt-1 truncate">
+                        <p className="text-xs text-slate-500 mt-1 truncate">
                           {book.author || 'Unknown Author'}
                         </p>
 
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-[10px] text-blue-100">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-[10px] text-slate-600">
                           <div>
-                            <span className="text-blue-300 font-semibold">ISBN:</span>{' '}
+                            <span className="text-slate-400 font-semibold">ISBN:</span>{' '}
                             <span className="font-mono">{book.isbn}</span>
                           </div>
                           {book.edition && (
                             <div>
-                              <span className="text-blue-300 font-semibold">Edition:</span>{' '}
+                              <span className="text-slate-400 font-semibold">Edition:</span>{' '}
                               <span>{book.edition}</span>
                             </div>
                           )}
                           {book.branch && (
                             <div>
-                              <span className="text-blue-300 font-semibold">Branch:</span>{' '}
+                              <span className="text-slate-400 font-semibold">Branch:</span>{' '}
                               <span>{book.branch}</span>
                             </div>
                           )}
                           {book.category && (
                             <div>
-                              <span className="text-blue-300 font-semibold">Category:</span>{' '}
+                              <span className="text-slate-400 font-semibold">Category:</span>{' '}
                               <span>{book.category}</span>
                             </div>
                           )}
@@ -315,11 +315,11 @@ export default function StudentCatalog() {
 
                         <div className="mt-2.5 flex items-center gap-3 text-[10px] font-bold">
                           {isAvailable ? (
-                            <span className="text-green-400 bg-green-400/10 px-2 py-0.5 rounded-md border border-green-400/20">
+                            <span className="text-green-600 bg-green-100 px-2 py-0.5 rounded-md border border-green-400/20">
                               Available
                             </span>
                           ) : (
-                            <span className="text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/20">
+                            <span className="text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
                               Unavailable
                             </span>
                           )}
@@ -356,11 +356,11 @@ export default function StudentCatalog() {
       </main>
 
       <nav className="fixed bottom-4 left-4 right-4 z-30 mx-auto max-w-sm">
-        <div className="flex items-center justify-around rounded-full border border-white/20 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
+        <div className="flex items-center justify-around rounded-full border border-slate-200 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
           <button
             type="button"
             onClick={() => navigate('/student')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <BookOpen className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
@@ -369,7 +369,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/catalog')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-white/25 text-white shadow-lg transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
           >
             <FileText className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
@@ -378,7 +378,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
@@ -387,7 +387,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/student/profile')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-white/65 hover:text-white hover:bg-white/10 transition"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <User className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Profile</span>

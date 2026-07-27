@@ -13,4 +13,6 @@ public interface GateLogRepository extends JpaRepository<GateLog, Long> {
     List<GateLog> findByUserId(Long userId);
     Optional<GateLog> findTopByUserIdAndExitTimeIsNullOrderByEntryTimeDesc(Long userId);
     List<GateLog> findAllByExitTimeIsNull();
+    List<GateLog> findAllByEntryTimeBetweenOrderByEntryTimeDesc(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    long countByExitTimeIsNull();
 }

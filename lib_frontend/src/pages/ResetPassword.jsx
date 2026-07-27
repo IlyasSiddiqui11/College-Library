@@ -52,19 +52,19 @@ export default function ResetPassword() {
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center px-4 py-12">
-      <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />
+      <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-blue-100 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
 
-      <div className="relative w-full max-w-[460px] rounded-2xl border border-white/20 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
+      <div className="relative w-full max-w-[460px] rounded-2xl border border-slate-200 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
         <div className="mb-8 flex flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
             <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover" />
-            <p className="text-2xl font-bold tracking-tight text-white">
+            <p className="text-2xl font-bold tracking-tight text-slate-900">
               BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
             </p>
           </div>
-          <h1 className="text-xl font-bold text-white mt-4">Reset Password</h1>
-          <p className="text-center text-sm text-blue-200 mt-2">
+          <h1 className="text-xl font-bold text-slate-900 mt-4">Reset Password</h1>
+          <p className="text-center text-sm text-slate-500 mt-2">
             Enter your new password below.
           </p>
         </div>
@@ -95,11 +95,11 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 New Password
               </label>
               <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -107,12 +107,12 @@ export default function ResetPassword() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-white/20 glass-input py-3.5 pl-11 pr-10 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-blue-600"
+                  className="w-full rounded-xl border border-slate-200 glass-input py-3.5 pl-11 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600 transition"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -120,11 +120,11 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Confirm Password
               </label>
               <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-blue-200" />
+                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   required
@@ -132,12 +132,12 @@ export default function ResetPassword() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-white/20 glass-input py-3.5 pl-11 pr-10 text-sm text-white placeholder:text-blue-200 outline-none transition focus:border-blue-600"
+                  className="w-full rounded-xl border border-slate-200 glass-input py-3.5 pl-11 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600 transition"
                 >
                   {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>

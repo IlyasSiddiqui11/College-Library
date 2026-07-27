@@ -28,6 +28,8 @@ public class BookResponse {
     private String branch;
     private String category;
     private String language;
+    private String source;
+    private String classificationNumber;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

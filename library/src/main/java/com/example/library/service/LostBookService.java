@@ -14,6 +14,8 @@ import com.example.library.repository.BookRepository;
 import com.example.library.repository.BorrowRequestRepository;
 import com.example.library.repository.LostBookRepository;
 import com.example.library.repository.StudentProfileRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,10 @@ public class LostBookService {
         private final BorrowRequestRepository borrowRequestRepository;
         private final StudentProfileRepository studentProfileRepository;
         private final LostBookRepository lostBookRepository;
+
+        @Lazy
+        @Autowired
+        private FineService fineService;
 
         @Transactional(readOnly = true)
         public LostBookDetailsResponse getLostBookDetails(String accessionNumber) {
@@ -128,20 +134,25 @@ public class LostBookService {
                 // 1. Save LostBook record
                 LostBook savedLostBook = lostBookRepository.save(lostBook);
 
+                // Capture book price before deleting the book entity
+                Double bookPrice = book.getPrice();
+
                 // 2. Update APPROVED Borrow Request status to LOST
                 borrowRequest.setStatus(BorrowStatus.LOST);
                 borrowRequestRepository.save(borrowRequest);
 
-                // 3. Disassociate ALL borrow requests (any status) from this physical book
-                //    to avoid FK constraint violations on delete
-                List<BorrowRequest> allLinked = borrowRequestRepository.findByBookId(book.getId());
-                for (BorrowRequest req : allLinked) {
-                        req.setBook(null);
-                }
-                borrowRequestRepository.saveAll(allLinked);
+                // 3. Update physical book status to LOST
+                book.setStatus("LOST");
+                bookRepository.save(book);
 
-                // 4. Delete physical book record completely from Book table
-                bookRepository.delete(book);
+                // 4. Generate fine
+                try {
+                        fineService.generateLostBookFine(borrowRequest, bookPrice);
+                } catch (Exception e) {
+                        // Log but don't fail the whole operation — fine can be added manually
+                        System.err.println("[LostBookService] Failed to generate fine for lost book: " + e.getMessage());
+                        e.printStackTrace();
+                }
 
                 return savedLostBook;
         }

@@ -18,20 +18,20 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full text-white">
-      <nav className="sticky top-0 z-50 border-b border-white/20 glass-panel backdrop-blur-xl">
+    <div className="w-full text-slate-900">
+      <nav className="sticky top-0 z-50 border-b border-slate-200 glass-panel backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-              <span className="hidden font-bold text-white sm:inline">
+              <span className="font-bold text-slate-900">
                 BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
               </span>
             </div>
 
             <div className="hidden gap-8 md:flex items-center">
-              <a href="#features" className="text-sm font-medium text-blue-100 hover:text-white transition">Features</a>
-              <a href="#workflow" className="text-sm font-medium text-blue-100 hover:text-white transition">Workflow</a>
+              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Features</a>
+              <a href="#workflow" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Workflow</a>
               <Link
                 to="/login"
                 className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
@@ -48,16 +48,16 @@ export default function Home() {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-blue-100 hover:text-white"
+              className="md:hidden p-2 text-slate-600 hover:text-blue-600"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
           {mobileMenuOpen && (
-            <div className="border-t border-white/20 py-4 space-y-3 md:hidden">
-              <a href="#features" className="block text-sm font-medium text-blue-100 hover:text-white">Features</a>
-              <a href="#workflow" className="block text-sm font-medium text-blue-100 hover:text-white">Workflow</a>
+            <div className="border-t border-slate-200 py-4 space-y-3 md:hidden">
+              <a href="#features" className="block text-sm font-medium text-slate-600 hover:text-blue-600">Features</a>
+              <a href="#workflow" className="block text-sm font-medium text-slate-600 hover:text-blue-600">Workflow</a>
               <Link
                 to="/login"
                 className="block rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white text-center hover:bg-blue-700 transition"
@@ -87,11 +87,11 @@ export default function Home() {
             Modern Library Management System
           </div>
 
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             Transform Your Library With <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Digital Innovation</span>
           </h1>
 
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100 sm:text-xl">
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-slate-600 sm:text-xl">
             Seamless book management, intelligent borrowing, QR-based attendance, and real-time inventory tracking. Built for modern academic libraries.
           </p>
 
@@ -112,7 +112,7 @@ export default function Home() {
             </Link>
             <a
               href="#features"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 glass-panel px-8 py-4 text-base font-semibold text-white hover:border-white/30 hover:bg-white/10 transition"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 glass-panel px-8 py-4 text-base font-semibold text-slate-900 hover:border-white/30 hover:bg-slate-100 transition"
             >
               Learn More
             </a>
@@ -123,8 +123,8 @@ export default function Home() {
       <section id="features" className="px-4 py-20 sm:px-6 lg:px-8 glass-panel">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">Powerful Features</h2>
-            <p className="text-lg text-blue-100">Everything you need for modern library management</p>
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 sm:text-4xl">Powerful Features</h2>
+            <p className="text-lg text-slate-600">Everything you need for modern library management</p>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -162,13 +162,13 @@ export default function Home() {
             ].map((feature, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-white/20 glass-panel p-8 shadow-xl hover:shadow-md hover:border-blue-200/50 transition group"
+                className="rounded-xl border border-slate-200 glass-panel p-8 shadow-xl hover:shadow-md hover:border-blue-200/50 transition group"
               >
                 <div className="mb-4 inline-flex rounded-lg bg-gradient-to-br from-blue-100 to-violet-100 p-3 text-blue-600 group-hover:from-blue-200 group-hover:to-violet-200 transition">
                   <feature.icon className="h-6 w-6" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-white">{feature.title}</h3>
-                <p className="text-sm text-blue-100">{feature.desc}</p>
+                <h3 className="mb-2 text-lg font-semibold text-slate-900">{feature.title}</h3>
+                <p className="text-sm text-slate-600">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -178,8 +178,8 @@ export default function Home() {
       <section id="workflow" className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">Student Workflow</h2>
-            <p className="text-lg text-blue-100">From registration to book return in seconds</p>
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 sm:text-4xl">Student Workflow</h2>
+            <p className="text-lg text-slate-600">From registration to book return in seconds</p>
           </div>
 
           <div className="space-y-6">
@@ -196,8 +196,8 @@ export default function Home() {
                   {step.num}
                 </div>
                 <div className="flex-1">
-                  <h3 className="mb-2 text-lg font-semibold text-white">{step.title}</h3>
-                  <p className="text-blue-100">{step.desc}</p>
+                  <h3 className="mb-2 text-lg font-semibold text-slate-900">{step.title}</h3>
+                  <p className="text-slate-600">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -211,16 +211,16 @@ export default function Home() {
           <p className="mb-8 text-lg text-blue-100">Join the BCOE-lib ecosystem and experience modern library management.</p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-xl glass-panel px-8 py-4 text-base font-semibold text-blue-600 shadow-xl hover:bg-white/10 transition"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-blue-600 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20"
           >
             Get Started Now
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </section>
 
-      <footer className="border-t border-white/20 px-4 py-12 sm:px-6 lg:px-8 glass-panel">
-        <div className="mx-auto max-w-6xl text-center text-sm text-blue-100">
+      <footer className="border-t border-slate-200 px-4 py-12 sm:px-6 lg:px-8 glass-panel">
+        <div className="mx-auto max-w-6xl text-center text-sm text-slate-600">
           <p>© 2026 BCOE-lib. Built for modern academic libraries.</p>
         </div>
       </footer>
