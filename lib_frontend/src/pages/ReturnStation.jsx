@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import {
-  ChevronLeft, ScanLine, CheckCircle2,
+  ChevronLeft, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
 , Banknote} from 'lucide-react'
@@ -287,12 +287,12 @@ export default function ReturnStation() {
               {returnStatus === 'idle' && (
                 <div className="text-center flex flex-col items-center gap-4">
                   <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
-                    <ScanLine className="size-8 animate-pulse" />
+                    <Users className="size-8" />
                   </div>
 
-                  <h2 className="text-2xl font-bold text-slate-900">Scan or Enter Return Info</h2>
+                  <h2 className="text-2xl font-bold text-slate-900">Enter Return Info</h2>
                   <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-                    Scan the book's accession barcode with the hardware gun scanner, or manually type the details below.
+                    Enter the Student ID and Accession Number below to process a return or loan extension.
                   </p>
 
                   {/* Form to capture student ID and Accession number */}

@@ -471,16 +471,16 @@ export default function InventoryManagement() {
                   <tr className="border-b border-slate-300 text-slate-500 uppercase tracking-wider bg-slate-100">
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Accession No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">ISBN</th>
-                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Title</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Author</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Title</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Publisher</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Pub. Year</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Edition</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Series</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Pages</th>
-                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Source</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Class. No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Price</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Source</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill Date</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Branch</th>
@@ -507,16 +507,16 @@ export default function InventoryManagement() {
                         <tr key={book.id} className="border-b border-slate-300 hover:bg-slate-50 transition">
                           <td className="py-3 px-3 font-bold text-amber-600 font-mono whitespace-nowrap">{book.accessionNumber}</td>
                           <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">{book.isbn}</td>
-                          <td className="py-3 px-3 font-semibold text-slate-900 max-w-[160px] truncate">{book.title}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.author || '—'}</td>
+                          <td className="py-3 px-3 font-semibold text-slate-900 max-w-[160px] truncate">{book.title}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.publisher || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.publicationYear || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.edition || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.series || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.totalPages || '—'}</td>
-                          <td className="py-3 px-3 text-slate-600">{book.source || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.classificationNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.price != null ? `₹${book.price}` : '—'}</td>
+                          <td className="py-3 px-3 text-slate-600">{book.source || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billDate || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.branch || '—'}</td>
