@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, User, Mail, Phone, GraduationCap, 
-  MapPin, Clock, Loader2, Save, Edit2, History, FileText, Banknote, CheckCircle2
+  MapPin, Clock, Loader2, Save, Edit2, History, FileText, CheckCircle2
 } from 'lucide-react'
 
 export default function StudentProfile() {
@@ -27,7 +27,6 @@ export default function StudentProfile() {
 
   // Statistics & status
   const [borrowRequests, setBorrowRequests] = useState([])
-  const [fines, setFines] = useState([])
   const [attendanceStatus, setAttendanceStatus] = useState({
     insideLibrary: false,
     entryTime: null,
@@ -71,9 +70,7 @@ export default function StudentProfile() {
       const statusRes = await apiClient.get(`/api/gate/status/${user.id}`)
       setAttendanceStatus(statusRes.data)
 
-      // 5. Get fine history
-      const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
-      setFines(finesRes.data || [])
+
     } catch (err) {
       console.error('Error loading profile details:', err)
       if (showLoading) setErrorMsg('Failed to sync profile data. Please try again.')
@@ -391,55 +388,7 @@ export default function StudentProfile() {
               </form>
             </section>
 
-            {/* Fine History Section */}
-            <section className="rounded-2xl border border-slate-200 glass-panel p-5 shadow-xl backdrop-blur-md overflow-hidden">
-              <div className="flex items-center gap-2 pb-4 border-b border-slate-200 mb-4">
-                <Banknote className="size-4 text-blue-600" />
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fine History</h3>
-              </div>
 
-              <div className="flex flex-col gap-4">
-                {fines.length === 0 ? (
-                  <div className="text-center py-6">
-                    <CheckCircle2 className="size-8 text-green-400 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs text-slate-500">You have no recorded fines.</p>
-                  </div>
-                ) : (
-                  fines.map(fine => (
-                    <div key={fine.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold tracking-wider ${
-                          fine.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                          fine.status === 'UNPAID' ? 'bg-red-100 text-red-700' :
-                          'bg-amber-100 text-amber-700'
-                        }`}>
-                          {fine.status}
-                        </span>
-                      </div>
-                      <div className="pr-16">
-                        <p className="text-sm font-bold text-slate-900 truncate" title={fine.bookTitle}>{fine.bookTitle}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Acc#: {fine.accessionNumber}</p>
-                      </div>
-                      
-                      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200/60 pt-3">
-                        <div>
-                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Delayed By</p>
-                          <p className="text-xs font-semibold text-slate-700">{fine.delayDays} Days</p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Fine</p>
-                          <p className="text-xs font-bold text-red-600">₹{fine.totalFine}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Date Generated</p>
-                          <p className="text-[10px] font-medium text-slate-600">{formatDateFull(fine.createdAt)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
           </>
         )}
       </main>

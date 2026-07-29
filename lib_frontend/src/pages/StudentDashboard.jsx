@@ -237,21 +237,7 @@ export default function StudentDashboard() {
     }
   }
 
-  // Extend borrow request
-  const [extendingId, setExtendingId] = useState(null)
-  const handleExtendRequest = async (requestId) => {
-    if (!user) return
-    setExtendingId(requestId)
-    try {
-      await apiClient.post(`/api/borrow/${requestId}/extend?userId=${user.id}`)
-      await fetchData(false)
-      alert('Book extended successfully!')
-    } catch (err) {
-      alert('Extend failed: ' + (err.response?.data?.message || err.message))
-    } finally {
-      setExtendingId(null)
-    }
-  }
+
 
   if (!user) return null
 
@@ -489,20 +475,7 @@ export default function StudentDashboard() {
                           )
                         })()}
                       </div>
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="text-[10px] text-slate-500">
-                          Extended: {req.extensionCount || 0}/2 times
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleExtendRequest(req.id)}
-                          disabled={extendingId === req.id || (req.extensionCount || 0) >= 2}
-                          className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow hover:bg-blue-700 transition disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none flex items-center gap-1"
-                        >
-                          {extendingId === req.id ? <Loader2 className="size-3 animate-spin" /> : null}
-                          Extend
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>

@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   BookMarked
 , Banknote} from 'lucide-react'
+import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function GateLogs() {
   const { user, logout } = useAuth()
@@ -29,10 +30,11 @@ export default function GateLogs() {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('ALL')
-  
+
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [monthlyStats, setMonthlyStats] = useState(null)
+  const [availableMonths, setAvailableMonths] = useState([]) // [{year, month}]
 
   // Admin-only page
   useEffect(() => {
@@ -41,7 +43,25 @@ export default function GateLogs() {
     }
   }, [user, navigate])
 
-  // Fetch gate logs
+  // Fetch available months (past records) once on mount
+  useEffect(() => {
+    const fetchAvailableMonths = async () => {
+      try {
+        const res = await apiClient.get('/api/gate/available-months')
+        setAvailableMonths(res.data || [])
+        // Default to most recent month with records if exists
+        if (res.data && res.data.length > 0) {
+          setSelectedYear(res.data[0].year)
+          setSelectedMonth(res.data[0].month)
+        }
+      } catch (err) {
+        console.error('Failed to fetch available months:', err)
+      }
+    }
+    fetchAvailableMonths()
+  }, [])
+
+  // Fetch logs when month/year changes
   useEffect(() => {
     fetchLogs()
   }, [selectedMonth, selectedYear])
@@ -91,7 +111,33 @@ export default function GateLogs() {
 
   // Calculate statistics
   const totalStudents = new Set(logs.map((l) => l.userId)).size
-  
+
+  // ── Smart year/month options ─────────────────────────────────────
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  // Years: all years with records + next year
+  const recordYears = [...new Set(availableMonths.map(m => m.year))]
+  const yearOptions = [...new Set([...recordYears, currentYear, currentYear + 1])]
+    .sort((a, b) => b - a)
+    .map(y => ({ value: y, label: String(y) }))
+
+  // Months for selectedYear:
+  //  - past/current year: months with records + upcoming months up to current+3
+  //  - future year: all months (upcoming)
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const recordMonthsForYear = new Set(
+    availableMonths.filter(m => m.year === selectedYear).map(m => m.month)
+  )
+  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1)
+    .filter(m => {
+      if (selectedYear < currentYear) return recordMonthsForYear.has(m)
+      if (selectedYear === currentYear) return recordMonthsForYear.has(m) || m <= currentMonth + 3
+      return true // future year: show all
+    })
+    .map(m => ({ value: m, label: MONTH_NAMES[m - 1] }))
+
   // Format Date Helper: 26 May 2026, 10:45 AM
   const formatDateFull = (dateString) => {
     if (!dateString) return 'N/A'
@@ -345,24 +391,18 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
-              <select
+              <CustomSelect
                 value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium transition glass-panel text-slate-700 border border-slate-200 focus:outline-none focus:border-blue-500"
-              >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('default', { month: 'long' })}</option>
-                ))}
-              </select>
-              <select
+                onChange={(val) => setSelectedMonth(Number(val))}
+                options={monthOptions}
+                className="w-36"
+              />
+              <CustomSelect
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium transition glass-panel text-slate-700 border border-slate-200 focus:outline-none focus:border-blue-500"
-              >
-                {[2023, 2024, 2025, 2026, 2027].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedYear(Number(val))}
+                options={yearOptions}
+                className="w-24"
+              />
               {['ALL', 'INSIDE', 'OUTSIDE'].map((type) => (
                 <button
                   key={type}

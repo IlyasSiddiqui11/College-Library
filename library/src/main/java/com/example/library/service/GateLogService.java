@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -177,5 +178,12 @@ public class GateLogService {
             log.setExitTime(exitTime);
         }
         gateLogRepository.saveAll(activeLogs);
+    }
+
+    public List<Map<String, Integer>> getAvailableMonths() {
+        List<int[]> rows = gateLogRepository.findDistinctYearMonths();
+        return rows.stream()
+                .map(row -> Map.of("year", row[0], "month", row[1]))
+                .collect(Collectors.toList());
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Mail, AlertTriangle, Loader2, X } from 'lucide-react'
 import { apiClient } from '../api/client'
 
@@ -7,6 +7,27 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+
+  // Lock body scroll when modal open to prevent layout shift (mobile keyboard)
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+    } else {
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, parseInt(scrollY || '0') * -1)
+    }
+    return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -48,7 +69,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         </p>
 
         {error && (
-          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-100/20 bg-red-100 p-3 text-xs font-medium text-red-200">
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
             <AlertTriangle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -59,7 +80,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
             <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-green-500/20 text-green-600">
               <Mail className="size-5" />
             </div>
-            <p className="text-sm font-medium text-green-200 mb-4">
+            <p className="text-sm font-medium text-green-800 mb-4">
               Check your email! A reset link has been sent to {email}
             </p>
             <button

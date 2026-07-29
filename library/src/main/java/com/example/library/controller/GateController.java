@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gate")
@@ -64,5 +65,10 @@ public class GateController {
             @RequestParam int month) {
         com.example.library.dto.response.MonthlyGateStatsResponse response = gateLogService.getMonthlyStats(year, month);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/available-months")
+    public ResponseEntity<List<Map<String, Integer>>> getAvailableMonths() {
+        return ResponseEntity.ok(gateLogService.getAvailableMonths());
     }
 }

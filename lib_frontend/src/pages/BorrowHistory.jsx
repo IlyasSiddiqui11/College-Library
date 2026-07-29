@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, Search, Clock, CheckCircle2, 
-  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText
+  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText, Banknote
 } from 'lucide-react'
 
 export default function BorrowHistory() {
@@ -12,9 +12,10 @@ export default function BorrowHistory() {
   const navigate = useNavigate()
 
   // State
-  const [activeTab, setActiveTab] = useState('history') // 'history' or 'reservations'
+  const [activeTab, setActiveTab] = useState('history') // 'history', 'reservations', 'fines'
   const [borrowRequests, setBorrowRequests] = useState([])
   const [reservations, setReservations] = useState([])
+  const [fines, setFines] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
@@ -31,12 +32,14 @@ export default function BorrowHistory() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      const [historyRes, resRes] = await Promise.all([
+      const [historyRes, resRes, finesRes] = await Promise.all([
         apiClient.get(`/api/borrow/user/${user.id}`),
-        apiClient.get(`/api/reservations/user/${user.id}`)
+        apiClient.get(`/api/reservations/user/${user.id}`),
+        apiClient.get(`/api/fines/user/${user.id}`)
       ])
       setBorrowRequests(historyRes.data)
       setReservations(resRes.data)
+      setFines(finesRes.data || [])
     } catch (err) {
       console.error('Error fetching data:', err)
     } finally {
@@ -118,6 +121,7 @@ export default function BorrowHistory() {
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
   const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
+  const unpaidFines = fines.filter(f => f.status === 'UNPAID').length
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
@@ -154,7 +158,7 @@ export default function BorrowHistory() {
         </section>
 
         {/* Dynamic Statistics Grid */}
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-4 gap-2">
           <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
             <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Award className="size-4" />
@@ -168,7 +172,7 @@ export default function BorrowHistory() {
               <BookOpen className="size-4" />
             </div>
             <p className="text-lg font-bold text-slate-900">{currentReading}</p>
-            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Active Borrows</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Active</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
@@ -176,7 +180,15 @@ export default function BorrowHistory() {
               <BookMarked className="size-4" />
             </div>
             <p className="text-lg font-bold text-slate-900">{pendingReservations}</p>
-            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Reservations</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Reserved</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-red-50 text-red-500">
+              <Banknote className="size-4" />
+            </div>
+            <p className={`text-lg font-bold ${unpaidFines > 0 ? 'text-red-600' : 'text-slate-900'}`}>{unpaidFines}</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Unpaid</p>
           </div>
         </section>
 
@@ -192,7 +204,13 @@ export default function BorrowHistory() {
             onClick={() => setActiveTab('reservations')}
             className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'reservations' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
           >
-            Active Reservations
+            Reservations
+          </button>
+          <button
+            onClick={() => setActiveTab('fines')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'fines' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-500 hover:text-red-500'}`}
+          >
+            Fines {unpaidFines > 0 && <span className="ml-1 inline-block rounded-full bg-white/30 px-1.5 text-[9px]">{unpaidFines}</span>}
           </button>
         </div>
 
@@ -237,6 +255,56 @@ export default function BorrowHistory() {
               <Loader2 className="size-8 text-blue-500 animate-spin" />
               <span className="text-xs text-slate-500 mt-3">Syncing history catalog...</span>
             </div>
+          ) : activeTab === 'fines' ? (
+            fines.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
+                <CheckCircle2 className="size-8 text-green-400 mx-auto mb-2 opacity-60" />
+                <p className="text-sm font-semibold text-slate-600">No fines recorded</p>
+                <p className="text-xs text-slate-500 mt-1">You have a clean borrowing record!</p>
+              </div>
+            ) : (
+              fines.map(fine => (
+                <div key={fine.id} className={`rounded-2xl border p-4 shadow-sm ${
+                  fine.status === 'UNPAID' ? 'bg-red-50 border-red-100' :
+                  fine.status === 'PAID'   ? 'bg-green-50 border-green-100' :
+                  'bg-amber-50 border-amber-100'
+                }`}>
+                  <div className="flex gap-4">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/50 border border-black/5 text-red-400">
+                      <Banknote className="size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between">
+                        <h4 className="font-bold text-slate-900 text-sm truncate pr-2">{fine.bookTitle}</h4>
+                        <span className={`shrink-0 flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                          fine.status === 'PAID'   ? 'bg-green-100 text-green-800' :
+                          fine.status === 'UNPAID' ? 'bg-red-100 text-red-800' :
+                          'bg-amber-100 text-amber-800'
+                        }`}>
+                          {fine.status === 'PAID' ? <CheckCircle2 className="size-2.5" /> : <Clock className="size-2.5" />}
+                          {fine.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">Acc#: {fine.accessionNumber}</p>
+                      <div className="mt-3 flex flex-col gap-1 border-t border-black/5 pt-2.5 text-[10px] font-medium text-slate-500">
+                        <div className="flex justify-between">
+                          <span>Delayed By</span>
+                          <span className="font-bold text-orange-600">{fine.delayDays} days</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Fine Amount</span>
+                          <span className="font-bold text-red-600">₹{fine.totalFine}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Generated On</span>
+                          <span className="text-slate-700">{formatDate(fine.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )
           ) : activeTab === 'history' && filteredItems.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
               <p className="text-sm font-semibold text-slate-600">No matching logs found</p>
