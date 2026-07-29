@@ -181,6 +181,12 @@ public class BorrowService {
                     dueDate);
         }
 
+        // Check if there are no more available copies left for this ISBN, and convert other pending requests to reservations
+        long availableCopies = bookRepository.findAllByIsbnAndStatus(requestIsbn, "AVAILABLE").size();
+        if (availableCopies == 0 && requestIsbn != null) {
+            bookReservationService.convertPendingRequestsToReservations(requestIsbn);
+        }
+
         return mapToBorrowResponse(approvedRequest, selectedCopy);
     }
 
