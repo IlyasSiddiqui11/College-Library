@@ -6,6 +6,11 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
 }
 
 html {
