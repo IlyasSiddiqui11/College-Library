@@ -1,2 +1,5 @@
 library/data/
 test_login.json
+
+# Environment variables
+.env
