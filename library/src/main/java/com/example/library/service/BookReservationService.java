@@ -241,6 +241,14 @@ public class BookReservationService {
         }
     }
 
+    public long countPendingReservations(Long userId) {
+        return bookReservationRepository.countByUserIdAndStatus(userId, ReservationStatus.PENDING);
+    }
+
+    public boolean hasPendingReservation(Long userId, String isbn) {
+        return bookReservationRepository.existsByUserIdAndIsbnAndStatus(userId, isbn, ReservationStatus.PENDING);
+    }
+
     private String resolveIsbn(BorrowRequest request) {
         if (request.getIsbn() != null && !request.getIsbn().isBlank()) {
             return request.getIsbn().trim();

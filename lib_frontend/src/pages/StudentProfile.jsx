@@ -69,8 +69,6 @@ export default function StudentProfile() {
       // 4. Get gate attendance status
       const statusRes = await apiClient.get(`/api/gate/status/${user.id}`)
       setAttendanceStatus(statusRes.data)
-
-
     } catch (err) {
       console.error('Error loading profile details:', err)
       if (showLoading) setErrorMsg('Failed to sync profile data. Please try again.')
@@ -188,7 +186,7 @@ export default function StudentProfile() {
           <>
             {/* Header Avatar and Basic Info */}
             <section className="rounded-2xl border border-slate-200 glass-panel p-6 shadow-xl backdrop-blur-md flex flex-col items-center gap-4 text-center">
-              <div className="flex size-20 items-center justify-center rounded-3xl bg-blue-600 text-white font-bold text-3xl shadow-xl shadow-blue-600/10">
+              <div className="flex size-24 items-center justify-center rounded-full bg-blue-600 text-white font-semibold text-3xl shadow-md ring-4 ring-white">
                 {name?.slice(0, 2).toUpperCase() || 'ST'}
               </div>
               <div>
@@ -387,8 +385,6 @@ export default function StudentProfile() {
                 )}
               </form>
             </section>
-
-
           </>
         )}
       </main>

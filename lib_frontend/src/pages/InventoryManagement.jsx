@@ -297,7 +297,7 @@ export default function InventoryManagement() {
 
   const handleExport = () => {
     const headers = ['ID', 'Accession Number', 'ISBN', 'Title', 'Author', 'Publisher', 'Publication Year', 'Edition', 'Series',
-      'Total Pages', 'Source', 'Classification Number', 'Price', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
+      'Total Pages', 'Classification Number', 'Price', 'Source', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
     const csvRows = [
       headers.join(','),
       ...filteredBooks.map(book => [
@@ -311,9 +311,9 @@ export default function InventoryManagement() {
         `"${(book.edition || '').replace(/"/g, '""')}"`,
         `"${(book.series || '').replace(/"/g, '""')}"`,
         `"${book.totalPages || ''}"`,
-        `"${(book.source || '').replace(/"/g, '""')}"`,
         `"${(book.classificationNumber || '').replace(/"/g, '""')}"`,
         `"${book.price || ''}"`,
+        `"${(book.source || '').replace(/"/g, '""')}"`,
         `"${book.billNumber || ''}"`,
         `"${book.billDate || ''}"`,
         `"${book.branch || ''}"`,
@@ -471,8 +471,8 @@ export default function InventoryManagement() {
                   <tr className="border-b border-slate-300 text-slate-500 uppercase tracking-wider bg-slate-100">
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Accession No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">ISBN</th>
-                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Author</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Title</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Author</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Publisher</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Pub. Year</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Edition</th>
@@ -507,8 +507,8 @@ export default function InventoryManagement() {
                         <tr key={book.id} className="border-b border-slate-300 hover:bg-slate-50 transition">
                           <td className="py-3 px-3 font-bold text-amber-600 font-mono whitespace-nowrap">{book.accessionNumber}</td>
                           <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">{book.isbn}</td>
-                          <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.author || '—'}</td>
                           <td className="py-3 px-3 font-semibold text-slate-900 max-w-[160px] truncate">{book.title}</td>
+                          <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.author || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.publisher || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.publicationYear || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.edition || '—'}</td>

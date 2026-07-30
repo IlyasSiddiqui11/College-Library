@@ -26,7 +26,7 @@ public class FineResponse {
     private FineStatus status;
     private String verifiedBy;
     private LocalDateTime verificationDate;
-    private String remarks;
+    private String billNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

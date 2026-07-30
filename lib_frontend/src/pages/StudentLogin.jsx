@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { Mail, Lock, User, BookOpen, AlertTriangle, Loader2, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, User, BookOpen, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 
 export default function StudentLogin() {
@@ -62,7 +62,7 @@ export default function StudentLogin() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center px-4 py-12 bg-[#f8fafc]"
+      className="relative flex min-h-screen w-full overflow-x-hidden items-center justify-center px-4 py-12 bg-[#f8fafc]"
     >
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-blue-100 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
@@ -111,14 +111,14 @@ export default function StudentLogin() {
           </div>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-700">
-              <AlertTriangle className="size-4 shrink-0 text-red-500" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
+              <AlertTriangle className="size-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
           {successMsg && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-green-100 bg-green-50 p-4 text-xs font-medium text-green-700">
-              <div className="size-2 mt-1 rounded-full bg-green-500" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-green-200 bg-green-50 p-4 text-xs font-medium text-green-900">
+              <CheckCircle className="size-4 shrink-0 mt-0.5" />
               <span>{successMsg}</span>
             </div>
           )}

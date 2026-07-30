@@ -250,7 +250,7 @@ export default function BookScanner() {
               <div className="mt-4 border-t border-slate-200 pt-4 flex flex-col gap-2.5 text-xs text-left">
                 <div className="flex justify-between">
                   <span className="text-slate-500">ISBN-13 Code</span>
-                  <span className="font-semibold text-slate-200 font-mono">{bookDetails.isbn}</span>
+                  <span className="font-semibold text-slate-800 font-mono">{bookDetails.isbn}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Availability</span>

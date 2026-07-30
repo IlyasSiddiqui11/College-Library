@@ -55,8 +55,8 @@ public class Fine {
     @Column(name = "verification_date")
     private LocalDateTime verificationDate;
 
-    @Column(name = "remarks", columnDefinition = "TEXT")
-    private String remarks;
+    @Column(name = "bill_number", length = 15)
+    private String billNumber;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

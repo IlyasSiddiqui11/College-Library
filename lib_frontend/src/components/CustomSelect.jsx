@@ -33,7 +33,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500"
+        className="w-full flex items-center justify-between rounded-lg border border-slate-300 bg-white shadow-sm px-3 py-2 text-xs text-slate-900 outline-none hover:bg-slate-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
       >
         <span className="truncate mr-2">
           {selectedOption ? selectedOption.label : placeholder}

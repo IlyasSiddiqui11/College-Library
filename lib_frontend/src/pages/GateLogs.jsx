@@ -30,6 +30,7 @@ export default function GateLogs() {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('ALL')
+  const [branchFilter, setBranchFilter] = useState('ALL')
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -105,9 +106,14 @@ export default function GateLogs() {
     const matchesSearch =
       (log.userName || '').toLowerCase().includes(q) ||
       (log.userEmail || '').toLowerCase().includes(q)
-    const matchesFilter = filterBy === 'ALL' || log.status === filterBy
-    return matchesSearch && matchesFilter
+    const matchesStatus = filterBy === 'ALL' || log.status === filterBy
+    const matchesBranch = branchFilter === 'ALL' || log.branch === branchFilter
+    return matchesSearch && matchesStatus && matchesBranch
   })
+
+  // Calculate unique branch options
+  const uniqueBranches = [...new Set(logs.map(log => log.branch).filter(b => b && b !== 'N/A'))].sort()
+  const branchOptions = ['ALL', ...uniqueBranches].map(b => ({ value: b, label: b }))
 
   // Calculate statistics
   const totalStudents = new Set(logs.map((l) => l.userId)).size
@@ -117,26 +123,25 @@ export default function GateLogs() {
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
 
-  // Years: all years with records + next year
+  // Years: all years with records
   const recordYears = [...new Set(availableMonths.map(m => m.year))]
-  const yearOptions = [...new Set([...recordYears, currentYear, currentYear + 1])]
-    .sort((a, b) => b - a)
-    .map(y => ({ value: y, label: String(y) }))
+  const yearOptions = recordYears.length > 0 
+    ? recordYears.sort((a, b) => b - a).map(y => ({ value: y, label: String(y) }))
+    : [{ value: currentYear, label: String(currentYear) }]
 
   // Months for selectedYear:
-  //  - past/current year: months with records + upcoming months up to current+3
-  //  - future year: all months (upcoming)
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
   const recordMonthsForYear = new Set(
     availableMonths.filter(m => m.year === selectedYear).map(m => m.month)
   )
   const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1)
-    .filter(m => {
-      if (selectedYear < currentYear) return recordMonthsForYear.has(m)
-      if (selectedYear === currentYear) return recordMonthsForYear.has(m) || m <= currentMonth + 3
-      return true // future year: show all
-    })
+    .filter(m => recordMonthsForYear.has(m))
     .map(m => ({ value: m, label: MONTH_NAMES[m - 1] }))
+
+  // Fallback if no records found for selected year (e.g. brand new system)
+  if (monthOptions.length === 0) {
+    monthOptions.push({ value: currentMonth, label: MONTH_NAMES[currentMonth - 1] })
+  }
 
   // Format Date Helper: 26 May 2026, 10:45 AM
   const formatDateFull = (dateString) => {
@@ -391,6 +396,12 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
+              <CustomSelect
+                value={branchFilter}
+                onChange={(val) => setBranchFilter(val)}
+                options={branchOptions}
+                className="w-32"
+              />
               <CustomSelect
                 value={selectedMonth}
                 onChange={(val) => setSelectedMonth(Number(val))}

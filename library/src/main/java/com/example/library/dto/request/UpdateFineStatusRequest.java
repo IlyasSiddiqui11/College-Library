@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class UpdateFineStatusRequest {
     private FineStatus status;
-    private String remarks;
+    private String billNumber;
 }

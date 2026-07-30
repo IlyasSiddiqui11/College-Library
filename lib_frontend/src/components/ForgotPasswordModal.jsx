@@ -69,18 +69,18 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         </p>
 
         {error && (
-          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-900">
             <AlertTriangle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success ? (
-          <div className="rounded-xl border border-green-100/20 bg-green-100 p-4 text-center">
-            <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-green-500/20 text-green-600">
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-center">
+            <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-green-100 text-green-700">
               <Mail className="size-5" />
             </div>
-            <p className="text-sm font-medium text-green-800 mb-4">
+            <p className="text-sm font-medium text-green-900 mb-4">
               Check your email! A reset link has been sent to {email}
             </p>
             <button

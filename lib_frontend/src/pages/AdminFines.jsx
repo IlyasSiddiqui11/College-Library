@@ -17,7 +17,7 @@ export default function AdminFines() {
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
   const [actionLoadingId, setActionLoadingId] = useState(null)
-  const [remarks, setRemarks] = useState({})
+  const [billNumbers, setBillNumbers] = useState({})
 
   useEffect(() => {
     if (!user) {
@@ -50,10 +50,16 @@ export default function AdminFines() {
   const handleMarkAsPaid = async (fineId) => {
     setActionLoadingId(fineId)
     try {
-      const fineRemarks = remarks[fineId] || ''
+      const fineBillNumber = billNumbers[fineId] || ''
+      if (!fineBillNumber) {
+        throw new Error("Bill Number is required")
+      }
+      if (fineBillNumber.length > 15) {
+        throw new Error("Bill Number must not exceed 15 digits")
+      }
       await apiClient.put(`/api/fines/${fineId}/status?adminName=${encodeURIComponent(user.name)}`, {
         status: 'PAID',
-        remarks: fineRemarks
+        billNumber: fineBillNumber
       })
       await fetchFines()
     } catch (err) {
@@ -63,8 +69,10 @@ export default function AdminFines() {
     }
   }
 
-  const handleRemarksChange = (id, val) => {
-    setRemarks(prev => ({ ...prev, [id]: val }))
+  const handleBillNumberChange = (id, val) => {
+    // only allow digits, up to 15
+    const digitsOnly = val.replace(/\D/g, '').slice(0, 15)
+    setBillNumbers(prev => ({ ...prev, [id]: digitsOnly }))
   }
 
   if (!user) return null
@@ -97,7 +105,7 @@ export default function AdminFines() {
     .reduce((sum, f) => sum + (f.totalFine || 0), 0)
 
   const handleExport = () => {
-    const headers = ['Fine ID', 'Student', 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date']
+    const headers = ['Fine ID', 'Student', 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date', 'Bill Number']
     const csvRows = [
       headers.join(','),
       ...filteredFines.map(fine => {
@@ -112,7 +120,8 @@ export default function AdminFines() {
           `"${fine.totalFine || 0}"`,
           `"${fine.status}"`,
           `"${fine.verifiedBy || ''}"`,
-          `"${fine.verificationDate ? new Date(fine.verificationDate).toLocaleString() : ''}"`
+          `"${fine.verificationDate ? new Date(fine.verificationDate).toLocaleString() : ''}"`,
+          `"${fine.billNumber || ''}"`
         ].join(',')
       })
     ]
@@ -397,15 +406,16 @@ export default function AdminFines() {
                               <>
                                 <input 
                                   type="text" 
-                                  placeholder="Remarks (optional)" 
+                                  placeholder="Bill Number (Max 15)" 
+                                  maxLength={15}
                                   className="text-[10px] px-2 py-1 rounded border border-slate-200 w-32"
-                                  value={remarks[fine.id] || ''}
-                                  onChange={(e) => handleRemarksChange(fine.id, e.target.value)}
+                                  value={billNumbers[fine.id] || ''}
+                                  onChange={(e) => handleBillNumberChange(fine.id, e.target.value)}
                                 />
                                 <button
                                   disabled={actionLoadingId === fine.id}
                                   onClick={() => handleMarkAsPaid(fine.id)}
-                                  className="flex items-center justify-center gap-1.5 rounded bg-green-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-green-700 disabled:opacity-50"
+                                  className="flex items-center justify-center gap-1.5 rounded bg-green-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-green-700 disabled:opacity-50 mt-1"
                                 >
                                   {actionLoadingId === fine.id ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}
                                   Mark Paid
@@ -415,6 +425,7 @@ export default function AdminFines() {
                               <div className="text-[9px] text-slate-500 text-center">
                                 <p>Verified by {fine.verifiedBy}</p>
                                 <p>{new Date(fine.verificationDate).toLocaleDateString()}</p>
+                                {fine.billNumber && <p className="font-bold text-slate-700 mt-0.5">Bill: {fine.billNumber}</p>}
                               </div>
                             )}
                           </div>

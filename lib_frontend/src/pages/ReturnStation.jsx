@@ -318,7 +318,7 @@ export default function ReturnStation() {
                         ref={accessionInputRef}
                         type="text"
                         required
-                        placeholder="Click here & scan barcode / enter Accession No."
+                        placeholder="Enter Accession No."
                         value={accessionNumber}
                         onChange={(e) => setAccessionNumber(e.target.value)}
                         className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2.5 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel"
