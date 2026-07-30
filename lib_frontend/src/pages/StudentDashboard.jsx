@@ -561,10 +561,10 @@ export default function StudentDashboard() {
             )}
 
             {/* Reservations */}
-            {!loading && reservations.length > 0 && (
+            {!loading && reservations.filter(r => r.status === 'PENDING').length > 0 && (
               <div className="flex flex-col gap-2 mt-2">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Waitlist Reservations ({reservations.length})</p>
-                {reservations.map((req) => (
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Waitlist Reservations ({reservations.filter(r => r.status === 'PENDING').length})</p>
+                {reservations.filter(r => r.status === 'PENDING').map((req) => (
                   <div key={`res-${req.id}`} className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 flex justify-between items-center text-xs">
                     <div className="min-w-0 flex-1 pr-4">
                       <p className="font-semibold text-slate-900 truncate">{req.bookTitle || 'Unknown Title'}</p>
