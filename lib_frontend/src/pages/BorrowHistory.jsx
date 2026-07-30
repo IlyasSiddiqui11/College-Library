@@ -121,6 +121,7 @@ export default function BorrowHistory() {
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
   const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
+  const pendingFinesAmount = fines.filter(f => f.status === 'UNPAID').reduce((sum, f) => sum + (f.fineAmount || 0), 0)
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
@@ -157,7 +158,7 @@ export default function BorrowHistory() {
         </section>
 
         {/* Dynamic Statistics Grid */}
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
             <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Award className="size-4" />
@@ -180,6 +181,14 @@ export default function BorrowHistory() {
             </div>
             <p className="text-lg font-bold text-slate-900">{pendingReservations}</p>
             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Reservations</p>
+          </div>
+          
+          <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <p className="text-lg font-bold text-slate-900">₹{pendingFinesAmount}</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Pending Fine</p>
           </div>
         </section>
 

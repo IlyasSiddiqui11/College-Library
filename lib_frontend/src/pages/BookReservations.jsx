@@ -247,7 +247,7 @@ export default function BookReservations() {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-[10px]">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-full pfp-circle bg-blue-600 text-white font-bold text-[10px]">
                               {(r.user?.name || 'ST').slice(0, 2).toUpperCase()}
                             </div>
                             <div>
