@@ -18,6 +18,8 @@ import java.util.List;
 public class BookCreateRequest {
 
     @NotBlank(message = "ISBN is required")
+    @com.example.library.validation.ValidIsbn
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = com.example.library.validation.IsbnDeserializer.class)
     private String isbn;
 
     @NotBlank(message = "Title is required")

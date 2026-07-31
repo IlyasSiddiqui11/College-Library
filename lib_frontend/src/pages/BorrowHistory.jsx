@@ -253,7 +253,7 @@ export default function BorrowHistory() {
           {loading ? (
             <div className="flex flex-col items-center py-12 text-center">
               <Loader2 className="size-8 text-blue-500 animate-spin" />
-              <span className="text-xs text-slate-500 mt-3">Syncing history catalog...</span>
+              <span className="text-xs text-slate-500 mt-3">Syncing history catalogue...</span>
             </div>
           ) : activeTab === 'history' && filteredItems.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
@@ -488,7 +488,7 @@ export default function BorrowHistory() {
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalogue</span>
           </button>
 
           <button

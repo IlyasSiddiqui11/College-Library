@@ -249,7 +249,7 @@ export default function AdminDashboard() {
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 System Overview
               </h1>
-              <p className="text-xs text-slate-500 mt-0.5">Live academic catalog and gate metrics</p>
+              <p className="text-xs text-slate-500 mt-0.5">Live academic catalogue and gate metrics</p>
             </div>
 
             <div className="flex items-center gap-4">

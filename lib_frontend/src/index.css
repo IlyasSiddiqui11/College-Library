@@ -52,10 +52,11 @@ body {
 }
 
 .glass-input {
-  background: #f1f5f9;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   color: #0f172a;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  accent-color: #3b82f6; /* matches calendar and native inputs to the blue theme */
 }
 
 .glass-input::placeholder {

@@ -102,7 +102,7 @@ export default function BookDetails() {
             className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition"
           >
             <ChevronLeft className="size-4" />
-            Catalog
+            Catalogue
           </button>
           <span className="text-sm font-bold tracking-wider uppercase text-blue-600">Book Details</span>
           <div className="size-6 opacity-0" />
@@ -119,7 +119,7 @@ export default function BookDetails() {
           <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
             <BookOpen className="size-8 text-blue-200/50 mx-auto mb-3" />
             <p className="text-sm font-bold text-slate-600">Book not found</p>
-            <p className="text-xs text-slate-500 mt-1">{errorMsg || 'This title is not in the catalog.'}</p>
+            <p className="text-xs text-slate-500 mt-1">{errorMsg || 'This title is not in the catalogue.'}</p>
           </div>
         ) : (
           <>

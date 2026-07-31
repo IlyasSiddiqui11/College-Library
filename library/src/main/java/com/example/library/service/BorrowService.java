@@ -428,33 +428,7 @@ public class BorrowService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public BorrowResponse extendBorrow(Long requestId, Long userId) {
-        BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Borrow request not found"));
 
-        if (!request.getUser().getId().equals(userId)) {
-            throw new BadRequestException("You can only extend your own borrowed books");
-        }
-
-        if (request.getStatus() != BorrowStatus.APPROVED) {
-            throw new BadRequestException("Only approved (active) borrows can be extended");
-        }
-
-        if (request.getExtensionCount() >= 2) {
-            throw new BadRequestException("You can only extend a book up to 2 times");
-        }
-
-        LocalDateTime newDueDate = request.getDueDate() != null 
-            ? request.getDueDate().plusDays(7) 
-            : request.getApprovedDate().plusDays(7).plusDays(7);
-            
-        request.setDueDate(newDueDate);
-        request.setExtensionCount(request.getExtensionCount() + 1);
-        
-        BorrowRequest saved = borrowRequestRepository.save(request);
-        return mapToBorrowResponse(saved, saved.getBook());
-    }
 
     private String resolveIsbn(BorrowRequest request) {
         if (request.getIsbn() != null && !request.getIsbn().isBlank()) {

@@ -406,7 +406,7 @@ export default function StudentProfile() {
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalogue</span>
           </button>
 
           <button
