@@ -8,7 +8,7 @@ import {
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentCatalog() {
-  const { user, profile, logout } = useAuth()
+  const { user, profile, hasFine, logout } = useAuth()
   const navigate = useNavigate()
 
   const [books, setBooks] = useState([])
@@ -378,7 +378,7 @@ export default function StudentCatalog() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
+            className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition ${hasFine ? 'text-red-600 animate-pulse hover:bg-red-50' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-100'}`}
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>

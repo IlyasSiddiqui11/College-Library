@@ -18,17 +18,19 @@ public class EmailService {
     private String fromEmail;
 
     public void sendEmail(String to, String subject, String body) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromEmail);
+                message.setTo(to);
+                message.setSubject(subject);
+                message.setText(body);
 
-            mailSender.send(message);
-            log.info("Email sent successfully to {}", to);
-        } catch (Exception e) {
-            log.error("Failed to send email to {}: {}", to, e.getMessage());
-        }
+                mailSender.send(message);
+                log.info("Email sent successfully to {}", to);
+            } catch (Exception e) {
+                log.error("Failed to send email to {}: {}", to, e.getMessage());
+            }
+        });
     }
 }

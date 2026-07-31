@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 
 export default function BorrowHistory() {
-  const { user } = useAuth()
+  const { user, hasFine } = useAuth()
   const navigate = useNavigate()
 
   // State
@@ -121,7 +121,8 @@ export default function BorrowHistory() {
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
   const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
-  const pendingFinesAmount = fines.filter(f => f.status === 'UNPAID').reduce((sum, f) => sum + (f.fineAmount || 0), 0)
+  const pendingFinesAmount = fines.filter(f => f.status === 'PENDING').reduce((sum, f) => sum + (f.totalFine || 0), 0)
+  const userHasFine = hasFine || pendingFinesAmount > 0
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
@@ -208,9 +209,12 @@ export default function BorrowHistory() {
           </button>
           <button
             onClick={() => setActiveTab('fines')}
-            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'fines' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition relative ${activeTab === 'fines' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
           >
             Fine History
+            {pendingFinesAmount > 0 && (
+              <span className="absolute top-2 right-4 size-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+            )}
           </button>
         </div>
 
@@ -494,7 +498,7 @@ export default function BorrowHistory() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
+            className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition ${userHasFine ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-slate-100 text-blue-600'}`}
           >
             <HistoryIcon className="size-5" />
             <span className="text-[9px] font-bold uppercase tracking-wider">History</span>

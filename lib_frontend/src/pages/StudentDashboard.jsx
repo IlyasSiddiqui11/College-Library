@@ -10,7 +10,7 @@ import {
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentDashboard() {
-  const { user, profile, completeProfile, logout } = useAuth()
+  const { user, profile, completeProfile, logout, hasFine } = useAuth()
   const navigate = useNavigate()
 
   // State variables
@@ -133,6 +133,7 @@ export default function StudentDashboard() {
     try {
       if (!branch.trim()) throw new Error('Academic branch is required')
       if (!contact.trim()) throw new Error('Contact number is required')
+      if (contact.trim().length !== 10) throw new Error('Contact number must be exactly 10 digits')
       if (!address.trim()) throw new Error('Residential address is required')
 
       await completeProfile(branch, year, contact, address)
@@ -679,9 +680,10 @@ export default function StudentDashboard() {
                   <input
                     type="tel"
                     required
-                    placeholder="e.g. +1 555-0199"
+                    placeholder="e.g. 9876543210"
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
+                    onChange={(e) => setContact(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    maxLength={10}
                     className="mt-1 w-full rounded-lg border border-slate-200 glass-input px-3 py-2 text-xs text-slate-900 outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -742,7 +744,7 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => navigate('/history')}
-            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
+            className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full transition ${hasFine ? 'text-red-600 animate-pulse hover:bg-red-50' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-100'}`}
           >
             <History className="size-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
