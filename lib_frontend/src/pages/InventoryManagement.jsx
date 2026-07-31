@@ -9,6 +9,7 @@ import {
   UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
 , Banknote} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
+import { formatAndValidateIsbn } from '../utils/validation.js'
 
 const PAGE_SIZE = 25
 
@@ -209,7 +210,8 @@ export default function InventoryManagement() {
     setErrorMsg(null)
     setSaving(true)
     try {
-      if (!isbn.trim()) throw new Error('ISBN is required')
+      const validIsbn = formatAndValidateIsbn(isbn)
+      if (!validIsbn) throw new Error('ISBN must be exactly 10 or 13 digits (excluding hyphens/spaces)')
       if (!title.trim()) throw new Error('Book title is required')
       if (!author.trim()) throw new Error('Author is required')
 
@@ -218,7 +220,7 @@ export default function InventoryManagement() {
         if (!accessionNumber) throw new Error('Accession number is required')
 
         await apiClient.put(`/api/books/${editingBook.id}`, {
-          isbn: isbn.trim(), title: title.trim(), author: author.trim(),
+          isbn: validIsbn, title: title.trim(), author: author.trim(),
           quantity: 1, accessionNumbers: [accessionNumber],
           publisher: publisher.trim(), edition: edition.trim(), series: series.trim(),
           publicationYear: publicationYear ? parseInt(publicationYear, 10) : null,
@@ -234,7 +236,7 @@ export default function InventoryManagement() {
         if (filledAccessions.length !== quantity) throw new Error('Enter accession numbers for all copies')
 
         await apiClient.post('/api/books', {
-          isbn: isbn.trim(), title: title.trim(), author: author.trim(),
+          isbn: validIsbn, title: title.trim(), author: author.trim(),
           quantity, accessionNumbers: filledAccessions,
           publisher: publisher.trim(), edition: edition.trim(), series: series.trim(),
           publicationYear: publicationYear ? parseInt(publicationYear, 10) : null,
