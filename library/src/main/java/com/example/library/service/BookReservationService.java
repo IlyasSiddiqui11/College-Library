@@ -50,10 +50,7 @@ public class BookReservationService {
             throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
         }
 
-        long availableCount = copies.stream().filter(b -> "AVAILABLE".equals(b.getStatus())).count();
-        if (availableCount > 0) {
-            throw new BadRequestException("Cannot reserve this book as there are available copies.");
-        }
+
 
         long pendingReservations = bookReservationRepository.countByUserIdAndStatus(user.getId(), ReservationStatus.PENDING);
         if (pendingReservations >= 2) {
@@ -65,15 +62,7 @@ public class BookReservationService {
             throw new BadRequestException("You have already reserved this book.");
         }
 
-        boolean alreadyBorrowed = borrowRequestRepository.findByUserId(user.getId()).stream()
-                .anyMatch(req -> {
-                    String reqIsbn = req.getIsbn() != null ? req.getIsbn() : (req.getBook() != null ? req.getBook().getIsbn() : null);
-                    return isbn.equals(reqIsbn)
-                            && (req.getStatus() == BorrowStatus.PENDING || req.getStatus() == BorrowStatus.APPROVED);
-                });
-        if (alreadyBorrowed) {
-            throw new BadRequestException("You already have an active or pending borrow request for this book.");
-        }
+
 
         Book sampleBook = copies.get(0);
 
