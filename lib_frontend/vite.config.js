@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8443',
+        target: 'https://college-library-2sfk.onrender.com',
         changeOrigin: true,
         secure: false,
       }
