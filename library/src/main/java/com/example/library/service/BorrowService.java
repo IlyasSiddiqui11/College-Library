@@ -66,7 +66,14 @@ public class BorrowService {
 
         boolean hasAvailableCopy = copies.stream().anyMatch(b -> "AVAILABLE".equals(b.getStatus()));
         if (!hasAvailableCopy) {
-            throw new BadRequestException("No available copies found for ISBN: " + isbn);
+            long pendingReservations = bookReservationService.countPendingReservations(user.getId());
+            if (pendingReservations >= 2) {
+                throw new BadRequestException("No available copies found, and you have reached the maximum limit of 2 reservations.");
+            }
+            boolean alreadyReserved = bookReservationService.hasPendingReservation(user.getId(), isbn);
+            if (alreadyReserved) {
+                throw new BadRequestException("No available copies found, and you already have a pending reservation for this book.");
+            }
         }
 
         // Check active request for this ISBN (title-level, not physical copy)
@@ -101,6 +108,11 @@ public class BorrowService {
                 .build();
 
         BorrowRequest savedRequest = borrowRequestRepository.save(request);
+
+        if (!hasAvailableCopy) {
+            bookReservationService.convertPendingRequestsToReservations(isbn);
+        }
+
         return mapToBorrowResponse(savedRequest, copies.get(0));
     }
 
@@ -179,6 +191,12 @@ public class BorrowService {
                     selectedCopy.getIsbn(),
                     issueDate,
                     dueDate);
+        }
+
+        // Check if there are no more available copies left for this ISBN, and convert other pending requests to reservations
+        long availableCopies = bookRepository.findAllByIsbnAndStatus(requestIsbn, "AVAILABLE").size();
+        if (availableCopies == 0 && requestIsbn != null) {
+            bookReservationService.convertPendingRequestsToReservations(requestIsbn);
         }
 
         return mapToBorrowResponse(approvedRequest, selectedCopy);

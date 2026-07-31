@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { 
   BookOpen, ChevronLeft, Search, Clock, CheckCircle2, 
-  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText
+  XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText, Banknote
 } from 'lucide-react'
 
 export default function BorrowHistory() {
@@ -15,6 +15,7 @@ export default function BorrowHistory() {
   const [activeTab, setActiveTab] = useState('history') // 'history' or 'reservations'
   const [borrowRequests, setBorrowRequests] = useState([])
   const [reservations, setReservations] = useState([])
+  const [fines, setFines] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
@@ -31,12 +32,14 @@ export default function BorrowHistory() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      const [historyRes, resRes] = await Promise.all([
+      const [historyRes, resRes, finesRes] = await Promise.all([
         apiClient.get(`/api/borrow/user/${user.id}`),
-        apiClient.get(`/api/reservations/user/${user.id}`)
+        apiClient.get(`/api/reservations/user/${user.id}`),
+        apiClient.get(`/api/fines/user/${user.id}`)
       ])
       setBorrowRequests(historyRes.data)
       setReservations(resRes.data)
+      setFines(finesRes.data || [])
     } catch (err) {
       console.error('Error fetching data:', err)
     } finally {
@@ -118,6 +121,7 @@ export default function BorrowHistory() {
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
   const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
+  const pendingFinesAmount = fines.filter(f => f.status === 'UNPAID').reduce((sum, f) => sum + (f.fineAmount || 0), 0)
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
@@ -154,7 +158,7 @@ export default function BorrowHistory() {
         </section>
 
         {/* Dynamic Statistics Grid */}
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
             <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Award className="size-4" />
@@ -178,6 +182,14 @@ export default function BorrowHistory() {
             <p className="text-lg font-bold text-slate-900">{pendingReservations}</p>
             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Reservations</p>
           </div>
+          
+          <div className="rounded-2xl border border-slate-200 glass-panel p-3 shadow-xl backdrop-blur-md flex flex-col items-center gap-1 text-center">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <p className="text-lg font-bold text-slate-900">₹{pendingFinesAmount}</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Pending Fine</p>
+          </div>
         </section>
 
         {/* Tabs */}
@@ -193,6 +205,12 @@ export default function BorrowHistory() {
             className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'reservations' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
           >
             Active Reservations
+          </button>
+          <button
+            onClick={() => setActiveTab('fines')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'fines' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
+          >
+            Fine History
           </button>
         </div>
 
@@ -247,6 +265,62 @@ export default function BorrowHistory() {
               <p className="text-sm font-semibold text-slate-600">No active reservations found</p>
               <p className="text-xs text-slate-500 mt-1">You don't have any pending book reservations.</p>
             </div>
+          ) : activeTab === 'fines' ? (
+            fines.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
+                <CheckCircle2 className="size-8 text-green-400 mx-auto mb-3 opacity-50" />
+                <p className="text-sm font-semibold text-slate-600">No recorded fines</p>
+                <p className="text-xs text-slate-500 mt-1">You have a clean record!</p>
+              </div>
+            ) : (
+              fines.map(fine => (
+                <div key={fine.id} className={`rounded-xl border p-4 relative overflow-hidden shadow-sm ${
+                  fine.status === 'PAID' ? 'bg-green-50/50 border-green-100' :
+                  fine.status === 'UNPAID' ? 'bg-red-50/50 border-red-100' :
+                  'bg-amber-50/50 border-amber-100'
+                }`}>
+                  <div className="absolute top-0 right-0 p-3">
+                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold tracking-wider ${
+                      fine.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                      fine.status === 'UNPAID' ? 'bg-red-100 text-red-700' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>
+                      {fine.status}
+                    </span>
+                  </div>
+                  <div className="pr-16 flex items-start gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
+                      <Banknote className="size-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 truncate">{fine.bookTitle}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Accession: {fine.accessionNumber}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                    <div>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Delayed By</p>
+                      <p className="text-xs font-semibold text-slate-700">{fine.delayDays} Days</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Fine</p>
+                      <p className="text-xs font-bold text-red-600">₹{fine.totalFine}</p>
+                    </div>
+                    {fine.billNumber && (
+                      <div className="col-span-2">
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Bill Number</p>
+                        <p className="text-[10px] font-medium text-slate-600 font-mono">{fine.billNumber}</p>
+                      </div>
+                    )}
+                    <div className="col-span-2">
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Date Generated</p>
+                      <p className="text-[10px] font-medium text-slate-600">{formatDate(fine.createdAt)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )
           ) : (
             (activeTab === 'history' ? filteredItems : activeReservations).map((item) => {
               let bgClass = 'bg-white border-slate-200'

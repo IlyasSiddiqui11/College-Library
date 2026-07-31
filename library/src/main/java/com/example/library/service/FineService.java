@@ -27,6 +27,7 @@ public class FineService {
 
     private final FineRepository fineRepository;
     private final com.example.library.repository.LostBookRepository lostBookRepository;
+    private final EmailService emailService;
 
     @Transactional
     public Fine generateFine(BorrowRequest request, long delayDays) {
@@ -50,7 +51,23 @@ public class FineService {
                 .status(FineStatus.PENDING)
                 .build();
 
-        return fineRepository.save(fine);
+        Fine savedFine = fineRepository.save(fine);
+
+        try {
+            String bookTitle = (request.getBook() != null) ? request.getBook().getTitle() : "Unknown Book";
+            String subject = "Library Fine Assigned - " + bookTitle;
+            String body = String.format("Dear %s,\n\nA fine of ₹%s has been assigned to your account due to a delay of %d days in returning '%s'.\n\nPlease clear the dues at your earliest convenience.\n\nRegards,\nCollege Library",
+                request.getUser().getName(),
+                totalFine.toString(),
+                delayDays,
+                bookTitle
+            );
+            emailService.sendEmail(request.getUser().getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send fine assignment email: " + e.getMessage());
+        }
+
+        return savedFine;
     }
 
     @Transactional
@@ -76,7 +93,22 @@ public class FineService {
                 .status(FineStatus.PENDING)
                 .build();
 
-        return fineRepository.save(fine);
+        Fine savedFine = fineRepository.save(fine);
+
+        try {
+            String bookTitle = (request.getBook() != null) ? request.getBook().getTitle() : (request.getIsbn() != null ? request.getIsbn() : "Unknown Book");
+            String subject = "Library Fine Assigned (Lost Book) - " + bookTitle;
+            String body = String.format("Dear %s,\n\nA fine of ₹%s has been assigned to your account for the lost book '%s' (including any late fees if applicable).\n\nPlease clear the dues at your earliest convenience.\n\nRegards,\nCollege Library",
+                request.getUser().getName(),
+                totalFine.toString(),
+                bookTitle
+            );
+            emailService.sendEmail(request.getUser().getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send lost book fine email: " + e.getMessage());
+        }
+
+        return savedFine;
     }
 
     @Transactional(readOnly = true)
@@ -97,8 +129,9 @@ public class FineService {
         Fine fine = fineRepository.findById(fineId)
                 .orElseThrow(() -> new ResourceNotFoundException("Fine not found with ID: " + fineId));
 
+        boolean wasNotPaid = fine.getStatus() != FineStatus.PAID;
         fine.setStatus(request.getStatus());
-        fine.setRemarks(request.getRemarks());
+        fine.setBillNumber(request.getBillNumber());
         
         if (request.getStatus() == FineStatus.PAID) {
             fine.setVerifiedBy(adminName);
@@ -106,6 +139,22 @@ public class FineService {
         }
 
         Fine updatedFine = fineRepository.save(fine);
+
+        if (request.getStatus() == FineStatus.PAID && wasNotPaid) {
+            try {
+                String subject = "Library Fine Payment Confirmation";
+                String body = String.format("Dear %s,\n\nYour payment of ₹%s for the fine associated with your library account has been successfully verified by %s.\n\nBill Number: %s\n\nThank you for clearing your dues.\n\nRegards,\nCollege Library",
+                    fine.getUser().getName(),
+                    fine.getTotalFine().toString(),
+                    adminName,
+                    request.getBillNumber() != null ? request.getBillNumber() : "N/A"
+                );
+                emailService.sendEmail(fine.getUser().getEmail(), subject, body);
+            } catch (Exception e) {
+                System.err.println("Failed to send fine payment email: " + e.getMessage());
+            }
+        }
+
         return mapToResponse(updatedFine);
     }
 
@@ -167,7 +216,7 @@ public class FineService {
                 .status(fine.getStatus())
                 .verifiedBy(fine.getVerifiedBy())
                 .verificationDate(fine.getVerificationDate())
-                .remarks(fine.getRemarks())
+                .billNumber(fine.getBillNumber())
                 .createdAt(fine.getCreatedAt())
                 .updatedAt(fine.getUpdatedAt())
                 .build();

@@ -9,6 +9,10 @@
   border-radius: 0 !important;
 }
 
+.pfp-circle {
+  border-radius: 9999px !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -20,15 +24,16 @@ body,
   padding: 0;
   min-height: 100%;
   width: 100%;
-  color-scheme: light;
+  color-scheme: light only;
+  background-color: #f8fafc;
+  color: #0f172a;
+  forced-color-adjust: none;
 }
 
 body {
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* ── Clean Light Theme background ── */
   background: #f8fafc;
   background-attachment: fixed;
   min-height: 100vh;

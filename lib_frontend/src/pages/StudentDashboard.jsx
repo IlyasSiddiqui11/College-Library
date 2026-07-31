@@ -17,6 +17,7 @@ export default function StudentDashboard() {
   const [showQrModal, setShowQrModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [borrowRequests, setBorrowRequests] = useState([])
+  const [reservations, setReservations] = useState([])
   const [gateLogs, setGateLogs] = useState([])
   const [attendanceStatus, setAttendanceStatus] = useState({
     insideLibrary: false,
@@ -56,6 +57,10 @@ export default function StudentDashboard() {
       // 1. Get borrowing requests
       const borrowRes = await apiClient.get(`/api/borrow/user/${user.id}`)
       setBorrowRequests(borrowRes.data)
+
+      // 1.5 Get reservations
+      const resRes = await apiClient.get(`/api/reservations/user/${user.id}`)
+      setReservations(resRes.data)
 
       // 2. Get gate logs
       const gateRes = await apiClient.get(`/api/gate/user/${user.id}`)
@@ -229,6 +234,20 @@ export default function StudentDashboard() {
     setCancellingId(requestId)
     try {
       await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
+      await fetchData(false)
+    } catch (err) {
+      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
+  // Cancel reservation
+  const handleCancelReservation = async (reservationId) => {
+    if (!user) return
+    setCancellingId(`res-${reservationId}`)
+    try {
+      await apiClient.delete(`/api/reservations/${reservationId}?userId=${user.id}`)
       await fetchData(false)
     } catch (err) {
       alert('Cancel failed: ' + (err.response?.data?.message || err.message))
@@ -535,6 +554,40 @@ export default function StudentDashboard() {
                           '✕ Cancel'
                         )}
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Reservations */}
+            {!loading && reservations.filter(r => r.status === 'PENDING').length > 0 && (
+              <div className="flex flex-col gap-2 mt-2">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Waitlist Reservations ({reservations.filter(r => r.status === 'PENDING').length})</p>
+                {reservations.filter(r => r.status === 'PENDING').map((req) => (
+                  <div key={`res-${req.id}`} className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 flex justify-between items-center text-xs">
+                    <div className="min-w-0 flex-1 pr-4">
+                      <p className="font-semibold text-slate-900 truncate">{req.bookTitle || 'Unknown Title'}</p>
+                      <p className="text-[10px] text-slate-500">ISBN: {req.isbn}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200/40">
+                        {req.status}
+                      </span>
+                      {req.status === 'PENDING' && (
+                        <button
+                          type="button"
+                          onClick={() => handleCancelReservation(req.id)}
+                          disabled={cancellingId === `res-${req.id}`}
+                          className="flex items-center gap-1 rounded-full bg-red-500/20 border border-red-400/30 px-2.5 py-1 text-[9px] font-bold text-red-600 hover:bg-red-500/30 transition disabled:opacity-50"
+                        >
+                          {cancellingId === `res-${req.id}` ? (
+                            <Loader2 className="size-2.5 animate-spin" />
+                          ) : (
+                            '✕ Cancel'
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

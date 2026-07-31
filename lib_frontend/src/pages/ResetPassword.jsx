@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Lock, AlertTriangle, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { Lock, AlertTriangle, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { apiClient } from '../api/client'
 
 export default function ResetPassword() {
@@ -51,7 +51,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center px-4 py-12">
+    <div className="relative flex min-h-screen w-full overflow-x-hidden items-center justify-center px-4 py-12">
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-blue-100 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
 
@@ -69,21 +69,21 @@ export default function ResetPassword() {
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-700">
-            <AlertTriangle className="size-4 shrink-0 text-red-500" />
-            <span>{error}</span>
+        {errorMsg && (
+          <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
+            <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
         {success ? (
-          <div className="rounded-xl border border-green-100 bg-green-50 p-6 text-center shadow-sm">
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <CheckCircle2 className="size-6" />
+          <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+              <CheckCircle className="size-6" />
             </div>
             <h3 className="mb-2 text-lg font-bold text-green-900">Password Reset Complete!</h3>
-            <p className="text-sm text-green-700 mb-6">
-              Your password has been successfully updated. You will be redirected to the login page shortly.
+            <p className="text-sm text-green-900 mb-6">
+              Your password has been successfully updated. You can now log in with your new password.
             </p>
             <button
               onClick={() => navigate('/login')}

@@ -183,6 +183,72 @@ public class BookReservationService {
         }
     }
 
+    @Transactional
+    public void convertPendingRequestsToReservations(String isbn) {
+        if (isbn == null || isbn.isBlank()) return;
+
+        List<BorrowRequest> pendingRequests = borrowRequestRepository.findByIsbnAndStatus(isbn, BorrowStatus.PENDING);
+        if (pendingRequests.isEmpty()) return;
+
+        // Check if there are truly no available copies left
+        long availableCount = bookRepository.findAllByIsbnAndStatus(isbn, "AVAILABLE").size();
+        if (availableCount > 0) return;
+
+        // Find a sample book for title and author
+        List<Book> copies = bookRepository.findByIsbn(isbn);
+        if (copies.isEmpty()) return;
+        Book sampleBook = copies.get(0);
+
+        for (BorrowRequest req : pendingRequests) {
+            User user = req.getUser();
+
+            // Check if user already reached the limit of pending reservations
+            long pendingReservations = bookReservationRepository.countByUserIdAndStatus(user.getId(), ReservationStatus.PENDING);
+            if (pendingReservations >= 2) {
+                log.warn("Cannot convert request to reservation for user {} due to limits. Cancelling borrow request.", user.getId());
+                req.setStatus(BorrowStatus.CANCELLED);
+                borrowRequestRepository.save(req);
+                continue;
+            }
+
+            // Check if user already has a reservation for this ISBN
+            boolean alreadyReserved = bookReservationRepository.existsByUserIdAndIsbnAndStatus(user.getId(), isbn, ReservationStatus.PENDING);
+            if (alreadyReserved) {
+                req.setStatus(BorrowStatus.CANCELLED);
+                borrowRequestRepository.save(req);
+                continue;
+            }
+
+            // Create Reservation
+            BookReservation reservation = BookReservation.builder()
+                    .user(user)
+                    .isbn(isbn)
+                    .bookTitle(sampleBook.getTitle())
+                    .bookAuthor(sampleBook.getAuthor())
+                    .status(ReservationStatus.PENDING)
+                    .reservationDate(LocalDateTime.now())
+                    .build();
+            bookReservationRepository.save(reservation);
+
+            // Cancel the borrow request since it's converted
+            req.setStatus(BorrowStatus.CANCELLED);
+            borrowRequestRepository.save(req);
+
+            // Optionally send email to notify user
+            if (user.getEmail() != null && !user.getEmail().isBlank()) {
+                borrowingService.processBookReservationEmail(user.getEmail(), user.getName(), sampleBook.getTitle(), isbn);
+            }
+        }
+    }
+
+    public long countPendingReservations(Long userId) {
+        return bookReservationRepository.countByUserIdAndStatus(userId, ReservationStatus.PENDING);
+    }
+
+    public boolean hasPendingReservation(Long userId, String isbn) {
+        return bookReservationRepository.existsByUserIdAndIsbnAndStatus(userId, isbn, ReservationStatus.PENDING);
+    }
+
     private String resolveIsbn(BorrowRequest request) {
         if (request.getIsbn() != null && !request.getIsbn().isBlank()) {
             return request.getIsbn().trim();

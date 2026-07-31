@@ -297,7 +297,7 @@ export default function InventoryManagement() {
 
   const handleExport = () => {
     const headers = ['ID', 'Accession Number', 'ISBN', 'Title', 'Author', 'Publisher', 'Publication Year', 'Edition', 'Series',
-      'Total Pages', 'Source', 'Classification Number', 'Price', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
+      'Total Pages', 'Classification Number', 'Price', 'Source', 'Bill Number', 'Bill Date', 'Branch', 'Category', 'Language', 'Status', 'Created At', 'Updated At']
     const csvRows = [
       headers.join(','),
       ...filteredBooks.map(book => [
@@ -311,9 +311,9 @@ export default function InventoryManagement() {
         `"${(book.edition || '').replace(/"/g, '""')}"`,
         `"${(book.series || '').replace(/"/g, '""')}"`,
         `"${book.totalPages || ''}"`,
-        `"${(book.source || '').replace(/"/g, '""')}"`,
         `"${(book.classificationNumber || '').replace(/"/g, '""')}"`,
         `"${book.price || ''}"`,
+        `"${(book.source || '').replace(/"/g, '""')}"`,
         `"${book.billNumber || ''}"`,
         `"${book.billDate || ''}"`,
         `"${book.branch || ''}"`,
@@ -478,9 +478,9 @@ export default function InventoryManagement() {
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Edition</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Series</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Pages</th>
-                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Source</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Class. No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Price</th>
+                    <th className="py-3 px-3 font-semibold whitespace-nowrap">Source</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill No.</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Bill Date</th>
                     <th className="py-3 px-3 font-semibold whitespace-nowrap">Branch</th>
@@ -514,9 +514,9 @@ export default function InventoryManagement() {
                           <td className="py-3 px-3 text-slate-600">{book.edition || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.series || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.totalPages || '—'}</td>
-                          <td className="py-3 px-3 text-slate-600">{book.source || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.classificationNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.price != null ? `₹${book.price}` : '—'}</td>
+                          <td className="py-3 px-3 text-slate-600">{book.source || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billNumber || '—'}</td>
                           <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{book.billDate || '—'}</td>
                           <td className="py-3 px-3 text-slate-600">{book.branch || '—'}</td>

@@ -470,7 +470,7 @@ export default function BorrowRequests() {
                     <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Student Information</h4>
                     <div className="flex items-center justify-between gap-3 glass-panel p-4 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full pfp-circle bg-blue-600 text-white font-bold text-sm">
                           {selectedReq.userName?.slice(0, 2).toUpperCase() || 'ST'}
                         </div>
                         <div>

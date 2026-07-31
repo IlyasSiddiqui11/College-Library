@@ -45,7 +45,7 @@ export default function LibrarianLogin() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center px-4 py-12"
+      className="relative flex min-h-screen w-full overflow-x-hidden items-center justify-center px-4 py-12"
     >
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-blue-100 blur-[80px] pointer-events-none" />
@@ -78,10 +78,10 @@ export default function LibrarianLogin() {
           </div>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-700">
-              <AlertTriangle className="size-4 shrink-0 text-red-500 mt-0.5" />
-              <span>{error}</span>
-            </div>
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
+            <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
