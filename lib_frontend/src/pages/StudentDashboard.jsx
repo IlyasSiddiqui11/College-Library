@@ -405,7 +405,7 @@ export default function StudentDashboard() {
           >
             <Library className="size-7" />
             <div>
-              <p className="font-semibold text-white">Digital Catalog</p>
+              <p className="font-semibold text-white">Digital Catalogue</p>
               <p className="text-[11px] text-teal-100 mt-0.5">Search and request books online</p>
             </div>
           </button>
@@ -763,7 +763,7 @@ export default function StudentDashboard() {
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
-            <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider">Catalogue</span>
           </button>
 
           <button

@@ -156,7 +156,7 @@ export default function StudentCatalog() {
         <section className="flex flex-col gap-3 glass-panel p-5 rounded-2xl border border-slate-200 shadow-xl">
           <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
             <Library className="size-6 text-blue-600" />
-            Library Catalog
+            Library Catalogue
           </h1>
           <p className="text-xs text-slate-500">Browse book titles and request a copy from the library.</p>
 
@@ -247,14 +247,14 @@ export default function StudentCatalog() {
 
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Catalog</h2>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Catalogue</h2>
             <span className="text-xs font-semibold text-slate-500">{filteredBooks.length} Titles</span>
           </div>
 
           {loading ? (
             <div className="flex flex-col items-center py-12">
               <Loader2 className="size-8 animate-spin text-blue-600" />
-              <p className="text-xs text-slate-500 mt-3 font-medium">Loading catalog...</p>
+              <p className="text-xs text-slate-500 mt-3 font-medium">Loading catalogue...</p>
             </div>
           ) : filteredBooks.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
@@ -372,7 +372,7 @@ export default function StudentCatalog() {
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-slate-100 text-blue-600 transition"
           >
             <FileText className="size-5" />
-            <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider">Catalogue</span>
           </button>
 
           <button

@@ -157,7 +157,7 @@ export default function StudentFines() {
             className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <FileText className="size-5" />
-            <span className="text-[9px] font-bold uppercase tracking-wider">Catalog</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider">Catalogue</span>
           </button>
           
           <button
