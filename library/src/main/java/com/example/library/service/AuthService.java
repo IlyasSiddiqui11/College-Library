@@ -31,24 +31,34 @@ public class AuthService {
     private final EmailService emailService;
     private final Random random = new Random();
 
+    private String generateOtp() {
+        return String.format("%06d", random.nextInt(1000000));
+    }
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email is already registered");
         }
 
+        String otp = generateOtp();
+        
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .isVerified(true)
+                .isVerified(false)
+                .registrationOtp(otp)
+                .registrationOtpExpiry(LocalDateTime.now().plusMinutes(15))
                 .build();
 
         User savedUser = userRepository.save(user);
 
+        sendOtpEmail(savedUser.getEmail(), savedUser.getName(), otp);
+
         return AuthResponse.builder()
-                .message("User registered successfully.")
+                .message("User registered successfully. Please verify your email.")
                 .user(mapToUserResponse(savedUser))
                 .build();
     }
@@ -112,8 +122,11 @@ public class AuthService {
             throw new BadRequestException("Invalid email or password");
         }
 
-        if (!Boolean.TRUE.equals(user.getIsVerified())) {
-            throw new BadRequestException("Account is not verified.");
+        if (!Boolean.TRUE.equals(user.getIsVerified()) && user.getRegistrationOtp() == null) {
+            user.setIsVerified(true);
+            userRepository.save(user);
+        } else if (!Boolean.TRUE.equals(user.getIsVerified())) {
+            throw new BadRequestException("Please verify your email to log in.");
         }
 
         return LoginResponse.builder()
