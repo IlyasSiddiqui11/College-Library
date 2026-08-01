@@ -2,11 +2,12 @@ package com.example.library.service;
 
 import lombok.RequiredArgsConstructor;
 
-
 import com.example.library.dto.request.LoginRequest;
 import com.example.library.dto.request.RegisterRequest;
 import com.example.library.dto.request.ForgotPasswordRequest;
 import com.example.library.dto.request.ResetPasswordRequest;
+import com.example.library.dto.request.VerifyOtpRequest;
+import com.example.library.dto.request.ResendOtpRequest;
 import com.example.library.dto.response.AuthResponse;
 import com.example.library.dto.response.LoginResponse;
 import com.example.library.dto.response.UserResponse;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -27,6 +29,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final Random random = new Random();
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -39,23 +42,78 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .isVerified(true)
                 .build();
 
         User savedUser = userRepository.save(user);
 
         return AuthResponse.builder()
-                .message("User registered successfully")
+                .message("User registered successfully.")
                 .user(mapToUserResponse(savedUser))
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    private void sendOtpEmail(String email, String name, String otp) {
+        try {
+            String subject = "Verify your Email - College Library";
+            String body = String.format("Dear %s,\n\nWelcome to the College Library System!\n\nYour email verification OTP is: %s\n\nThis OTP is valid for 15 minutes.\n\nBest Regards,\nCollege Library", name, otp);
+            emailService.sendEmail(email, subject, body);
+        } catch (Exception e) {
+            throw new BadRequestException("Email error: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void verifyRegistrationOtp(VerifyOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User not found with this email"));
+
+        if (Boolean.TRUE.equals(user.getIsVerified())) {
+            throw new BadRequestException("Email is already verified");
+        }
+
+        if (user.getRegistrationOtp() == null || !user.getRegistrationOtp().equals(request.getOtp())) {
+            throw new BadRequestException("Invalid OTP");
+        }
+
+        if (user.getRegistrationOtpExpiry() == null || user.getRegistrationOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("OTP has expired. Please request a new one.");
+        }
+
+        user.setIsVerified(true);
+        user.setRegistrationOtp(null);
+        user.setRegistrationOtpExpiry(null);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void resendRegistrationOtp(ResendOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User not found with this email"));
+
+        if (Boolean.TRUE.equals(user.getIsVerified())) {
+            throw new BadRequestException("Email is already verified");
+        }
+
+        String otp = generateOtp();
+        user.setRegistrationOtp(otp);
+        user.setRegistrationOtpExpiry(LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        sendOtpEmail(user.getEmail(), user.getName(), otp);
+    }
+
+    @Transactional
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Invalid email or password");
+        }
+
+        if (!Boolean.TRUE.equals(user.getIsVerified())) {
+            throw new BadRequestException("Account is not verified.");
         }
 
         return LoginResponse.builder()

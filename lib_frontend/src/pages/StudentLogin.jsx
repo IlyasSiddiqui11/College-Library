@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { Mail, Lock, User, BookOpen, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Mail, Lock, User, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 
 export default function StudentLogin() {
-  const { login, register, user } = useAuth()
+  const { login, register, verifyRegistrationOtp, resendRegistrationOtp, user } = useAuth()
   const navigate = useNavigate()
 
   const [isRegister, setIsRegister] = useState(false)
+  const [showOtp, setShowOtp] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -40,11 +41,9 @@ export default function StudentLogin() {
         if (password.length < 6) throw new Error('Password must be at least 6 characters')
         
         await register(name, email, password)
-        setSuccessMsg('Account created successfully! Please sign in.')
+        setSuccessMsg('Account created successfully! You can now sign in.')
         setIsRegister(false)
         setPassword('')
-        setName('')
-        setEmail('')
       } else {
         const logged = await login(email, password)
         if (logged.role === 'ADMIN') {
@@ -54,11 +53,13 @@ export default function StudentLogin() {
         }
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during submission')
+         setError(err.message || 'An error occurred during submission')
     } finally {
       setLoading(false)
     }
   }
+
+
 
   return (
     <div
@@ -81,34 +82,34 @@ export default function StudentLogin() {
         </div>
 
         <div className="w-full rounded-2xl border border-slate-200 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
-          <div className="mb-8 grid grid-cols-2 rounded-lg glass-panel p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegister(false)
-                setError(null)
-                setSuccessMsg(null)
-              }}
-              className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                !isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegister(true)
-                setError(null)
-                setSuccessMsg(null)
-              }}
-              className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
-                isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
-              }`}
-            >
-              Register
-            </button>
-          </div>
+            <div className="mb-8 grid grid-cols-2 rounded-lg glass-panel p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(false)
+                  setError(null)
+                  setSuccessMsg(null)
+                }}
+                className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  !isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(true)
+                  setError(null)
+                  setSuccessMsg(null)
+                }}
+                className={`rounded-md py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  isRegister ? 'bg-white text-blue-600 shadow-md relative z-10' : 'text-slate-500 hover:text-blue-600'
+                }`}
+              >
+                Register
+              </button>
+            </div>
 
           {error && (
             <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
@@ -143,57 +144,61 @@ export default function StudentLogin() {
               </div>
             )}
 
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Email Address
-              </label>
-              <div className="relative mt-1.5">
-                <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@university.edu"
-                  className="w-full rounded-xl border border-slate-200 glass-panel py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:glass-panel"
-                />
-              </div>
-            </div>
+            <>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    Email Address
+                  </label>
+                  <div className="relative mt-1.5">
+                    <Mail className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="student@university.edu"
+                      className="w-full rounded-xl border border-slate-200 glass-panel py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:glass-panel"
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Password
-                </label>
-                {!isRegister && (
-                  <button 
-                    type="button" 
-                    onClick={() => setIsForgotModalOpen(true)}
-                    className="text-[11px] text-blue-600 hover:underline"
-                  >
-                    Forgot Password?
-                  </button>
-                )}
-              </div>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 glass-panel py-3.5 pl-11 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:glass-panel"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600 transition"
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-            </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      Password
+                    </label>
+                    {!isRegister && (
+                      <button 
+                        type="button" 
+                        onClick={() => setIsForgotModalOpen(true)}
+                        className="text-[11px] text-blue-600 hover:underline"
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative mt-1.5">
+                    <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-xl border border-slate-200 glass-panel py-3.5 pl-11 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:glass-panel"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600 transition"
+                    >
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                </div>
+            </>
+
+
 
             <button
               type="submit"
@@ -216,22 +221,24 @@ export default function StudentLogin() {
             </button>
           </form>
 
-          <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs">
-            <span className="text-slate-500">
-              {isRegister ? 'Already have an account? ' : 'New to BCOE-lib? '}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegister(!isRegister)
-                setError(null)
-                setSuccessMsg(null)
-              }}
-              className="font-bold text-blue-600 hover:underline"
-            >
-              {isRegister ? 'Sign In' : 'Register Account'}
-            </button>
-          </div>
+
+
+            <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs">
+              <span className="text-slate-500">
+                {isRegister ? 'Already have an account? ' : 'New to BCOE-lib? '}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(!isRegister)
+                  setError(null)
+                  setSuccessMsg(null)
+                }}
+                className="font-bold text-blue-600 hover:underline"
+              >
+                {isRegister ? 'Sign In' : 'Register Account'}
+              </button>
+            </div>
         </div>
 
         <p className="text-center text-[10px] tracking-wide text-slate-500">
