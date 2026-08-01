@@ -23,7 +23,7 @@
 
 The system features **QR-based library entry/exit tracking**, **ISBN barcode scanning**, **digital borrow requests with approval workflows**, **lost book tracking**, **automated fine management**, **book reservation queues**, and a live **real-time admin dashboard** — all wrapped in a light-theme glassmorphism UI.
 
----
+----
 
 ## ✨ Feature Highlights
 
