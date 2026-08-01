@@ -96,6 +96,7 @@ export default function StudentProfile() {
       if (!name.trim()) throw new Error('Full Name is required')
       if (!branch.trim()) throw new Error('Academic branch is required')
       if (!contact.trim()) throw new Error('Phone number is required')
+      if (contact.trim().length !== 10) throw new Error('Phone number must be exactly 10 digits')
       if (!address.trim()) throw new Error('Residential address is required')
 
       // Call complete profile API (which supports upsert / updates in our backend)
@@ -297,9 +298,10 @@ export default function StudentProfile() {
                     type="tel"
                     required
                     disabled={!isEditing}
-                    placeholder="e.g. +1 555-0199"
+                    placeholder="e.g. 9876543210"
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
+                    onChange={(e) => setContact(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    maxLength={10}
                     className="mt-1.5 w-full rounded-xl border border-slate-200 glass-input px-3.5 py-3 text-xs text-slate-900 outline-none focus:border-indigo-500 focus:glass-panel disabled:glass-panel/40 disabled:text-blue-200 disabled:border-white/20 transition"
                   />
                 </div>

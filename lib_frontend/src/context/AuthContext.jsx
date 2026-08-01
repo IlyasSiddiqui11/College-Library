@@ -6,6 +6,7 @@ const AuthContext = createContext(undefined)
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [hasFine, setHasFine] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // On mount, load user from local storage
@@ -58,9 +59,17 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     if (!user) return null
     try {
-      const response = await apiClient.get(`/api/profile/${user.id}`)
-      setProfile(response.data)
-      return response.data
+      const profileRes = await apiClient.get(`/api/student/profile/${user.id}`)
+      setProfile(profileRes.data)
+      
+      try {
+        const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
+        const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
+        setHasFine(pendingFines.length > 0)
+      } catch (err) {
+        console.warn('Failed to fetch fines:', err.message)
+      }
+      return profileRes.data
     } catch (err) {
       setProfile(null)
       if (err.message && err.message.includes('User not found')) {
@@ -99,18 +108,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        profile,
-        loading,
-        login,
-        register,
-        completeProfile,
-        fetchProfile,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, profile, loading, login, register, logout, hasFine, completeProfile, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )
