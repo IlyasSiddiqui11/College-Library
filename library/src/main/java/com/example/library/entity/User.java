@@ -53,6 +53,16 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    @Column(name = "registration_otp")
+    private String registrationOtp;
+
+    @Column(name = "registration_otp_expiry")
+    private LocalDateTime registrationOtpExpiry;
+
+    @Column(name = "is_verified")
+    @Builder.Default
+    private Boolean isVerified = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

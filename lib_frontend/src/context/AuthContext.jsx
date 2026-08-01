@@ -56,10 +56,26 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const verifyRegistrationOtp = async (email, otp) => {
+    try {
+      await apiClient.post('/api/auth/verify-registration-otp', { email, otp })
+    } catch (err) {
+      throw new Error(err.message || 'OTP Verification failed')
+    }
+  }
+
+  const resendRegistrationOtp = async (email) => {
+    try {
+      await apiClient.post('/api/auth/resend-registration-otp', { email })
+    } catch (err) {
+      throw new Error(err.message || 'Failed to resend OTP')
+    }
+  }
+
   const fetchProfile = async () => {
     if (!user) return null
     try {
-      const profileRes = await apiClient.get(`/api/student/profile/${user.id}`)
+      const profileRes = await apiClient.get(`/api/profile/${user.id}`)
       setProfile(profileRes.data)
       
       try {
@@ -108,7 +124,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, register, logout, hasFine, completeProfile, fetchProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, register, verifyRegistrationOtp, resendRegistrationOtp, logout, hasFine, completeProfile, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

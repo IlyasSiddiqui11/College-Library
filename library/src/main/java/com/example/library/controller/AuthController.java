@@ -46,4 +46,16 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok("Password has been reset successfully.");
     }
+
+    @PostMapping("/verify-registration-otp")
+    public ResponseEntity<String> verifyRegistrationOtp(@Valid @RequestBody com.example.library.dto.request.VerifyOtpRequest request) {
+        authService.verifyRegistrationOtp(request);
+        return ResponseEntity.ok("Email verified successfully.");
+    }
+
+    @PostMapping("/resend-registration-otp")
+    public ResponseEntity<String> resendRegistrationOtp(@Valid @RequestBody com.example.library.dto.request.ResendOtpRequest request) {
+        authService.resendRegistrationOtp(request);
+        return ResponseEntity.ok("OTP has been resent successfully.");
+    }
 }

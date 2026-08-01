@@ -634,7 +634,7 @@ export default function InventoryManagement() {
                   <div className="flex flex-col gap-5">
                     {/* Book Details Group */}
                     <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">📚 Book Details</h4>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">Book Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2">
                           <label className="text-[10px] font-bold text-slate-500 uppercase">ISBN <span className="text-red-600">*</span></label>
@@ -704,7 +704,7 @@ export default function InventoryManagement() {
 
                     {/* Purchase Details Group */}
                     <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">🧾 Purchase Details</h4>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">Purchase Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Price (₹)</label>
@@ -732,7 +732,7 @@ export default function InventoryManagement() {
                   <div className="flex flex-col gap-5">
                     {/* Library Details Group */}
                     <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">🏛️ Library Details</h4>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">Library Details</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Branch</label>
@@ -787,7 +787,7 @@ export default function InventoryManagement() {
                     {!editingBook && (
                       <div className="rounded-xl border border-slate-300 bg-slate-100 p-5 flex flex-col gap-3">
                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-300 pb-2">
-                          🏷️ Accession Numbers ({quantity} {quantity === 1 ? 'copy' : 'copies'})
+                          Accession Numbers ({quantity} {quantity === 1 ? 'copy' : 'copies'})
                         </h4>
                         <div className="flex flex-col gap-3 max-h-[280px] overflow-y-auto pr-1">
                           {accessionNumbersList.map((num, idx) => (
