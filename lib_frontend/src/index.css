@@ -6,7 +6,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  border-radius: 1 !important;
+  border-radius: 8px !important;
 }
 
 .pfp-circle {
