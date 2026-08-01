@@ -13,6 +13,7 @@ export default function StudentLogin() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState(null)
@@ -36,14 +37,21 @@ export default function StudentLogin() {
     setLoading(true)
 
     try {
-      if (isRegister) {
+      if (showOtp) {
+        if (otp.length !== 6) throw new Error('OTP must be exactly 6 digits')
+        await verifyRegistrationOtp(email, otp)
+        setSuccessMsg('Email verified successfully! You can now sign in.')
+        setShowOtp(false)
+        setIsRegister(false)
+        setOtp('')
+        setPassword('')
+      } else if (isRegister) {
         if (!name.trim()) throw new Error('Name is required')
         if (password.length < 6) throw new Error('Password must be at least 6 characters')
         
         await register(name, email, password)
-        setSuccessMsg('Account created successfully! You can now sign in.')
-        setIsRegister(false)
-        setPassword('')
+        setSuccessMsg('Account created! Please check your email for the 6-digit OTP.')
+        setShowOtp(true)
       } else {
         const logged = await login(email, password)
         if (logged.role === 'ADMIN') {
@@ -53,13 +61,30 @@ export default function StudentLogin() {
         }
       }
     } catch (err) {
+      if (err.message && err.message.includes('verify your email')) {
+         setSuccessMsg('Please check your email for the verification OTP.')
+         setError(null)
+         setShowOtp(true)
+      } else {
          setError(err.message || 'An error occurred during submission')
+      }
     } finally {
       setLoading(false)
     }
   }
 
-
+  const handleResendOtp = async () => {
+    try {
+      setLoading(true)
+      await resendRegistrationOtp(email)
+      setSuccessMsg('A new OTP has been sent to your email.')
+      setError(null)
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div
@@ -82,6 +107,7 @@ export default function StudentLogin() {
         </div>
 
         <div className="w-full rounded-2xl border border-slate-200 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
+          {!showOtp && (
             <div className="mb-8 grid grid-cols-2 rounded-lg glass-panel p-1">
               <button
                 type="button"
@@ -110,6 +136,14 @@ export default function StudentLogin() {
                 Register
               </button>
             </div>
+          )}
+
+          {showOtp && (
+             <div className="mb-6 text-center">
+               <h3 className="text-lg font-bold text-slate-900">Verify Your Email</h3>
+               <p className="text-xs text-slate-500 mt-1">We sent a 6-digit code to {email}</p>
+             </div>
+          )}
 
           {error && (
             <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
@@ -125,7 +159,7 @@ export default function StudentLogin() {
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            {isRegister && (
+            {!showOtp && isRegister && (
               <div>
                 <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   Full Name
@@ -144,7 +178,8 @@ export default function StudentLogin() {
               </div>
             )}
 
-            <>
+            {!showOtp && (
+              <>
                 <div>
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Email Address
@@ -196,9 +231,28 @@ export default function StudentLogin() {
                     </button>
                   </div>
                 </div>
-            </>
+              </>
+            )}
 
-
+            {showOtp && (
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  6-Digit OTP
+                </label>
+                <div className="relative mt-1.5">
+                  <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    className="w-full text-center tracking-[0.5em] font-mono rounded-xl border border-slate-200 glass-panel py-3.5 pl-11 pr-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-600 focus:glass-panel"
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -213,6 +267,8 @@ export default function StudentLogin() {
                   <Loader2 className="size-4 animate-spin" />
                   Processing...
                 </>
+              ) : showOtp ? (
+                'Verify Email'
               ) : isRegister ? (
                 'Create Account'
               ) : (
@@ -221,8 +277,33 @@ export default function StudentLogin() {
             </button>
           </form>
 
+          {showOtp && (
+            <div className="mt-6 text-center text-xs">
+              <span className="text-slate-500">Didn't receive the code? </span>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleResendOtp}
+                className="font-bold text-blue-600 hover:underline disabled:opacity-50"
+              >
+                Resend OTP
+              </button>
+              <br />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOtp(false)
+                  setError(null)
+                  setSuccessMsg(null)
+                }}
+                className="mt-4 font-bold text-slate-500 hover:text-slate-700 underline"
+              >
+                Back to Login
+              </button>
+            </div>
+          )}
 
-
+          {!showOtp && (
             <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs">
               <span className="text-slate-500">
                 {isRegister ? 'Already have an account? ' : 'New to BCOE-lib? '}
@@ -239,6 +320,7 @@ export default function StudentLogin() {
                 {isRegister ? 'Sign In' : 'Register Account'}
               </button>
             </div>
+          )}
         </div>
 
         <p className="text-center text-[10px] tracking-wide text-slate-500">

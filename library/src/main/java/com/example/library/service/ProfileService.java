@@ -60,16 +60,6 @@ public class ProfileService {
         }
 
         StudentProfile savedProfile = profileRepository.save(profile);
-
-        // Send welcome email after profile completion
-        try {
-            String subject = "Welcome to College Library";
-            String body = String.format("Dear %s,\n\nYour profile has been successfully completed.\n\nWelcome to the College Library System!\n\nBest Regards,\nCollege Library", user.getName());
-            emailService.sendEmail(user.getEmail(), subject, body);
-        } catch (Exception e) {
-            System.err.println("Failed to send welcome email after profile completion: " + e.getMessage());
-        }
-
         return mapToProfileResponse(savedProfile);
     }
 
