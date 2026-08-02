@@ -7,6 +7,7 @@ import {
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
 , Banknote} from 'lucide-react'
+import AddAssetModal from '../components/AddAssetModal.jsx'
 
 export default function ReturnStation() {
   const { user, logout } = useAuth()
@@ -14,6 +15,7 @@ export default function ReturnStation() {
 
   // State controls
   const [returnStatus, setReturnStatus] = useState('idle')
+  const [showReplaceModal, setShowReplaceModal] = useState(false)
   const [studentId, setStudentId] = useState('')
   const [accessionNumber, setAccessionNumber] = useState('')
   const [sessionHistory, setSessionHistory] = useState([])
@@ -36,6 +38,8 @@ export default function ReturnStation() {
   // Keep accession gun input focused at all times except when user is typing student ID
   useEffect(() => {
     const keepFocused = () => {
+      if (showReplaceModal) return
+      
       if (document.activeElement === studentInputRef.current) {
         return
       }
@@ -47,7 +51,7 @@ export default function ReturnStation() {
     keepFocused()
     const interval = setInterval(keepFocused, 1000)
     return () => clearInterval(interval)
-  }, [returnStatus])
+  }, [returnStatus, showReplaceModal])
 
   // Handle USB Gun Scan Submit (auto trigger when barcode is entered via gun)
   const handleFormSubmit = (e) => {
@@ -334,6 +338,20 @@ export default function ReturnStation() {
                         Extend Loan
                       </button>
                       <button
+                        type="button"
+                        onClick={() => {
+                          if (!studentId.trim() || !accessionNumber.trim()) {
+                            setErrorMsg('Please specify both Student ID and Accession Number.')
+                            setReturnStatus('error')
+                            return
+                          }
+                          setShowReplaceModal(true)
+                        }}
+                        className="flex-1 rounded-xl bg-amber-600 py-3 text-xs font-semibold text-white hover:bg-amber-700 transition"
+                      >
+                        Replace Book
+                      </button>
+                      <button
                         type="submit"
                         className="flex-1 rounded-xl bg-blue-600 py-3 text-xs font-semibold text-white hover:bg-blue-700 transition"
                       >
@@ -443,6 +461,40 @@ export default function ReturnStation() {
           </aside>
         </div>
       </div>
+
+      {/* Replace Book Modal */}
+      <AddAssetModal
+        isOpen={showReplaceModal}
+        onClose={() => setShowReplaceModal(false)}
+        onSuccess={() => {
+          setShowReplaceModal(false)
+          setReturnStatus('success')
+          setSuccessDetails({
+            isExtension: false,
+            bookTitle: 'Replacement Processed',
+            userName: `Student #${studentId}`,
+            accessionNumber: `${accessionNumber.trim()}-R`
+          })
+          setSessionHistory(prev => [
+            {
+              id: 'rep-' + Date.now(),
+              title: 'Replacement Processed',
+              student: `Student #${studentId}`,
+              accessionNumber: `${accessionNumber.trim()}-R`,
+              timestamp: new Date()
+            },
+            ...prev
+          ])
+          setTimeout(() => {
+            setAccessionNumber('')
+            setReturnStatus('idle')
+            setSuccessDetails(null)
+          }, 4000)
+        }}
+        isReplaceMode={true}
+        originalAccession={accessionNumber.trim()}
+        studentId={studentId.trim()}
+      />
     </div>
   )
 }

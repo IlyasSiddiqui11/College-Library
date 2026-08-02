@@ -2,13 +2,17 @@ package com.example.library.service;
 
 import lombok.RequiredArgsConstructor;
 import com.example.library.dto.request.BookCreateRequest;
+import com.example.library.dto.request.ReplaceBookRequest;
+import com.example.library.dto.request.LostBookReportRequest;
 import com.example.library.dto.response.AvailableCopyResponse;
 import com.example.library.dto.response.BookCatalogResponse;
 import com.example.library.dto.response.BookResponse;
 import com.example.library.entity.Book;
+import com.example.library.entity.ReplacedBook;
 import com.example.library.exception.BadRequestException;
 import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.BookRepository;
+import com.example.library.repository.ReplacedBookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +32,15 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final ReplacedBookRepository replacedBookRepository;
 
     @Autowired
     @Lazy
     private BookReservationService bookReservationService;
+
+    @Autowired
+    @Lazy
+    private LostBookService lostBookService;
 
     @Transactional
     public BookResponse addBook(BookCreateRequest request) {
@@ -96,6 +105,77 @@ public class BookService {
         }
 
         return mapToBookResponse(savedBooks.get(0));
+    }
+
+    @Transactional
+    public BookResponse replaceBook(ReplaceBookRequest request) {
+        String originalAccession = request.getOriginalAccessionNumber().trim();
+        
+        if (request.getAccessionNumbers() == null || request.getAccessionNumbers().isEmpty()) {
+            throw new BadRequestException("Accession number for replacement is required");
+        }
+        String replacementAccession = request.getAccessionNumbers().get(0).trim();
+        
+        if (bookRepository.existsByAccessionNumber(replacementAccession)) {
+             throw new BadRequestException("Book with accession number '" + replacementAccession + "' already exists");
+        }
+
+        // Mark original book as LOST
+        LostBookReportRequest lostRequest = LostBookReportRequest.builder()
+                .accessionNumber(originalAccession)
+                .reason("Replaced at Return Station")
+                .remarks("Automatically marked as lost during replacement")
+                .reportedByAdmin("Admin")
+                .build();
+        
+        lostBookService.reportLostBook(lostRequest);
+
+        // The original book is already marked as LOST by the lostBookService.
+        // We do not need to override its status here.
+        Book originalBook = bookRepository.findByAccessionNumber(originalAccession)
+            .orElseThrow(() -> new ResourceNotFoundException("Original book not found"));
+
+        // Create the new replacement book
+        Book replacementBook = Book.builder()
+                .accessionNumber(replacementAccession)
+                .isbn(request.getIsbn())
+                .title(request.getTitle())
+                .author(request.getAuthor())
+                .publisher(request.getPublisher())
+                .edition(request.getEdition())
+                .series(request.getSeries())
+                .publicationYear(request.getPublicationYear())
+                .totalPages(request.getTotalPages())
+                .price(request.getPrice())
+                .billNumber(request.getBillNumber())
+                .billDate(request.getBillDate())
+                .branch(request.getBranch())
+                .category(request.getCategory())
+                .language(request.getLanguage())
+                .source(request.getSource())
+                .classificationNumber(request.getClassificationNumber())
+                .status("AVAILABLE")
+                .build();
+
+        Book savedReplacement = bookRepository.save(replacementBook);
+
+        // Save ReplacedBook record
+        ReplacedBook replacedRecord = ReplacedBook.builder()
+                .originalBookId(originalBook.getId())
+                .replacementBookId(savedReplacement.getId())
+                .originalAccessionNumber(originalAccession)
+                .replacementAccessionNumber(replacementAccession)
+                .replacedBy("Admin")
+                .build();
+        replacedBookRepository.save(replacedRecord);
+
+        // Fulfill any pending reservations
+        String isbn = request.getIsbn() != null ? request.getIsbn().trim() : null;
+        if (isbn != null && !isbn.isBlank()) {
+            bookReservationService.fulfillReservation(isbn);
+        }
+
+        return mapToBookResponse(savedReplacement);
     }
 
     @Transactional(readOnly = true)

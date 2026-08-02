@@ -26,6 +26,12 @@ public class BookController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PostMapping("/replace")
+    public ResponseEntity<BookResponse> replaceBook(@Valid @RequestBody com.example.library.dto.request.ReplaceBookRequest request) {
+        BookResponse response = bookService.replaceBook(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<BookResponse>> getAllBooks() {
         List<BookResponse> response = bookService.getAllBooks();

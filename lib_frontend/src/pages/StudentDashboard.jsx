@@ -27,6 +27,14 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true)
   const [exiting, setExiting] = useState(false)
   const [cancellingId, setCancellingId] = useState(null)
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
 
   const scannerRef = useRef(null)
   const isProcessingQr = useRef(false)
@@ -204,26 +212,25 @@ export default function StudentDashboard() {
     try {
       await apiClient.post('/api/gate/scan', { userId: user.id })
       fetchData() // Refresh status and logs
-      alert('Checked in successfully at the gate!')
+      showNotification('Checked in successfully at the gate!', 'success')
       setShowQrModal(false)
     } catch (err) {
-      alert('Check-in error: ' + (err.response?.data?.message || err.message))
+      showNotification('Check-in error: ' + (err.response?.data?.message || err.message), 'error')
       setShowQrModal(false)
     } finally {
       isProcessingQr.current = false
     }
   }
 
-  // Gate Exit checkout trigger
   const handleExitLibrary = async () => {
     if (!user) return
     setExiting(true)
     try {
       await apiClient.post(`/api/gate/exit/${user.id}`)
       fetchData()
-      alert('Successfully marked as OUTSIDE. Thank you for visiting!')
+      showNotification('Successfully marked as OUTSIDE. Thank you for visiting!', 'success')
     } catch (err) {
-      alert('Exit error: ' + err.message)
+      showNotification('Exit error: ' + err.message, 'error')
     } finally {
       setExiting(false)
     }
@@ -237,7 +244,7 @@ export default function StudentDashboard() {
       await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
       await fetchData(false)
     } catch (err) {
-      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+      showNotification('Cancel failed: ' + (err.response?.data?.message || err.message), 'error')
     } finally {
       setCancellingId(null)
     }
@@ -251,7 +258,7 @@ export default function StudentDashboard() {
       await apiClient.delete(`/api/reservations/${reservationId}?userId=${user.id}`)
       await fetchData(false)
     } catch (err) {
-      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+      showNotification('Cancel failed: ' + (err.response?.data?.message || err.message), 'error')
     } finally {
       setCancellingId(null)
     }
@@ -290,6 +297,18 @@ export default function StudentDashboard() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32">
+      {/* Toast Notification */}
+      {notification.show && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-sm rounded-xl px-4 py-3 shadow-2xl transition-all animate-in slide-in-from-top-5 fade-in ${
+          notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
+        }`}>
+          <div className="flex items-center gap-3">
+            {notification.type === 'error' ? <AlertCircle className="size-5 shrink-0" /> : <CheckCircle2 className="size-5 shrink-0" />}
+            <p className="text-sm font-semibold leading-tight">{notification.message}</p>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Header */}
       <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
