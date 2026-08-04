@@ -27,6 +27,7 @@ export default function BorrowRequests() {
   const [selectedProfile, setSelectedProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
+  const [confirmModal, setConfirmModal] = useState({ show: false, action: null, id: null, accNum: null })
 
   useEffect(() => {
     if (!user) {
@@ -88,10 +89,6 @@ export default function BorrowRequests() {
   }, [selectedReq?.id, selectedReq?.isbn, selectedReq?.status])
 
   const handleApprove = async (id, accNum) => {
-    if (!accNum || !accNum.trim()) {
-      alert('Please select an accession number to issue.')
-      return
-    }
     setActionLoading(true)
     try {
       await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
@@ -113,6 +110,29 @@ export default function BorrowRequests() {
       alert('Rejection failed: ' + err.message)
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  const confirmApprove = (id, accNum) => {
+    if (!accNum || !accNum.trim()) {
+      alert('Please select an accession number to issue.')
+      return
+    }
+    setConfirmModal({ show: true, action: 'APPROVE', id, accNum })
+  }
+
+  const confirmReject = (id) => {
+    setConfirmModal({ show: true, action: 'REJECT', id, accNum: null })
+  }
+
+  const proceedAction = async () => {
+    const { action, id, accNum } = confirmModal
+    setConfirmModal({ show: false, action: null, id: null, accNum: null })
+    
+    if (action === 'APPROVE') {
+      await handleApprove(id, accNum)
+    } else if (action === 'REJECT') {
+      await handleReject(id)
     }
   }
 
@@ -486,7 +506,7 @@ export default function BorrowRequests() {
                   {selectedReq.status === 'PENDING' ? (
                     <>
                       <button
-                        onClick={() => handleReject(selectedReq.id)}
+                        onClick={() => confirmReject(selectedReq.id)}
                         disabled={actionLoading}
                         className="flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/50 px-5 py-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
                       >
@@ -494,7 +514,7 @@ export default function BorrowRequests() {
                         Reject
                       </button>
                       <button
-                        onClick={() => handleApprove(selectedReq.id, accessionNumber)}
+                        onClick={() => confirmApprove(selectedReq.id, accessionNumber)}
                         disabled={actionLoading || !accessionNumber || availableCopies.length === 0}
                         className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition duration-200 active:scale-[0.98] disabled:opacity-50"
                       >
@@ -527,6 +547,36 @@ export default function BorrowRequests() {
           </div>
         </main>
       </div>
+
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 glass-panel p-6 shadow-2xl animate-in fade-in duration-150">
+            <h3 className="font-bold text-slate-900 text-base mb-2">Confirm Action</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to {confirmModal.action === 'APPROVE' ? 'approve' : 'reject'} this borrow request?
+              {confirmModal.action === 'APPROVE' && confirmModal.accNum && (
+                <span className="block mt-1">Accession Number: <span className="font-mono font-bold text-blue-600">{confirmModal.accNum}</span></span>
+              )}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmModal({ show: false, action: null, id: null, accNum: null })}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={proceedAction}
+                className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition ${
+                  confirmModal.action === 'APPROVE' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                Yes, {confirmModal.action === 'APPROVE' ? 'Approve' : 'Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showProfileModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">

@@ -76,6 +76,7 @@ export default function BookDetails() {
   if (!user) return null
 
   const isAvailable = book?.availability === 'Available'
+  const isLost = book?.availability === 'Lost'
 
   const detailRows = book
     ? [
@@ -145,6 +146,10 @@ export default function BookDetails() {
                       <span className="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-md border border-green-400/20">
                         Available
                       </span>
+                    ) : isLost ? (
+                      <span className="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-md border border-red-400/20">
+                        Lost
+                      </span>
                     ) : (
                       <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
                         Unavailable
@@ -205,11 +210,13 @@ export default function BookDetails() {
 
             <button
               onClick={handleRequestBorrow}
-              disabled={requesting || !isAvailable}
+              disabled={requesting || (!isAvailable && isLost)}
               className={`w-full rounded-xl py-3.5 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
                 isAvailable
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
-                  : 'bg-slate-50 text-slate-400 cursor-not-allowed shadow-none'
+                  : isLost
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                  : 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-600/20 disabled:opacity-50'
               }`}
             >
               {requesting ? (
@@ -219,6 +226,8 @@ export default function BookDetails() {
                 </>
               ) : isAvailable ? (
                 'Request to Borrow'
+              ) : isLost ? (
+                'Book Lost'
               ) : (
                 'Not Available'
               )}
