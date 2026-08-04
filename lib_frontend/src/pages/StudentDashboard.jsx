@@ -62,17 +62,17 @@ export default function StudentDashboard() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      // 1. Get borrowing requests
-      const borrowRes = await apiClient.get(`/api/borrow/user/${user.id}`)
-      setBorrowRequests(borrowRes.data)
+      // Fire all network requests concurrently
+      const [borrowRes, resRes, gateRes, statusRes] = await Promise.all([
+        apiClient.get(`/api/borrow/user/${user.id}`),
+        apiClient.get(`/api/reservations/user/${user.id}`),
+        apiClient.get(`/api/gate/user/${user.id}`),
+        apiClient.get(`/api/gate/status/${user.id}`)
+      ]);
 
-      // 1.5 Get reservations
-      const resRes = await apiClient.get(`/api/reservations/user/${user.id}`)
+      setBorrowRequests(borrowRes.data)
       setReservations(resRes.data)
 
-      // 2. Get gate logs
-      const gateRes = await apiClient.get(`/api/gate/user/${user.id}`)
-      
       // Flatten gate logs
       const flatLogs = []
       gateRes.data.forEach((log) => {
@@ -92,8 +92,6 @@ export default function StudentDashboard() {
       flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       setGateLogs(flatLogs)
 
-      // 3. Get gate status
-      const statusRes = await apiClient.get(`/api/gate/status/${user.id}`)
       setAttendanceStatus(statusRes.data)
     } catch (err) {
       console.error('Error fetching dashboard data:', err)

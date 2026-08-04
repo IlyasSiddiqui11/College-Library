@@ -48,10 +48,14 @@ export default function StudentProfile() {
       setSuccessMsg(null)
     }
     try {
-      // 1. Sync authentication context profile
-      const prof = await fetchProfile()
+      // Fire all network requests concurrently
+      const [prof, borrowRes, statusRes] = await Promise.all([
+        fetchProfile(),
+        apiClient.get(`/api/borrow/user/${user.id}`),
+        apiClient.get(`/api/gate/status/${user.id}`)
+      ]);
       
-      // 2. Initialize fields (only on initial load)
+      // Initialize fields (only on initial load)
       if (showLoading) {
         setName(user.name || '')
         if (prof) {
@@ -62,12 +66,8 @@ export default function StudentProfile() {
         }
       }
 
-      // 3. Get borrowing stats
-      const borrowRes = await apiClient.get(`/api/borrow/user/${user.id}`)
+      // Update state with results
       setBorrowRequests(borrowRes.data)
-
-      // 4. Get gate attendance status
-      const statusRes = await apiClient.get(`/api/gate/status/${user.id}`)
       setAttendanceStatus(statusRes.data)
     } catch (err) {
       console.error('Error loading profile details:', err)
