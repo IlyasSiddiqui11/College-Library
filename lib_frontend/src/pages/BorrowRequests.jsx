@@ -233,7 +233,7 @@ export default function BorrowRequests() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-8 py-4 backdrop-blur-md">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 Lending Queue
@@ -241,7 +241,7 @@ export default function BorrowRequests() {
               <p className="text-xs text-slate-500 mt-0.5">Assign physical copies and monitor loans</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ml-auto">
               <button
                 onClick={handleExport}
                 disabled={loading || filteredRequests.length === 0}
