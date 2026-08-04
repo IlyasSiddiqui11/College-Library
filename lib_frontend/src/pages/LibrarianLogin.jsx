@@ -53,13 +53,11 @@ export default function LibrarianLogin() {
   }
 
   return (
-    <div
-      className="relative flex min-h-screen w-full overflow-x-hidden items-center justify-center px-4 py-12"
-    >
+    <div className="relative flex min-h-screen w-full overflow-hidden items-center justify-center p-4 bg-[#f8fafc]">
       <div className="absolute left-[-100px] top-[-100px] size-[400px] rounded-full bg-violet-500/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-blue-100 blur-[80px] pointer-events-none" />
 
-      <div className="relative flex w-full max-w-[460px] flex-col gap-6">
+      <div className="relative flex w-full max-w-[460px] mx-auto flex-col gap-6 z-10">
         <Link
           to="/"
           className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition"

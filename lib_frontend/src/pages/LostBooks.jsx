@@ -39,6 +39,7 @@ export default function LostBooks() {
   const [lostBooks, setLostBooks] = useState([])
   const [loadingList, setLoadingList] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
 
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -118,17 +119,20 @@ export default function LostBooks() {
 
   const filteredLostBooks = useMemo(() => {
     const q = searchQuery.toLowerCase()
-    if (!q) return sortedLostBooks
-    return sortedLostBooks.filter(item =>
-      (item.accessionNumber || '').toLowerCase().includes(q) ||
-      (item.isbn || '').toLowerCase().includes(q) ||
-      (item.title || '').toLowerCase().includes(q) ||
-      (item.author || '').toLowerCase().includes(q) ||
-      (item.studentName || '').toLowerCase().includes(q) ||
-      (item.studentEmail || '').toLowerCase().includes(q) ||
-      (item.reason || '').toLowerCase().includes(q)
-    )
-  }, [sortedLostBooks, searchQuery])
+    return sortedLostBooks.filter(item => {
+      const matchesSearch = !q ||
+        (item.accessionNumber || '').toLowerCase().includes(q) ||
+        (item.isbn || '').toLowerCase().includes(q) ||
+        (item.title || '').toLowerCase().includes(q) ||
+        (item.author || '').toLowerCase().includes(q) ||
+        (item.studentName || '').toLowerCase().includes(q) ||
+        (item.studentEmail || '').toLowerCase().includes(q) ||
+        (item.reason || '').toLowerCase().includes(q)
+      
+      const matchesUserType = userTypeFilter === 'ALL' || item.userRole === userTypeFilter
+      return matchesSearch && matchesUserType
+    })
+  }, [sortedLostBooks, searchQuery, userTypeFilter])
 
   const getExportRows = () => {
     const headers = [
@@ -318,6 +322,15 @@ export default function LostBooks() {
                 Reported Lost Books
               </h3>
               <div className="flex items-center gap-2">
+                <select
+                  value={userTypeFilter}
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                  className="rounded-xl border border-slate-200 glass-input px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
+                >
+                  <option value="ALL">All Users</option>
+                  <option value="STUDENT">Students</option>
+                  <option value="STAFF">Staff</option>
+                </select>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 size-3 -translate-y-1/2 text-slate-500" />
                   <input
@@ -356,8 +369,17 @@ export default function LostBooks() {
                         <td className="py-3 pr-3 font-mono text-amber-600 font-bold whitespace-nowrap">{item.accessionNumber}</td>
                         <td className="py-3 pr-3 text-slate-900 font-semibold max-w-[120px] truncate">{item.title}</td>
                         <td className="py-3 pr-3">
-                          <p className="text-slate-600 font-semibold">{item.studentName}</p>
-                          <p className="text-[10px] text-slate-400">{item.studentBranch} / Yr {item.studentYear}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-slate-600 font-semibold">{item.studentName}</p>
+                            {item.userRole === 'STAFF' && (
+                              <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                                STAFF
+                              </span>
+                            )}
+                          </div>
+                          {item.userRole !== 'STAFF' && (
+                            <p className="text-[10px] text-slate-400">{item.studentBranch} / Yr {item.studentYear}</p>
+                          )}
                         </td>
                         <td className="py-3 pr-3 text-slate-500 whitespace-nowrap">{formatDt(item.borrowDate)}</td>
                         <td className="py-3 pr-3 text-slate-600 max-w-[100px] truncate" title={item.reason}>{item.reason}</td>

@@ -95,6 +95,7 @@ public class BookReplacementService {
                 .replacementCategory(newBook != null ? newBook.getCategory() : null)
                 .replacementStatus(newBook != null ? newBook.getStatus() : null)
                 .studentId(student != null ? student.getId() : null)
+                .userRole(student != null ? student.getRole() : null)
                 .studentName(student != null ? student.getName() : "Unknown")
                 .replacedByAdmin(replacement.getReplacedByAdmin())
                 .replacementDate(replacement.getReplacementDate())

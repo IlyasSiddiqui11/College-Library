@@ -158,6 +158,7 @@ public class GateLogService {
                 .userId(user.getId())
                 .userName(user.getName())
                 .userEmail(userEmail)
+                .userRole(user.getRole())
                 .branch(branch)
                 .year(year)
                 .entryTime(log.getEntryTime())

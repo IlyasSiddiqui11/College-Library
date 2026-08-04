@@ -76,6 +76,7 @@ public class DataInitializer implements CommandLineRunner {
                     .email(adminEmail)
                     .password(passwordEncoder.encode(adminPassword))
                     .role(Role.ADMIN)
+                    .isVerified(true)
                     .build();
             userRepository.save(admin);
         }

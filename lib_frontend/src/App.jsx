@@ -3,9 +3,12 @@ import { AuthProvider } from './context/AuthContext'
 import Home from './pages/Home.jsx'
 import BorrowRequests from './pages/BorrowRequests.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
+import AdminStaffManagement from './pages/AdminStaffManagement.jsx'
 import InventoryManagement from './pages/InventoryManagement.jsx'
 import StudentLogin from './pages/StudentLogin.jsx'
 import LibrarianLogin from './pages/LibrarianLogin.jsx'
+import StaffLogin from './pages/StaffLogin.jsx'
+import StaffDashboard from './pages/StaffDashboard.jsx'
 import StudentDashboard from './pages/StudentDashboard.jsx'
 import BorrowHistory from './pages/BorrowHistory.jsx'
 import ReturnStation from './pages/ReturnStation.jsx'
@@ -30,8 +33,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<StudentLogin />} />
           <Route path="/admin/login" element={<LibrarianLogin />} />
+          <Route path="/staff/login" element={<StaffLogin />} />
+          <Route path="/staff/dashboard" element={<StaffDashboard />} />
           <Route path="/lending" element={<BorrowRequests />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/staff" element={<AdminStaffManagement />} />
           <Route path="/admin/gate-logs" element={<GateLogs />} />
           <Route path="/admin/students" element={<RegisteredStudents />} />
           <Route path="/inventory" element={<InventoryManagement />} />

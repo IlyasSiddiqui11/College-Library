@@ -44,6 +44,12 @@ export default function Home() {
               >
                 Librarian Login
               </Link>
+              <Link
+                to="/staff/login"
+                className="rounded-lg border-2 border-emerald-600 px-6 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 transition"
+              >
+                Staff Login
+              </Link>
             </div>
 
             <button
@@ -69,6 +75,12 @@ export default function Home() {
                 className="block rounded-lg border-2 border-violet-600 glass-panel px-4 py-2.5 text-sm font-semibold text-violet-600 text-center hover:bg-violet-50 transition"
               >
                 Librarian Login
+              </Link>
+              <Link
+                to="/staff/login"
+                className="block rounded-lg border-2 border-emerald-600 glass-panel px-4 py-2.5 text-sm font-semibold text-emerald-600 text-center hover:bg-emerald-50 transition"
+              >
+                Staff Login
               </Link>
             </div>
           )}
@@ -108,6 +120,13 @@ export default function Home() {
               className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-violet-600 glass-panel px-8 py-4 text-base font-semibold text-violet-600 hover:bg-violet-50 transition"
             >
               Admin Portal
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/staff/login"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-600 glass-panel px-8 py-4 text-base font-semibold text-emerald-600 hover:bg-emerald-50 transition"
+            >
+              Staff Portal
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a

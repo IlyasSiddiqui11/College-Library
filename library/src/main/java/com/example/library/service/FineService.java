@@ -202,6 +202,7 @@ public class FineService {
         return FineResponse.builder()
                 .id(fine.getId())
                 .userId(user.getId())
+                .userRole(user.getRole())
                 .studentName(user.getName())
                 .enrollmentNumber(user.getEmail()) // Using email as enrollment number fallback
                 .borrowRequestId(request != null ? request.getId() : null)

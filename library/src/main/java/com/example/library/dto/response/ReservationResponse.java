@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class ReservationResponse {
     private Long id;
     private UserDto user;
+    private com.example.library.enums.Role userRole;
     private String isbn;
     private String bookTitle;
     private String bookAuthor;

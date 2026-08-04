@@ -13,6 +13,7 @@ export default function ReplacementHistory() {
 
   const [replacements, setReplacements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -39,13 +40,15 @@ export default function ReplacementHistory() {
 
   const filteredItems = replacements.filter(item => {
     const query = searchQuery.toLowerCase()
-    return (
+    const matchesSearch = (
       (item.originalTitle?.toLowerCase().includes(query)) ||
       (item.originalIsbn?.includes(query)) ||
       (item.replacementTitle?.toLowerCase().includes(query)) ||
       (item.replacementIsbn?.includes(query)) ||
       (item.studentName?.toLowerCase().includes(query))
     )
+    const matchesUserType = userTypeFilter === 'ALL' || item.userRole === userTypeFilter
+    return matchesSearch && matchesUserType
   })
 
   // Date formatter
@@ -101,6 +104,15 @@ export default function ReplacementHistory() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <select
+                value={userTypeFilter}
+                onChange={(e) => setUserTypeFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
+              >
+                <option value="ALL">All Users</option>
+                <option value="STUDENT">Students</option>
+                <option value="STAFF">Staff</option>
+              </select>
               {/* Search */}
               <input
                 type="text"
@@ -188,7 +200,14 @@ export default function ReplacementHistory() {
                               {item.studentName.charAt(0)}
                             </div>
                             <div className="flex flex-col">
-                              <span className="font-bold text-slate-900 text-xs">{item.studentName}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-900 text-xs">{item.studentName}</span>
+                                {item.userRole === 'STAFF' && (
+                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                                    STAFF
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-[10px] text-slate-500">ID: {item.studentId}</span>
                             </div>
                           </div>

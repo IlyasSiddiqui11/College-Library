@@ -25,7 +25,8 @@ public class LostBookDetailsResponse {
     private String bookCategory;
     private Double price;
 
-    // Student details
+    // Student/User details
+    private com.example.library.enums.Role userRole;
     private Long studentId;
     private String studentName;
     private String studentEmail;

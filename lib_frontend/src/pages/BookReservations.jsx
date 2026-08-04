@@ -33,6 +33,7 @@ export default function BookReservations() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [filterStatus, setFilterStatus] = useState('ALL')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -69,7 +70,8 @@ export default function BookReservations() {
         (r.isbn || '').toLowerCase().includes(q) ||
         (r.user?.name || '').toLowerCase().includes(q)
       const matchesStatus = filterStatus === 'ALL' || r.status === filterStatus
-      return matchesSearch && matchesStatus
+      const matchesUserType = userTypeFilter === 'ALL' || r.userRole === userTypeFilter
+      return matchesSearch && matchesStatus && matchesUserType
     })
     .sort((a, b) => new Date(b.reservationDate) - new Date(a.reservationDate))
 
@@ -104,6 +106,16 @@ export default function BookReservations() {
               />
 
               {/* Status Filter */}
+              <select
+                value={userTypeFilter}
+                onChange={(e) => setUserTypeFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
+              >
+                <option value="ALL">All Users</option>
+                <option value="STUDENT">Students</option>
+                <option value="STAFF">Staff</option>
+              </select>
+
               <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                 {['ALL', 'PENDING', 'FULFILLED', 'CANCELLED'].map(s => (
                   <button
@@ -194,7 +206,14 @@ export default function BookReservations() {
                               {(r.user?.name || 'ST').slice(0, 2).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-bold text-slate-900">{r.user?.name || `User #${r.user?.id}`}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-slate-900">{r.user?.name || `User #${r.user?.id}`}</p>
+                                {r.userRole === 'STAFF' && (
+                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                                    STAFF
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[10px] text-slate-500">{r.user?.email || ''}</p>
                             </div>
                           </div>

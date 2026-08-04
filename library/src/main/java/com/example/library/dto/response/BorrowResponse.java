@@ -20,6 +20,7 @@ public class BorrowResponse {
     private Long id;
     private Long userId;
     private String userName;
+    private com.example.library.enums.Role userRole;
     private Long bookId;
     private String bookTitle;
     private String bookAuthor;

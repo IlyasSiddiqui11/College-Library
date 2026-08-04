@@ -17,6 +17,9 @@ import com.example.library.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.library.repository.StaffProfileRepository;
+import com.example.library.entity.StaffProfile;
+import com.example.library.enums.StaffStatus;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final StaffProfileRepository staffProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Random random = new Random();
@@ -116,10 +120,30 @@ public class AuthService {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+                .orElse(null);
+
+        if (user == null) {
+            // Check if they are a staff waiting for approval or rejected
+            staffProfileRepository.findByCollegeEmail(request.getEmail()).ifPresent(profile -> {
+                if (profile.getStatus() == StaffStatus.PENDING) {
+                    throw new BadRequestException("Your staff verification request is pending Admin approval.");
+                } else if (profile.getStatus() == StaffStatus.REJECTED) {
+                    throw new BadRequestException("Your staff verification request has been rejected. Please contact the library administrator.");
+                }
+            });
+            throw new BadRequestException("Invalid email or password");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Invalid email or password");
+        }
+
+        if (user.getRole() == com.example.library.enums.Role.STAFF) {
+            staffProfileRepository.findByCollegeEmail(user.getEmail()).ifPresent(profile -> {
+                if (profile.getStatus() == StaffStatus.INACTIVE) {
+                    throw new BadRequestException("Your account has been deactivated. Please contact the administrator.");
+                }
+            });
         }
 
         if (!Boolean.TRUE.equals(user.getIsVerified()) && user.getRegistrationOtp() == null) {

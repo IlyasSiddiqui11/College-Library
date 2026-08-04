@@ -498,6 +498,7 @@ public class BorrowService {
                 .id(request.getId())
                 .userId(request.getUser().getId())
                 .userName(request.getUser().getName())
+                .userRole(request.getUser().getRole())
                 .bookId(bookId)
                 .bookTitle(bookTitle)
                 .bookAuthor(bookAuthor)

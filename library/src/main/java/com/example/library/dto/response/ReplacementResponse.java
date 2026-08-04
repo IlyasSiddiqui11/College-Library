@@ -34,6 +34,7 @@ public class ReplacementResponse {
 
     // Replacement Information
     private Long studentId;
+    private com.example.library.enums.Role userRole;
     private String studentName;
     private String replacedByAdmin;
     private LocalDateTime replacementDate;

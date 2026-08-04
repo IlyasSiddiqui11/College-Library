@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class FineResponse {
     private Long id;
     private Long userId;
+    private com.example.library.enums.Role userRole;
     private String studentName;
     private String enrollmentNumber;
     private Long borrowRequestId;
