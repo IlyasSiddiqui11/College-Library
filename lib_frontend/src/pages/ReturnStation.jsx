@@ -6,7 +6,7 @@ import {
   ChevronLeft, CheckCircle2,
   AlertCircle, Loader2, Laptop, UserCheck, ShieldAlert,
   Library, ClipboardList, BookOpen, Clock, Users, LogOut, BookMarked
-, Banknote} from 'lucide-react'
+, Banknote, History} from 'lucide-react'
 import AddAssetModal from '../components/AddAssetModal.jsx'
 
 export default function ReturnStation() {
@@ -50,6 +50,15 @@ export default function ReturnStation() {
 
     keepFocused()
     const interval = setInterval(keepFocused, 1000)
+  useEffect(() => {
+    if (errorMsg) {
+      setTimeout(() => {
+        const el = document.querySelector('.bg-red-50, #error-message, .text-red-600')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [errorMsg])
+
     return () => clearInterval(interval)
   }, [returnStatus, showReplaceModal])
 
@@ -219,6 +228,13 @@ export default function ReturnStation() {
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+                        <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
             </button>
             <button
               onClick={() => navigate('/admin/fines')}

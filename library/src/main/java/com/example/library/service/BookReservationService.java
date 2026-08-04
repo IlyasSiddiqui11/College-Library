@@ -34,6 +34,7 @@ public class BookReservationService {
     private final BookRepository bookRepository;
     private final BorrowRequestRepository borrowRequestRepository;
     private final BorrowingService borrowingService;
+    private final com.example.library.repository.FineRepository fineRepository;
 
     @Transactional
     public ReservationResponse createReservation(ReservationRequestDto dto) {
@@ -48,6 +49,16 @@ public class BookReservationService {
         List<Book> copies = bookRepository.findByIsbn(isbn);
         if (copies.isEmpty()) {
             throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
+        }
+
+        boolean allLost = copies.stream().allMatch(c -> "LOST".equalsIgnoreCase(c.getStatus()));
+        if (allLost) {
+            throw new BadRequestException("All copies of this book are currently lost. Reservations are not allowed.");
+        }
+
+        boolean hasPendingFines = fineRepository.existsByUserIdAndStatusIn(user.getId(), java.util.List.of(com.example.library.enums.FineStatus.PENDING, com.example.library.enums.FineStatus.UNPAID));
+        if (hasPendingFines) {
+            throw new BadRequestException("You have pending fines. No reservations are allowed until fines are cleared.");
         }
 
 

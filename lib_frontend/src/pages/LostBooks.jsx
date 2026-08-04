@@ -18,7 +18,7 @@ import {
   RefreshCw,
   BookMarked,
   Banknote
-} from 'lucide-react'
+, History} from 'lucide-react'
 
 function exportToCsv(rows, filename) {
   const csv = rows.map(row =>
@@ -175,6 +175,15 @@ export default function LostBooks() {
 
   const formatDt = (dt) => dt ? new Date(dt).toLocaleDateString() : 'N/A'
   const formatFull = (dt) => dt ? new Date(dt).toLocaleString() : 'N/A'
+  useEffect(() => {
+    if (errorMsg) {
+      setTimeout(() => {
+        const el = document.querySelector('.bg-red-50, #error-message, .text-red-600')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [errorMsg])
+
 
   return (
     <div className="h-screen flex text-slate-900">
@@ -194,6 +203,7 @@ export default function LostBooks() {
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books', active: true },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
+              { path: '/admin/replacements', icon: History, label: 'Replacement History' },
               { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
             ].map(({ path, icon: Icon, label, active }) => (

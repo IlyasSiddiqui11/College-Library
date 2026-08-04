@@ -19,7 +19,7 @@ import {
   BookOpen,
   ShieldAlert,
   BookMarked
-, Banknote} from 'lucide-react'
+, Banknote, History} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function GateLogs() {
@@ -39,10 +39,19 @@ export default function GateLogs() {
 
   // Admin-only page
   useEffect(() => {
-    if (user && user.role !== 'ADMIN') {
+    if (user && user.role !== 'ADMIN' && user.role !== 'GATE_GUARD') {
       navigate('/student')
     }
   }, [user, navigate])
+
+  useEffect(() => {
+    if (error) {
+      const el = document.getElementById('error-message')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [error])
 
   // Fetch available months (past records) once on mount
   useEffect(() => {
@@ -259,6 +268,13 @@ export default function GateLogs() {
               <BookMarked className="size-4.5" />
               Book Reservations
             </button>
+                        <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
+            </button>
             <button
               onClick={() => navigate('/admin/fines')}
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
@@ -432,7 +448,7 @@ export default function GateLogs() {
 
           {/* Error State */}
           {error && (
-            <div className="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-4">
+            <div id="error-message" className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-900">
               <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-red-900">Error Loading Logs</p>

@@ -7,7 +7,7 @@ import {
   BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList,
   Users, X, ScanLine, Clock, ShieldAlert,
   UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
-, Banknote} from 'lucide-react'
+, Banknote, History} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AddAssetModal from '../components/AddAssetModal.jsx'
 
@@ -165,6 +165,7 @@ export default function InventoryManagement() {
               { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
               { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
               { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
+              { path: '/admin/replacements', icon: History, label: 'Replacement History' },
               { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
               { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
             ].map(({ path, icon: Icon, label, active }) => (
@@ -267,7 +268,8 @@ export default function InventoryManagement() {
                   { value: 'ALL', label: 'ALL' },
                   { value: 'AVAILABLE', label: 'AVAILABLE' },
                   { value: 'BORROWED', label: 'BORROWED' },
-                  { value: 'LOST', label: 'LOST' }
+                  { value: 'LOST', label: 'LOST' },
+                  { value: 'REPLACED', label: 'REPLACED' }
                 ]}
                 className="w-full"
               />
@@ -314,7 +316,8 @@ export default function InventoryManagement() {
                   ) : (
                     paginatedBooks.map((book) => {
                       const isBorrowed = book.status === 'BORROWED'
-                      const isLost = book.status === 'LOST' || book.status === 'REPLACED'
+                      const isLost = book.status === 'LOST'
+                      const isReplaced = book.status === 'REPLACED'
                       const formatDt = (dt) => dt ? new Date(dt).toLocaleDateString() : '—'
 
                       return (
@@ -339,8 +342,10 @@ export default function InventoryManagement() {
                           <td className="py-3 px-3 text-center">
                             {isLost ? (
                               <span className="w-20 inline-block text-center px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold text-[9px] border border-red-200 whitespace-nowrap">LOST</span>
+                            ) : isReplaced ? (
+                              <span className="w-20 inline-block text-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold text-[9px] border border-blue-200 whitespace-nowrap">REPLACED</span>
                             ) : isBorrowed ? (
-                              <span className="w-20 inline-block text-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold text-[9px] border border-blue-200 whitespace-nowrap">BORROWED</span>
+                              <span className="w-20 inline-block text-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-600 font-bold text-[9px] border border-indigo-200 whitespace-nowrap">BORROWED</span>
                             ) : (
                               <span className="w-20 inline-block text-center px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-bold text-[9px] border border-green-200 whitespace-nowrap">AVAILABLE</span>
                             )}

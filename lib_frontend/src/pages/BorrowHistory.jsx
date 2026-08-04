@@ -16,6 +16,7 @@ export default function BorrowHistory() {
   const [borrowRequests, setBorrowRequests] = useState([])
   const [reservations, setReservations] = useState([])
   const [fines, setFines] = useState([])
+  const [replacements, setReplacements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [loading, setLoading] = useState(true)
@@ -32,14 +33,16 @@ export default function BorrowHistory() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      const [historyRes, resRes, finesRes] = await Promise.all([
+      const [historyRes, resRes, finesRes, replRes] = await Promise.all([
         apiClient.get(`/api/borrow/user/${user.id}`),
         apiClient.get(`/api/reservations/user/${user.id}`),
-        apiClient.get(`/api/fines/user/${user.id}`)
+        apiClient.get(`/api/fines/user/${user.id}`),
+        apiClient.get(`/api/replacements/user/${user.id}`)
       ])
       setBorrowRequests(historyRes.data)
       setReservations(resRes.data)
       setFines(finesRes.data || [])
+      setReplacements(replRes.data || [])
     } catch (err) {
       console.error('Error fetching data:', err)
     } finally {
@@ -116,6 +119,15 @@ export default function BorrowHistory() {
       return title.includes(query) || r.isbn?.includes(query)
     })
     .sort((a, b) => new Date(a.reservationDate).getTime() - new Date(b.reservationDate).getTime())
+
+  // Filtered replacements
+  const filteredReplacements = replacements
+    .filter(r => {
+      const title = r.originalTitle?.toLowerCase() || r.replacementTitle?.toLowerCase() || ''
+      const query = searchQuery.toLowerCase()
+      return title.includes(query) || r.originalIsbn?.includes(query) || r.replacementIsbn?.includes(query)
+    })
+    .sort((a, b) => new Date(b.replacementDate).getTime() - new Date(a.replacementDate).getTime())
 
   // Compute Stats
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
@@ -215,6 +227,12 @@ export default function BorrowHistory() {
             {pendingFinesAmount > 0 && (
               <span className="absolute top-2 right-4 size-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab('replacements')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${activeTab === 'replacements' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-blue-600'}`}
+          >
+            Replacement History
           </button>
         </div>
 

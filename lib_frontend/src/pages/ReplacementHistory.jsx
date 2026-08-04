@@ -1,0 +1,308 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { apiClient } from '../api/client'
+import { ShieldAlert, BookOpen, Clock, UserCheck, BookMarked, Banknote, Search, ChevronLeft, LayoutDashboard, History, Database , Download, LogOut, Library, ClipboardList, Users} from 'lucide-react'
+
+export default function ReplacementHistory() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const [replacements, setReplacements] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user || user.role !== 'ADMIN') {
+      navigate('/')
+    }
+  }, [user, navigate])
+
+  const fetchReplacements = async () => {
+    setLoading(true)
+    try {
+      const res = await apiClient.get('/api/replacements')
+      setReplacements(res.data || [])
+    } catch (err) {
+      console.error('Error fetching replacements:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchReplacements()
+  }, [])
+
+  const filteredItems = replacements.filter(item => {
+    const query = searchQuery.toLowerCase()
+    return (
+      (item.originalTitle?.toLowerCase().includes(query)) ||
+      (item.originalIsbn?.includes(query)) ||
+      (item.replacementTitle?.toLowerCase().includes(query)) ||
+      (item.replacementIsbn?.includes(query)) ||
+      (item.studentName?.toLowerCase().includes(query))
+    )
+  })
+
+  // Date formatter
+  
+  const handleExport = () => {
+    const headers = ['Original Title', 'Original Accession', 'Replacement Title', 'Replacement Accession', 'Student Name', 'Replaced By', 'Date']
+    const csvRows = [
+      headers.join(','),
+      ...filteredItems.map(item => {
+        return [
+          `"${(item.originalTitle || '').replace(/"/g, '""')}"`,
+          `"${(item.originalAccession || '')}"`,
+          `"${(item.replacementTitle || '').replace(/"/g, '""')}"`,
+          `"${(item.replacementAccession || '')}"`,
+          `"${(item.studentName || '').replace(/"/g, '""')}"`,
+          `"${(item.replacedByAdmin || '')}"`,
+          `"${item.replacementDate ? new Date(item.replacementDate).toLocaleString() : ''}"`
+        ].join(',')
+      })
+    ]
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `replacement_history_${new Date().getTime()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const d = new Date(dateString)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
+
+  if (!user || user.role !== 'ADMIN') return null
+
+  return (
+    <div className="h-screen flex text-slate-900">
+      <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
+            <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <span className="font-bold tracking-tight text-slate-900 text-base">
+              BCOE-lib
+            </span>
+          </div>
+
+          <nav className="flex flex-col gap-1 p-4">
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Library className="size-4.5" />
+              Overview
+            </button>
+            <button
+              onClick={() => navigate('/inventory')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookOpen className="size-4.5" />
+              Catalogue Inventory
+            </button>
+            <button
+              onClick={() => navigate('/lending')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <ClipboardList className="size-4.5" />
+              Borrow Requests
+            </button>
+            <button
+              onClick={() => navigate('/returns')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Users className="size-4.5" />
+              Return Station
+            </button>
+            <button
+              onClick={() => navigate('/admin/lost-books')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <ShieldAlert className="size-4.5" />
+              Lost Books
+            </button>
+            <button
+              onClick={() => navigate('/admin/gate-logs')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Clock className="size-4.5" />
+              Gate Logs
+            </button>
+            <button
+              onClick={() => navigate('/admin/reservations')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <BookMarked className="size-4.5" />
+              Book Reservations
+            </button>
+            <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
+            </button>
+            <button
+              onClick={() => navigate('/admin/fines')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <Banknote className="size-4.5" />
+              Fine Management
+            </button>
+            <button
+              onClick={() => navigate('/admin/students')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <UserCheck className="size-4.5" />
+              Registered Students
+            </button>
+          </nav>
+        </div>
+
+        <div className="p-4 border-t border-slate-200">
+          <div className="flex items-center justify-between rounded-xl glass-panel p-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+              <p className="text-[10px] text-slate-500 font-medium">Administrator</p>
+            </div>
+            <button
+              onClick={logout}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 bg-slate-50">
+        
+        {/* Header */}
+        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Replacement History</h1>
+            <p className="text-sm font-medium text-slate-500">Track and manage books replaced due to loss or damage.</p>
+          </div>
+        <div className="flex items-center gap-3 ml-auto">
+          <button onClick={handleExport} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition">
+            <Download className="size-4" />
+            Export
+          </button>
+        </div>
+          
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search by title, ISBN, or student..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition"
+            />
+          </div>
+        </header>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="size-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+              <p className="text-sm font-semibold text-slate-500 animate-pulse">Loading replacements...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Content Table */}
+        {!loading && filteredItems.length > 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th className="px-6 py-4">Replacement Info</th>
+                    <th className="px-6 py-4">Original Book</th>
+                    <th className="px-6 py-4">Replacement Book</th>
+                    <th className="px-6 py-4">Student</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredItems.map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50/50 transition group">
+                      <td className="px-6 py-4 align-top">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold text-slate-900">{formatDate(item.replacementDate)}</span>
+                          <span className="text-xs text-slate-500">By Admin: {item.replacedByAdmin}</span>
+                          {item.remarks && (
+                            <span className="mt-1 text-xs text-slate-500 italic max-w-[150px] truncate" title={item.remarks}>
+                              "{item.remarks}"
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-bold text-slate-900 max-w-[200px] truncate">{item.originalTitle}</p>
+                          <p className="text-[10px] text-slate-500">Acc No: <span className="font-mono text-slate-700 font-semibold">{item.originalAccessionNumber}</span></p>
+                          <p className="text-[10px] text-slate-500">ISBN: {item.originalIsbn}</p>
+                          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-bold text-blue-800">
+                            REPLACED
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-bold text-slate-900 max-w-[200px] truncate">{item.replacementTitle}</p>
+                          <p className="text-[10px] text-slate-500">Acc No: <span className="font-mono text-slate-700 font-semibold">{item.replacementAccessionNumber}</span></p>
+                          <p className="text-[10px] text-slate-500">ISBN: {item.replacementIsbn}</p>
+                          <span className="mt-1 inline-flex w-fit items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700">
+                            AVAILABLE
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        {item.studentName && item.studentName !== 'Unknown' ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 font-bold text-xs">
+                              {item.studentName.charAt(0)}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-900 text-xs">{item.studentName}</span>
+                              <span className="text-[10px] text-slate-500">ID: {item.studentId}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">No Student</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && filteredItems.length === 0 && (
+          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center">
+            <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 text-slate-400">
+              <History className="size-8" />
+            </div>
+            <h3 className="mb-1 text-lg font-bold text-slate-900">No replacements found</h3>
+            <p className="text-sm text-slate-500 max-w-sm">
+              {searchQuery ? "We couldn't find any replacements matching your search criteria." : "There are currently no book replacements recorded in the system."}
+            </p>
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}

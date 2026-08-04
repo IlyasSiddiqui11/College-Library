@@ -6,7 +6,7 @@ import {
   Banknote, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X,
   Clock, BookOpen, 
   UserCheck, Download, ShieldAlert, BookMarked
-} from 'lucide-react'
+, History} from 'lucide-react'
 
 export default function AdminFines() {
   const { user, logout } = useAuth()
@@ -30,7 +30,7 @@ export default function AdminFines() {
   const fetchFines = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/api/fines?size=1000') // fetch up to 1000 for simple view
+      const response = await apiClient.get('/api/fines?size=1000&sort=createdAt,desc')
       if (response.data && response.data.content) {
         setFines(response.data.content)
       } else {
@@ -195,6 +195,13 @@ export default function AdminFines() {
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+                        <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
             </button>
             <button
               onClick={() => navigate('/admin/fines')}

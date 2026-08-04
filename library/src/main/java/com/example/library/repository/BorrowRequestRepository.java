@@ -47,4 +47,6 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
     long countByReturnedDateBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
     java.util.List<BorrowRequest> findTop10ByOrderByRequestDateDesc();
     java.util.List<BorrowRequest> findTop10ByStatusOrderByReturnedDateDesc(BorrowStatus status);
+    
+    List<BorrowRequest> findByAccessionNumber(String accessionNumber);
 }

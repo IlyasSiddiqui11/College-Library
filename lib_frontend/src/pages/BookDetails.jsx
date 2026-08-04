@@ -91,6 +91,15 @@ export default function BookDetails() {
         { label: 'Language', value: book.language },
       ].filter((row) => row.value !== null && row.value !== undefined && String(row.value).trim() !== '')
     : []
+  useEffect(() => {
+    if (errorMsg) {
+      setTimeout(() => {
+        const el = document.querySelector('.bg-red-50, #error-message, .text-red-600')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [errorMsg])
+
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-20">
