@@ -83,6 +83,9 @@ export default function StudentProfile() {
     const intervalId = setInterval(() => {
       loadProfileData(false)
     }, 5000)
+    return () => clearInterval(intervalId)
+  }, [user])
+
   useEffect(() => {
     if (errorMsg) {
       setTimeout(() => {
@@ -91,9 +94,6 @@ export default function StudentProfile() {
       }, 100)
     }
   }, [errorMsg])
-
-    return () => clearInterval(intervalId)
-  }, [user])
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()

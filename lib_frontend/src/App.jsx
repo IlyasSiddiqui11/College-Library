@@ -20,6 +20,7 @@ import BookReservations from './pages/BookReservations.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import AdminFines from './pages/AdminFines.jsx'
 import ReplacementHistory from './pages/ReplacementHistory.jsx'
+import StudentFines from './pages/StudentFines.jsx'
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
           <Route path="/admin/replacements" element={<ReplacementHistory />} />
           <Route path="/admin/fines" element={<AdminFines />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/student/fines" element={<StudentFines />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
-import { 
-  BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
-  Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
-  UserCheck, BookMarked, Banknote
-, History} from 'lucide-react'
+import {
+  Users, ClipboardList, ArrowRight, ShieldAlert, Loader2, LogOut, Check, X, RefreshCw
+} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
+import AdminSidebar from '../components/AdminSidebar.jsx';
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -149,113 +148,7 @@ export default function AdminDashboard() {
   return (
     <div className="h-screen flex text-slate-900">
       {/* Admin Sidebar Navigation */}
-      <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
-        <div className="flex flex-col">
-          {/* Logo Brand */}
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
-            <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-            <span className="font-bold tracking-tight text-slate-900 text-base">
-              BCOE-lib
-            </span>
-          </div>
-
-          {/* Links */}
-          <nav className="flex flex-col gap-1 p-4">
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50/50 text-left transition"
-            >
-              <Library className="size-4.5" />
-              Overview
-            </button>
-            <button
-              onClick={() => navigate('/inventory')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <BookOpen className="size-4.5" />
-              Catalogue Inventory
-            </button>
-            <button
-              onClick={() => navigate('/lending')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <ClipboardList className="size-4.5" />
-              Borrow Requests
-              {pendingRequests.length > 0 && (
-                <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">
-                  {pendingRequests.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => navigate('/returns')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <Users className="size-4.5" />
-              Return Station
-            </button>
-            <button
-              onClick={() => navigate('/admin/lost-books')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <ShieldAlert className="size-4.5" />
-              Lost Books
-            </button>
-            <button
-              onClick={() => navigate('/admin/gate-logs')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <Clock className="size-4.5" />
-              Gate Logs
-            </button>
-            <button
-              onClick={() => navigate('/admin/reservations')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <BookMarked className="size-4.5" />
-              Book Reservations
-            </button>
-                        <button
-              onClick={() => navigate('/admin/replacements')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <History className="size-4.5" />
-              Replacement History
-            </button>
-            <button
-              onClick={() => navigate('/admin/fines')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <Banknote className="size-4.5" />
-              Fine Management
-            </button>
-            <button
-              onClick={() => navigate('/admin/students')}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
-            >
-              <UserCheck className="size-4.5" />
-              Registered Students
-            </button>
-          </nav>
-        </div>
-
-        {/* User Card & Logout */}
-        <div className="p-4 border-t border-slate-200">
-          <div className="flex items-center justify-between rounded-xl glass-panel p-3">
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
-              <p className="text-[10px] text-slate-500 font-medium">Administrator</p>
-            </div>
-            <button
-              onClick={logout}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
-              title="Sign Out"
-            >
-              <LogOut className="size-4" />
-            </button>
-          </div>
-        </div>
-      </aside>
+      <AdminSidebar user={user} logout={logout} />
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
