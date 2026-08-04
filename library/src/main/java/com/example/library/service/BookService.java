@@ -217,6 +217,7 @@ public class BookService {
 
         return byIsbn.entrySet().stream()
                 .map(entry -> mapToCatalogResponse(entry.getKey(), entry.getValue()))
+                .filter(res -> !"Lost".equalsIgnoreCase(res.getAvailability()))
                 .sorted(Comparator.comparing(BookCatalogResponse::getTitle, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
     }
@@ -325,6 +326,16 @@ public class BookService {
     private BookCatalogResponse mapToCatalogResponse(String isbn, List<Book> copies) {
         Book representative = copies.get(0);
         long available = copies.stream().filter(b -> "AVAILABLE".equals(b.getStatus())).count();
+        boolean allLost = copies.stream().allMatch(b -> "LOST".equalsIgnoreCase(b.getStatus()));
+
+        String availability;
+        if (available > 0) {
+            availability = "Available";
+        } else if (allLost) {
+            availability = "Lost";
+        } else {
+            availability = "Unavailable";
+        }
 
         return BookCatalogResponse.builder()
                 .isbn(isbn)
@@ -338,7 +349,7 @@ public class BookService {
                 .category(representative.getCategory())
                 .language(representative.getLanguage())
                 .totalPages(representative.getTotalPages())
-                .availability(available > 0 ? "Available" : "Unavailable")
+                .availability(availability)
                 .availableCopies(available)
                 .totalCopies(copies.size())
                 .build();

@@ -88,32 +88,41 @@ export default function ReplacementHistory() {
     <div className="h-screen flex text-slate-900">
       <AdminSidebar user={user} logout={logout} />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-8 bg-slate-50">
-        
-        {/* Header */}
-        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Replacement History</h1>
-            <p className="text-sm font-medium text-slate-500">Track and manage books replaced due to loss or damage.</p>
-          </div>
-        <div className="flex items-center gap-3 ml-auto">
-          <button onClick={handleExport} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition">
-            <Download className="size-4" />
-            Export
-          </button>
-        </div>
-          
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search by title, ISBN, or student..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition"
-            />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-8 py-4 backdrop-blur-md">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                <History className="size-5 text-indigo-600" />
+                Replacement History
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {filteredItems.length} records found • Track and manage books replaced due to loss or damage
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <input
+                type="text"
+                placeholder="Search by title, ISBN, or student..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 rounded-xl border border-slate-200 glass-input py-2 px-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition"
+              />
+
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredItems.length === 0}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 glass-panel px-3.5 py-2 text-xs font-bold text-green-600 hover:bg-slate-100 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
+            </div>
           </div>
         </header>
+
+        <main className="flex-1 p-8 max-w-[1440px] mx-auto w-full bg-slate-50">
 
         {/* Loading State */}
         {loading && (
@@ -208,6 +217,7 @@ export default function ReplacementHistory() {
           </div>
         )}
 
+      </main>
       </div>
     </div>
   )

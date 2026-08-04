@@ -343,6 +343,54 @@ export default function BorrowHistory() {
                 </div>
               ))
             )
+          ) : activeTab === 'replacements' && filteredReplacements.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 glass-panel px-4 py-12 text-center">
+              <p className="text-sm font-semibold text-slate-600">No replacement history</p>
+              <p className="text-xs text-slate-500 mt-1">You have not replaced any lost books.</p>
+            </div>
+          ) : activeTab === 'replacements' ? (
+            filteredReplacements.map(rep => (
+              <div key={rep.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition">
+                <div className="flex gap-4">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600">
+                    <HistoryIcon className="size-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-bold text-slate-900 text-sm truncate pr-2">
+                        {rep.originalTitle || 'Unknown Title'}
+                      </h4>
+                      <span className="flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[9px] font-bold text-indigo-800">
+                        <CheckCircle2 className="size-2.5" /> REPLACED
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Original Accession: {rep.originalAccessionNumber}
+                    </p>
+                    <div className="mt-3 flex flex-col gap-1 border-t border-black/5 pt-2.5 text-[10px] font-medium text-slate-500">
+                      <div className="flex justify-between">
+                        <span>Replaced With</span>
+                        <span className="text-slate-700 font-semibold truncate max-w-[180px]">{rep.replacementTitle || 'Unknown'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>New Accession</span>
+                        <span className="font-mono text-slate-700 font-bold">{rep.replacementAccessionNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Replacement Date</span>
+                        <span className="text-slate-700">{formatDate(rep.replacementDate)}</span>
+                      </div>
+                      {rep.remarks && (
+                        <div className="flex justify-between mt-1">
+                          <span>Remarks</span>
+                          <span className="text-slate-700 truncate max-w-[180px]">{rep.remarks}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
           ) : (
             (activeTab === 'history' ? filteredItems : activeReservations).map((item) => {
               let bgClass = 'bg-white border-slate-200'

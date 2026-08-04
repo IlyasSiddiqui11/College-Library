@@ -49,6 +49,10 @@ export default function ReturnStation() {
 
     keepFocused()
     const interval = setInterval(keepFocused, 1000)
+
+    return () => clearInterval(interval)
+  }, [returnStatus, showReplaceModal])
+
   useEffect(() => {
     if (errorMsg) {
       setTimeout(() => {
@@ -57,9 +61,6 @@ export default function ReturnStation() {
       }, 100)
     }
   }, [errorMsg])
-
-    return () => clearInterval(interval)
-  }, [returnStatus, showReplaceModal])
 
   // Handle USB Gun Scan Submit (auto trigger when barcode is entered via gun)
   const handleFormSubmit = (e) => {

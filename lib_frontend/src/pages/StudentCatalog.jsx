@@ -275,6 +275,7 @@ export default function StudentCatalog() {
             <div className="flex flex-col gap-4">
               {filteredBooks.map((book) => {
                 const isAvailable = book.availability === 'Available'
+                const isLost = book.availability === 'Lost'
 
                 return (
                   <div
@@ -327,6 +328,10 @@ export default function StudentCatalog() {
                             <span className="text-green-600 bg-green-100 px-2 py-0.5 rounded-md border border-green-400/20">
                               Available
                             </span>
+                          ) : isLost ? (
+                            <span className="text-red-600 bg-red-100 px-2 py-0.5 rounded-md border border-red-400/20">
+                              Lost
+                            </span>
                           ) : (
                             <span className="text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
                               Unavailable
@@ -338,10 +343,12 @@ export default function StudentCatalog() {
 
                     <button
                       onClick={() => isAvailable ? handleRequestBorrow(book.isbn) : handleReserveBook(book.isbn)}
-                      disabled={requestingIsbn === book.isbn}
+                      disabled={requestingIsbn === book.isbn || isLost}
                       className={`w-full rounded-xl py-3 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] ${
                         isAvailable
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20 disabled:opacity-50'
+                          : isLost
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
                           : 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-600/20 disabled:opacity-50'
                       }`}
                     >
@@ -352,6 +359,8 @@ export default function StudentCatalog() {
                         </>
                       ) : isAvailable ? (
                         'Request to Borrow'
+                      ) : isLost ? (
+                        'Book Lost'
                       ) : (
                         'Reserve Book'
                       )}
