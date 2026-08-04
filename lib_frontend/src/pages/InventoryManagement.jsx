@@ -4,12 +4,11 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
-  BookOpen, Plus, Search, Library, Loader2, LogOut, ClipboardList,
-  Users, X, ScanLine, Clock, ShieldAlert,
-  UserCheck, Download, Trash2, RefreshCw, ChevronLeft, ChevronRight, PencilLine, BookMarked
-, Banknote, History} from 'lucide-react'
+  Plus, Search, Loader2, Download, RefreshCw, ChevronLeft, ChevronRight, PencilLine
+} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AddAssetModal from '../components/AddAssetModal.jsx'
+import AdminSidebar from '../components/AdminSidebar.jsx';
 
 const PAGE_SIZE = 25
 
@@ -150,48 +149,7 @@ export default function InventoryManagement() {
   return (
     <div className="h-screen flex text-slate-900">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-300 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-300">
-            <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
-            <span className="font-bold tracking-tight text-slate-900 text-base">BCOE-lib</span>
-          </div>
-          <nav className="flex flex-col gap-1 p-4">
-            {[
-              { path: '/admin', icon: Library, label: 'Overview' },
-              { path: '/inventory', icon: BookOpen, label: 'Catalogue Inventory', active: true },
-              { path: '/lending', icon: ClipboardList, label: 'Borrow Requests' },
-              { path: '/returns', icon: Users, label: 'Return Station' },
-              { path: '/admin/lost-books', icon: ShieldAlert, label: 'Lost Books' },
-              { path: '/admin/gate-logs', icon: Clock, label: 'Gate Logs' },
-              { path: '/admin/reservations', icon: BookMarked, label: 'Book Reservations' },
-              { path: '/admin/replacements', icon: History, label: 'Replacement History' },
-              { path: '/admin/fines', icon: Banknote, label: 'Fine Management' },
-              { path: '/admin/students', icon: UserCheck, label: 'Registered Students' }
-            ].map(({ path, icon: Icon, label, active }) => (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-left transition ${active ? 'text-blue-600 bg-blue-50/50' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
-              >
-                <Icon className="size-4.5" />
-                {label}
-              </button>
-            ))}
-          </nav>
-        </div>
-        <div className="p-4 border-t border-slate-300">
-          <div className="flex items-center justify-between rounded-xl glass-panel p-3">
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
-              <p className="text-[10px] text-slate-500 font-medium">Administrator</p>
-            </div>
-            <button onClick={logout} className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition">
-              <LogOut className="size-4" />
-            </button>
-          </div>
-        </div>
-      </aside>
+      <AdminSidebar user={user} logout={logout} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
