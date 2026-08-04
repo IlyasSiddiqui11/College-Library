@@ -42,7 +42,7 @@ export default function StudentProfile() {
 
   const loadProfileData = async (showLoading = true) => {
     if (!user) return
-    if (showLoading) {
+    if (showLoading && !profile) {
       setLoading(true)
       setErrorMsg(null)
       setSuccessMsg(null)
@@ -73,7 +73,7 @@ export default function StudentProfile() {
       console.error('Error loading profile details:', err)
       if (showLoading) setErrorMsg('Failed to sync profile data. Please try again.')
     } finally {
-      if (showLoading) setLoading(false)
+      setLoading(false)
     }
   }
 

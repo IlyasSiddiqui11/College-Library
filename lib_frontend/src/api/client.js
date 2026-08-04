@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://college-library-2sfk.onrender.com'
+const isProd = import.meta.env.PROD;
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isProd ? 'https://college-library-2sfk.onrender.com' : 'http://localhost:8081')
 // Increased timeout to 60s to account for Render free tier cold starts
 const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS || 60000)
 

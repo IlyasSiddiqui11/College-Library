@@ -111,6 +111,10 @@ export default function AdminSidebar({ user, logout }) {
             <Banknote className="size-4.5" /> Fine Management
           </button>
           
+          <button onClick={() => navigate('/admin/staff')} className={getLinkClass('/admin/staff')}>
+            <UserCheck className="size-4.5" /> Staff Management
+          </button>
+          
           <button onClick={() => navigate('/admin/students')} className={getLinkClass('/admin/students')}>
             <UserCheck className="size-4.5" /> Registered Students
           </button>

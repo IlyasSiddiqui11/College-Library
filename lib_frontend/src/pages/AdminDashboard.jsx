@@ -54,10 +54,10 @@ export default function AdminDashboard() {
       const flatLogs = []
       gateLogsResponse.forEach(session => {
         if (session.entryTime) {
-          flatLogs.push({ id: session.id + '-in', action: 'ENTRY', userId: session.userId, userName: session.userName, timestamp: session.entryTime })
+          flatLogs.push({ id: session.id + '-in', action: 'ENTRY', userId: session.userId, userName: session.userName, userRole: session.userRole, timestamp: session.entryTime })
         }
         if (session.exitTime) {
-          flatLogs.push({ id: session.id + '-out', action: 'EXIT', userId: session.userId, userName: session.userName, timestamp: session.exitTime })
+          flatLogs.push({ id: session.id + '-out', action: 'EXIT', userId: session.userId, userName: session.userName, userRole: session.userRole, timestamp: session.exitTime })
         }
       })
 
@@ -313,8 +313,15 @@ export default function AdminDashboard() {
                         .slice(0, 5)
                         .map((req) => (
                         <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-100 transition">
-                          <td className="py-4 font-bold text-slate-900">
-                            {req.userName || `Student #${req.userId}`}
+                          <td className="py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{req.userName || `User #${req.userId}`}</span>
+                              {req.userRole === 'STAFF' && (
+                                <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                                  STAFF
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="py-4">
                             <p className="font-bold text-slate-900 max-w-[200px] truncate">{req.bookTitle}</p>
@@ -448,9 +455,16 @@ export default function AdminDashboard() {
                         {log.action === 'ENTRY' ? 'IN' : 'OUT'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900">
-                          {log.userName || `Student ID #${log.userId}`}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-slate-900">
+                            {log.userName || `User ID #${log.userId}`}
+                          </p>
+                          {log.userRole === 'STAFF' && (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                              STAFF
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] text-slate-500 mt-0.5">
                           {log.action === 'ENTRY' ? 'Checked into Library' : 'Checked out of Library'}
                         </p>

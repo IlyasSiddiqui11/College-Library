@@ -16,6 +16,7 @@ export default function BorrowRequests() {
   const [selectedRequestId, setSelectedRequestId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('PENDING')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [accessionNumber, setAccessionNumber] = useState('')
@@ -160,7 +161,8 @@ export default function BorrowRequests() {
         (req.isbn || '').includes(q)
       
       const matchesStatus = filterStatus === 'ALL' || req.status === filterStatus
-      return matchesSearch && matchesStatus
+      const matchesUserType = userTypeFilter === 'ALL' || req.userRole === userTypeFilter
+      return matchesSearch && matchesStatus && matchesUserType
     })
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
 
@@ -176,7 +178,7 @@ export default function BorrowRequests() {
         setSelectedRequestId(null);
       }
     }
-  }, [filterStatus, searchQuery, borrowRequests, loading]);
+  }, [filterStatus, userTypeFilter, searchQuery, borrowRequests, loading]);
 
   if (!user) return null
 
@@ -259,6 +261,16 @@ export default function BorrowRequests() {
                 />
               </div>
 
+              <select
+                value={userTypeFilter}
+                onChange={(e) => setUserTypeFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white shadow-sm transition-all"
+              >
+                <option value="ALL">All Users</option>
+                <option value="STUDENT">Students</option>
+                <option value="STAFF">Staff</option>
+              </select>
+
               <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                 {[
                   { id: 'ALL', label: 'All' },
@@ -335,7 +347,14 @@ export default function BorrowRequests() {
                             {req.status === 'APPROVED' ? 'ISSUED' : req.status}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5 truncate">{req.userName || `ID #${req.userId}`}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-[10px] text-slate-500 truncate">{req.userName || `ID #${req.userId}`}</p>
+                          {req.userRole === 'STAFF' && (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                              STAFF
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[9px] text-slate-500 mt-1 font-mono">ISBN: {req.isbn || '—'}</p>
                         <div className="flex justify-between items-center mt-2">
                           <p className="text-[9px] text-slate-500 font-medium">{new Date(req.requestDate).toLocaleDateString()}</p>
@@ -398,7 +417,14 @@ export default function BorrowRequests() {
                           {selectedReq.userName?.slice(0, 2).toUpperCase() || 'ST'}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{selectedReq.userName || `Student ID #${selectedReq.userId}`}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-slate-900 text-sm">{selectedReq.userName || `User ID #${selectedReq.userId}`}</p>
+                            {selectedReq.userRole === 'STAFF' && (
+                              <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 tracking-wider">
+                                STAFF
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <button 

@@ -22,6 +22,7 @@ public class GateLogResponse {
     private String userEmail;
     private String branch;
     private Integer year;
+    private com.example.library.enums.Role userRole;
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;
     private LocalDateTime createdAt;

@@ -286,6 +286,7 @@ public class BookReservationService {
         return ReservationResponse.builder()
                 .id(res.getId())
                 .user(userDto)
+                .userRole(res.getUser().getRole())
                 .isbn(res.getIsbn())
                 .bookTitle(res.getBookTitle())
                 .bookAuthor(res.getBookAuthor())

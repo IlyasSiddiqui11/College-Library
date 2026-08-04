@@ -17,6 +17,7 @@ export default function GateLogs() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('ALL')
   const [branchFilter, setBranchFilter] = useState('ALL')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -79,6 +80,7 @@ export default function GateLogs() {
         userEmail: log.userEmail || 'N/A',
         branch: log.branch || 'N/A',
         year: log.year,
+        userRole: log.userRole,
         entryTime: log.entryTime,
         exitTime: log.exitTime,
         status: log.exitTime ? 'OUTSIDE' : 'INSIDE'
@@ -103,7 +105,8 @@ export default function GateLogs() {
       (log.userEmail || '').toLowerCase().includes(q)
     const matchesStatus = filterBy === 'ALL' || log.status === filterBy
     const matchesBranch = branchFilter === 'ALL' || log.branch === branchFilter
-    return matchesSearch && matchesStatus && matchesBranch
+    const matchesUserType = userTypeFilter === 'ALL' || log.userRole === userTypeFilter
+    return matchesSearch && matchesStatus && matchesBranch && matchesUserType
   })
 
   // Calculate unique branch options
@@ -297,6 +300,15 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
+              <select
+                value={userTypeFilter}
+                onChange={(e) => setUserTypeFilter(e.target.value)}
+                className="w-28 rounded-lg border border-slate-200 glass-input px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
+              >
+                <option value="ALL">All Users</option>
+                <option value="STUDENT">Students</option>
+                <option value="STAFF">Staff</option>
+              </select>
               <CustomSelect
                 value={branchFilter}
                 onChange={(val) => setBranchFilter(val)}
@@ -373,7 +385,14 @@ export default function GateLogs() {
                         <tr key={log.id} className="hover:bg-slate-100 transition">
                           <td className="px-6 py-4 font-bold text-slate-900">
                             <div>
-                              <p className="font-bold text-slate-900">{log.userName}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-slate-900">{log.userName}</p>
+                                {log.userRole === 'STAFF' && (
+                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                                    STAFF
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{log.userEmail}</p>
                             </div>
                           </td>

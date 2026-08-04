@@ -95,6 +95,7 @@ export default function ReturnStation() {
           id: details.id,
           title: details.bookTitle || 'Unknown Title',
           student: details.userName || `Student #${sId}`,
+          userRole: details.userRole,
           accessionNumber: accNum,
           timestamp: new Date()
         },
@@ -143,6 +144,7 @@ export default function ReturnStation() {
           id: 'ext-' + details.id,
           title: details.bookTitle || 'Unknown Title',
           student: details.userName || `Student #${studentId}`,
+          userRole: details.userRole,
           accessionNumber: accessionNumber.trim(),
           timestamp: new Date(),
           isExtension: true
@@ -299,9 +301,16 @@ export default function ReturnStation() {
                   </p>
 
                   <div className="w-full glass-panel border border-slate-200 p-5 rounded-2xl text-left text-xs flex flex-col gap-2 mt-2">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-slate-500">Student</span>
-                      <span className="font-bold text-slate-900">{successDetails.userName}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900">{successDetails.userName}</span>
+                        {successDetails.userRole === 'STAFF' && (
+                          <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                            STAFF
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Accession Number</span>
@@ -355,7 +364,14 @@ export default function ReturnStation() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-slate-900 truncate">{item.title}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">By: {item.student}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-[10px] text-slate-500">By: {item.student}</p>
+                          {item.userRole === 'STAFF' && (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
+                              STAFF
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[9px] text-amber-600 mt-1 font-mono">Acc: {item.accessionNumber}</p>
                       </div>
                     </div>
