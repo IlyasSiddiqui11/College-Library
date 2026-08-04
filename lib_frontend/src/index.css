@@ -29,6 +29,7 @@ body,
   color: #0f172a;
   forced-color-adjust: none;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 body {
