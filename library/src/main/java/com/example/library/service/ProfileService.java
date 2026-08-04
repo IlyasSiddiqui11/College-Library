@@ -60,6 +60,15 @@ public class ProfileService {
         }
 
         StudentProfile savedProfile = profileRepository.save(profile);
+        
+        try {
+            String subject = "Profile Completion Confirmation - College Library";
+            String body = String.format("Dear %s,\n\nYour profile has been successfully completed and updated in the College Library System.\n\nThank you for keeping your information up to date!\n\nBest Regards,\nCollege Library", user.getName());
+            emailService.sendEmail(user.getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send profile completion email: " + e.getMessage());
+        }
+        
         return mapToProfileResponse(savedProfile);
     }
 

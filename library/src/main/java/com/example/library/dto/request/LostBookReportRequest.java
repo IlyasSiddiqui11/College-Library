@@ -20,4 +20,6 @@ public class LostBookReportRequest {
     private String remarks;
 
     private String reportedByAdmin;
+
+    private Boolean generateFine;
 }

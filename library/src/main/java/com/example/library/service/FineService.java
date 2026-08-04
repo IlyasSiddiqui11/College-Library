@@ -119,7 +119,7 @@ public class FineService {
 
     @Transactional(readOnly = true)
     public List<FineResponse> getFinesByUserId(Long userId) {
-        return fineRepository.findByUserId(userId).stream()
+        return fineRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

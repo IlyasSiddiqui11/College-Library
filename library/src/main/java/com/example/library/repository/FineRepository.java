@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface FineRepository extends JpaRepository<Fine, Long> {
 
-    List<Fine> findByUserId(Long userId);
+    List<Fine> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     Page<Fine> findByUserId(Long userId, Pageable pageable);
 

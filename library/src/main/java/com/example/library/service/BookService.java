@@ -8,11 +8,12 @@ import com.example.library.dto.response.AvailableCopyResponse;
 import com.example.library.dto.response.BookCatalogResponse;
 import com.example.library.dto.response.BookResponse;
 import com.example.library.entity.Book;
-import com.example.library.entity.ReplacedBook;
+import com.example.library.entity.BookReplacement;
 import com.example.library.exception.BadRequestException;
 import com.example.library.exception.ResourceNotFoundException;
 import com.example.library.repository.BookRepository;
-import com.example.library.repository.ReplacedBookRepository;
+import com.example.library.repository.BookReplacementRepository;
+import com.example.library.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,8 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final ReplacedBookRepository replacedBookRepository;
+    private final BookReplacementRepository bookReplacementRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     @Lazy
@@ -41,6 +43,10 @@ public class BookService {
     @Autowired
     @Lazy
     private LostBookService lostBookService;
+
+    @Autowired
+    @Lazy
+    private com.example.library.repository.BorrowRequestRepository borrowRequestRepository;
 
     @Transactional
     public BookResponse addBook(BookCreateRequest request) {
@@ -126,14 +132,16 @@ public class BookService {
                 .reason("Replaced at Return Station")
                 .remarks("Automatically marked as lost during replacement")
                 .reportedByAdmin("Admin")
+                .generateFine(false)
                 .build();
         
         lostBookService.reportLostBook(lostRequest);
 
-        // The original book is already marked as LOST by the lostBookService.
-        // We do not need to override its status here.
+        // Update original book status specifically to REPLACED
         Book originalBook = bookRepository.findByAccessionNumber(originalAccession)
             .orElseThrow(() -> new ResourceNotFoundException("Original book not found"));
+        originalBook.setStatus("REPLACED");
+        bookRepository.save(originalBook);
 
         // Create the new replacement book
         Book replacementBook = Book.builder()
@@ -159,20 +167,26 @@ public class BookService {
 
         Book savedReplacement = bookRepository.save(replacementBook);
 
-        // Save ReplacedBook record
-        ReplacedBook replacedRecord = ReplacedBook.builder()
-                .originalBookId(originalBook.getId())
-                .replacementBookId(savedReplacement.getId())
-                .originalAccessionNumber(originalAccession)
-                .replacementAccessionNumber(replacementAccession)
-                .replacedBy("Admin")
-                .build();
-        replacedBookRepository.save(replacedRecord);
+        // Save BookReplacement record
+        com.example.library.entity.User student = userRepository.findById(request.getStudentId())
+            .orElse(null);
 
-        // Fulfill any pending reservations
-        String isbn = request.getIsbn() != null ? request.getIsbn().trim() : null;
-        if (isbn != null && !isbn.isBlank()) {
-            bookReservationService.fulfillReservation(isbn);
+        BookReplacement replacedRecord = BookReplacement.builder()
+                .originalBook(originalBook)
+                .replacementBook(savedReplacement)
+                .student(student)
+                .replacedByAdmin("Admin")
+                .remarks(request.getRemarks())
+                .build();
+        bookReplacementRepository.save(replacedRecord);
+
+        List<com.example.library.entity.BorrowRequest> pendingRequests = borrowRequestRepository.findByAccessionNumber(originalAccession);
+        for (com.example.library.entity.BorrowRequest req : pendingRequests) {
+            if (req.getStatus() == com.example.library.enums.BorrowStatus.PENDING || req.getStatus() == com.example.library.enums.BorrowStatus.APPROVED) {
+                req.setAccessionNumber(replacementAccession);
+                req.setBook(savedReplacement);
+                borrowRequestRepository.save(req);
+            }
         }
 
         return mapToBookResponse(savedReplacement);

@@ -28,6 +28,7 @@ body,
   background-color: #f8fafc;
   color: #0f172a;
   forced-color-adjust: none;
+  overflow-y: scroll;
 }
 
 body {

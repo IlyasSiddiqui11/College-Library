@@ -30,6 +30,15 @@ export default function StudentLogin() {
     }
   }, [user, navigate])
 
+  React.useEffect(() => {
+    if (error) {
+      const el = document.getElementById('error-message')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [error])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
@@ -146,7 +155,7 @@ export default function StudentLogin() {
           )}
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
+            <div id="error-message" className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-900">
               <AlertTriangle className="size-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>

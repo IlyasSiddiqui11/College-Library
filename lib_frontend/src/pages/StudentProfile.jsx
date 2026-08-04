@@ -83,6 +83,15 @@ export default function StudentProfile() {
     const intervalId = setInterval(() => {
       loadProfileData(false)
     }, 5000)
+  useEffect(() => {
+    if (errorMsg) {
+      setTimeout(() => {
+        const el = document.querySelector('.bg-red-50, #error-message, .text-red-600')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [errorMsg])
+
     return () => clearInterval(intervalId)
   }, [user])
 

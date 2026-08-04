@@ -19,6 +19,7 @@ import LostBooks from './pages/LostBooks.jsx'
 import BookReservations from './pages/BookReservations.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import AdminFines from './pages/AdminFines.jsx'
+import ReplacementHistory from './pages/ReplacementHistory.jsx'
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="/scanner" element={<BookScanner />} />
           <Route path="/admin/lost-books" element={<LostBooks />} />
           <Route path="/admin/reservations" element={<BookReservations />} />
+          <Route path="/admin/replacements" element={<ReplacementHistory />} />
           <Route path="/admin/fines" element={<AdminFines />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/" replace />} />

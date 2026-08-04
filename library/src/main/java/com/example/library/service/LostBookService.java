@@ -145,13 +145,24 @@ public class LostBookService {
                 book.setStatus("LOST");
                 bookRepository.save(book);
 
-                // 4. Generate fine
-                try {
-                        fineService.generateLostBookFine(borrowRequest, bookPrice);
-                } catch (Exception e) {
-                        // Log but don't fail the whole operation — fine can be added manually
-                        System.err.println("[LostBookService] Failed to generate fine for lost book: " + e.getMessage());
-                        e.printStackTrace();
+                // 4. Generate fine and cancel pending reservations if not a replacement
+                if (reportRequest.getGenerateFine() == null || reportRequest.getGenerateFine()) {
+                        try {
+                                fineService.generateLostBookFine(borrowRequest, bookPrice);
+                        } catch (Exception e) {
+                                // Log but don't fail the whole operation — fine can be added manually
+                                System.err.println("[LostBookService] Failed to generate fine for lost book: " + e.getMessage());
+                                e.printStackTrace();
+                        }
+
+                        // Cancel pending reservations for this specific lost book since it won't be replaced
+                        List<BorrowRequest> pendingRequests = borrowRequestRepository.findByAccessionNumber(accessionNumber);
+                        for (BorrowRequest req : pendingRequests) {
+                                if (req.getStatus() == BorrowStatus.PENDING) {
+                                        req.setStatus(BorrowStatus.CANCELLED);
+                                        borrowRequestRepository.save(req);
+                                }
+                        }
                 }
 
                 return savedLostBook;

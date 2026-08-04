@@ -14,4 +14,6 @@ public class ReplaceBookRequest extends BookCreateRequest {
 
     @NotNull(message = "Student ID is required")
     private Long studentId;
+
+    private String remarks;
 }

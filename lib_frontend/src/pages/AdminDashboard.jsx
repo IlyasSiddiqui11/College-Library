@@ -6,7 +6,7 @@ import {
   BookOpen, Users, ClipboardList, ArrowRight, ShieldAlert,
   Library, Loader2, LogOut, Check, X, RefreshCw, LogIn, Clock,
   UserCheck, BookMarked, Banknote
-} from 'lucide-react'
+, History} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function AdminDashboard() {
@@ -53,6 +53,16 @@ export default function AdminDashboard() {
       const gateLogsResponse = dashboardRes.data.todaysGateActivity || []
       
       // Flatten sessions into individual entry and exit actions for the dashboard feed
+      const flatLogs = []
+      gateLogsResponse.forEach(session => {
+        if (session.entryTime) {
+          flatLogs.push({ id: session.id + '-in', action: 'ENTRY', userId: session.userId, userName: session.userName, timestamp: session.entryTime })
+        }
+        if (session.exitTime) {
+          flatLogs.push({ id: session.id + '-out', action: 'EXIT', userId: session.userId, userName: session.userName, timestamp: session.exitTime })
+        }
+      })
+
       // Sort flat logs by timestamp desc
       flatLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       setGateLogs(flatLogs)
@@ -204,6 +214,13 @@ export default function AdminDashboard() {
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+                        <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
             </button>
             <button
               onClick={() => navigate('/admin/fines')}

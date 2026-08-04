@@ -6,7 +6,7 @@ import {
   BookOpen, Search, Loader2, Library, ClipboardList, Users, LogOut, Check, X,
   Clock,
   UserCheck, Download, ShieldAlert, BookMarked
-, Banknote} from 'lucide-react'
+, Banknote, History} from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function BorrowRequests() {
@@ -271,6 +271,13 @@ export default function BorrowRequests() {
             >
               <BookMarked className="size-4.5" />
               Book Reservations
+            </button>
+                        <button
+              onClick={() => navigate('/admin/replacements')}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 text-left transition"
+            >
+              <History className="size-4.5" />
+              Replacement History
             </button>
             <button
               onClick={() => navigate('/admin/fines')}
