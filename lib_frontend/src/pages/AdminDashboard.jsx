@@ -36,16 +36,15 @@ export default function AdminDashboard() {
   const loadData = async (showLoading = true) => {
     if (showLoading) setLoading(true)
     try {
-      // 1. Fetch books
-      const booksRes = await apiClient.get('/api/books')
+      // Fire all network requests concurrently
+      const [booksRes, borrowRes, dashboardRes] = await Promise.all([
+        apiClient.get('/api/books'),
+        apiClient.get('/api/borrow'),
+        apiClient.get('/api/dashboard/today')
+      ]);
+
       setBooks(booksRes.data)
-
-      // 2. Fetch borrow requests
-      const borrowRes = await apiClient.get('/api/borrow')
       setBorrowRequests(borrowRes.data)
-
-      // 3. Fetch dashboard overview
-      const dashboardRes = await apiClient.get('/api/dashboard/today')
       setDashboardOverview(dashboardRes.data)
 
       // 4. Update gate logs for the live feed (already present in dashboardData)
