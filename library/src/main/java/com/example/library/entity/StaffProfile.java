@@ -7,6 +7,8 @@ import lombok.Data;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import com.example.library.enums.StaffStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "staff_profiles")
@@ -14,12 +16,14 @@ import com.example.library.enums.StaffStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StaffProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;

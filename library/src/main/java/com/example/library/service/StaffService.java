@@ -59,6 +59,7 @@ public class StaffService {
         emailService.sendEmail(profile.getCollegeEmail(), subject, body);
     }
 
+    @Transactional(readOnly = true)
     public List<StaffProfile> getAllRequests() {
         return staffProfileRepository.findAll();
     }
