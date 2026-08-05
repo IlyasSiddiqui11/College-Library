@@ -9,6 +9,7 @@ import StudentLogin from './pages/StudentLogin.jsx'
 import LibrarianLogin from './pages/LibrarianLogin.jsx'
 import StaffLogin from './pages/StaffLogin.jsx'
 import StaffDashboard from './pages/StaffDashboard.jsx'
+import StaffProfile from './pages/StaffProfile.jsx'
 import StudentDashboard from './pages/StudentDashboard.jsx'
 import BorrowHistory from './pages/BorrowHistory.jsx'
 import ReturnStation from './pages/ReturnStation.jsx'
@@ -34,7 +35,9 @@ function App() {
           <Route path="/login" element={<StudentLogin />} />
           <Route path="/admin/login" element={<LibrarianLogin />} />
           <Route path="/staff/login" element={<StaffLogin />} />
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/staff" element={<StaffDashboard />} />
+          <Route path="/staff/dashboard" element={<Navigate to="/staff" replace />} />
+          <Route path="/staff/profile" element={<StaffProfile />} />
           <Route path="/lending" element={<BorrowRequests />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/staff" element={<AdminStaffManagement />} />

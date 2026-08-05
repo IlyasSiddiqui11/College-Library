@@ -25,6 +25,8 @@ export default function BookDetails() {
     }
   }, [user, navigate])
 
+  const profileRoute = user?.role === 'STAFF' ? '/staff/profile' : '/student/profile'
+
   useEffect(() => {
     const fetchDetails = async () => {
       if (!isbn) return
@@ -193,7 +195,7 @@ export default function BookDetails() {
                      Dismiss
                    </button>
                    <button
-                    onClick={() => navigate('/student/profile')}
+                    onClick={() => navigate(profileRoute)}
                     className="flex-1 text-[10px] font-bold text-white bg-red-600 py-2 rounded-lg shadow-md hover:bg-red-700 transition"
                    >
                      View Fines
