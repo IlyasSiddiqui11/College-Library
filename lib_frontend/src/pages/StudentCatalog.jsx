@@ -8,7 +8,7 @@ import {
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentCatalog() {
-  const { user, profile, hasFine, logout, loading } = useAuth()
+  const { user, profile, hasFine, logout, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [books, setBooks] = useState([])
@@ -25,13 +25,13 @@ export default function StudentCatalog() {
   const [filterStatus, setFilterStatus] = useState('ALL')
 
   useEffect(() => {
-    if (loading) return
+    if (authLoading) return
     if (!user) {
       navigate('/login')
     } else if (user.role === 'ADMIN') {
       navigate('/admin')
     }
-  }, [user, navigate, loading])
+  }, [user, navigate, authLoading])
 
   const homeRoute = user?.role === 'STAFF' ? '/staff' : '/student'
   const profileRoute = user?.role === 'STAFF' ? '/staff/profile' : '/student/profile'
