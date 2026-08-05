@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client.js'
-import { Users, Search, RefreshCw, AlertTriangle, Loader2, CheckCircle, XCircle, ShieldAlert, BadgeInfo } from 'lucide-react'
+import { Users, Search, RefreshCw, AlertTriangle, Loader2, CheckCircle, XCircle, ShieldAlert, BadgeInfo, Download } from 'lucide-react'
 import AdminSidebar from '../components/AdminSidebar.jsx'
 
 export default function AdminStaffManagement() {
@@ -98,6 +98,32 @@ export default function AdminStaffManagement() {
     )
   })
 
+  const handleExport = () => {
+    const headers = ['Full Name', 'Employee ID', 'College Email', 'Mobile', 'Department', 'Designation', 'Employment Type', 'Status', 'Remarks', 'Approved By', 'Approval Date', 'Request Date']
+    const rows = filteredRequests.map(r => [
+      r.fullName || '',
+      r.employeeId || '',
+      r.collegeEmail || '',
+      r.mobileNumber || '',
+      r.department || '',
+      r.designation || '',
+      r.employmentType || '',
+      r.status || '',
+      (r.remarks || '').replace(/,/g, ';'),
+      r.approvedBy || '',
+      formatDate(r.approvalDate),
+      formatDate(r.createdAt)
+    ])
+    const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `staff-requests-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
     const d = new Date(dateString)
@@ -148,6 +174,14 @@ export default function AdminStaffManagement() {
                   className="w-64 rounded-xl border border-slate-200 py-2 pl-9 pr-3 text-xs outline-none focus:border-emerald-500 transition"
                 />
               </div>
+              <button
+                onClick={handleExport}
+                disabled={loading || filteredRequests.length === 0}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-green-600 hover:bg-slate-50 active:scale-[0.98] transition disabled:opacity-75"
+              >
+                <Download className="size-3.5" />
+                Export
+              </button>
               <button
                 onClick={fetchRequests}
                 disabled={loading}
