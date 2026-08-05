@@ -14,6 +14,7 @@ import com.example.library.dto.response.UserResponse;
 import com.example.library.entity.User;
 import com.example.library.exception.BadRequestException;
 import com.example.library.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Random random = new Random();
+
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     private String generateOtp() {
         return String.format("%06d", random.nextInt(1000000));
@@ -171,7 +175,7 @@ public class AuthService {
         user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
         
         String emailBody = "Hello " + user.getName() + ",\n\n"
                 + "You requested to reset your password. Please click the link below to set a new password:\n\n"
