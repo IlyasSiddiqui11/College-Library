@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 export default function StaffDashboard() {
-  const { user, staffProfile, fetchStaffProfile, logout, hasFine } = useAuth()
+  const { user, staffProfile, fetchStaffProfile, logout, hasFine, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [showQrModal, setShowQrModal] = useState(false)
@@ -40,6 +40,7 @@ export default function StaffDashboard() {
 
   // Redirect guards
   useEffect(() => {
+    if (authLoading) return
     if (!user) {
       navigate('/staff/login')
     } else if (user.role === 'ADMIN') {
@@ -47,7 +48,7 @@ export default function StaffDashboard() {
     } else if (user.role === 'STUDENT') {
       navigate('/student')
     }
-  }, [user, navigate])
+  }, [user, navigate, authLoading])
 
   // Fetch all dashboard data
   const fetchData = async (showLoading = true) => {

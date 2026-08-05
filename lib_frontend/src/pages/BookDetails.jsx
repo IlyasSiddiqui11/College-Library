@@ -8,7 +8,7 @@ import {
 
 export default function BookDetails() {
   const { isbn } = useParams()
-  const { user, profile } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [book, setBook] = useState(null)
@@ -18,12 +18,13 @@ export default function BookDetails() {
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
+    if (authLoading) return
     if (!user) {
       navigate('/login')
     } else if (user.role === 'ADMIN') {
       navigate('/admin')
     }
-  }, [user, navigate])
+  }, [user, navigate, authLoading])
 
   const profileRoute = user?.role === 'STAFF' ? '/staff/profile' : '/student/profile'
 

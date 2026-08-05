@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 
 export default function StaffProfile() {
-  const { user, staffProfile, fetchStaffProfile } = useAuth()
+  const { user, staffProfile, fetchStaffProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
@@ -16,12 +16,13 @@ export default function StaffProfile() {
   const [attendanceStatus, setAttendanceStatus] = useState({ insideLibrary: false })
 
   useEffect(() => {
+    if (authLoading) return
     if (!user) {
       navigate('/staff/login')
     } else if (user.role !== 'STAFF') {
       navigate('/student')
     }
-  }, [user, navigate])
+  }, [user, navigate, authLoading])
 
   const loadData = async () => {
     if (!user) return
