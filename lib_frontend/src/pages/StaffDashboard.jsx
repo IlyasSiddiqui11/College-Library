@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
-import { LogOut, AlertCircle, Loader2, Library, GraduationCap, CheckCircle } from 'lucide-react'
+import { LogOut, AlertCircle, Loader2, Library, GraduationCap, CheckCircle, CheckCircle2 } from 'lucide-react'
 
 export default function StaffDashboard() {
   const { user, logout } = useAuth()
@@ -13,6 +13,12 @@ export default function StaffDashboard() {
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError] = useState(null)
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3500)
+  }
   
   useEffect(() => {
     if (!user) {
@@ -54,7 +60,8 @@ export default function StaffDashboard() {
     try {
       await apiClient.post(`/api/staff/profile/complete/${user.id}`)
       setShowProfileModal(false)
-      fetchStaffProfile() // refresh
+      showNotification('Profile completed successfully! Welcome aboard.', 'success')
+      fetchStaffProfile()
     } catch (err) {
       setProfileError(err.response?.data?.message || err.message || 'Failed to complete profile')
     } finally {
@@ -66,6 +73,17 @@ export default function StaffDashboard() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32 bg-[#f8fafc]">
+      {/* Toast Notification */}
+      {notification.show && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-sm rounded-xl px-4 py-3 shadow-2xl transition-all animate-in slide-in-from-top-5 fade-in ${
+          notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
+        }`}>
+          <div className="flex items-center gap-3">
+            {notification.type === 'error' ? <AlertCircle className="size-5 shrink-0" /> : <CheckCircle2 className="size-5 shrink-0" />}
+            <p className="text-sm font-semibold leading-tight">{notification.message}</p>
+          </div>
+        </div>
+      )}
       {/* Dynamic Header */}
       <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">

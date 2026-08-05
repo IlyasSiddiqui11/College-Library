@@ -241,7 +241,7 @@ export default function BorrowRequests() {
               <p className="text-xs text-slate-500 mt-0.5">Assign physical copies and monitor loans</p>
             </div>
 
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-3">
               <button
                 onClick={handleExport}
                 disabled={loading || filteredRequests.length === 0}
