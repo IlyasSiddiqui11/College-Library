@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 
 export default function BorrowHistory() {
-  const { user, hasFine } = useAuth()
+  const { user, hasFine, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   // State
@@ -24,10 +24,11 @@ export default function BorrowHistory() {
 
   // Redirect if not logged in
   useEffect(() => {
+    if (authLoading) return
     if (!user) {
       navigate('/login')
     }
-  }, [user, navigate])
+  }, [user, navigate, authLoading])
 
   const homeRoute = user?.role === 'STAFF' ? '/staff' : '/student'
   const profileRoute = user?.role === 'STAFF' ? '/staff/profile' : '/student/profile'

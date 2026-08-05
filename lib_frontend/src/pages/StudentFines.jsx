@@ -7,19 +7,20 @@ import {
 } from 'lucide-react'
 
 export default function StudentFines() {
-  const { user, logout } = useAuth()
+  const { user, logout, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [fines, setFines] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (authLoading) return
     if (!user) {
       navigate('/login')
     } else if (user.role === 'ADMIN') {
       navigate('/admin')
     }
-  }, [user, navigate])
+  }, [user, navigate, authLoading])
 
   const homeRoute = user?.role === 'STAFF' ? '/staff' : '/student'
 
