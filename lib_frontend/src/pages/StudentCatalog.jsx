@@ -32,6 +32,9 @@ export default function StudentCatalog() {
     }
   }, [user, navigate])
 
+  const homeRoute = user?.role === 'STAFF' ? '/staff' : '/student'
+  const profileRoute = user?.role === 'STAFF' ? '/staff/profile' : '/student/profile'
+
   const fetchBooks = async () => {
     setLoading(true)
     try {
@@ -377,7 +380,7 @@ export default function StudentCatalog() {
         <div className="flex items-center justify-around rounded-full border border-slate-200 glass-panel px-6 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
           <button
             type="button"
-            onClick={() => navigate('/student')}
+            onClick={() => navigate(homeRoute)}
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <BookOpen className="size-5" />
@@ -404,7 +407,7 @@ export default function StudentCatalog() {
 
           <button
             type="button"
-            onClick={() => navigate('/student/profile')}
+            onClick={() => navigate(profileRoute)}
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <User className="size-5" />

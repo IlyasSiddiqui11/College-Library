@@ -36,7 +36,7 @@ export default function StaffLogin() {
       if (user.role === 'ADMIN') {
         navigate('/admin')
       } else if (user.role === 'STAFF') {
-        navigate('/staff/dashboard')
+        navigate('/staff')
       } else {
         navigate('/student')
       }

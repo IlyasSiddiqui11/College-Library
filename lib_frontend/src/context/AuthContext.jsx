@@ -6,6 +6,7 @@ const AuthContext = createContext(undefined)
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [staffProfile, setStaffProfile] = useState(null)
   const [hasFine, setHasFine] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -24,14 +25,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  // Auto-fetch profile if logged in as Student
+  // Auto-fetch profile if logged in
   useEffect(() => {
-    if (user && user.role === 'STUDENT') {
+    if (user) {
       fetchProfile().catch((err) => {
-        console.warn('Failed to fetch student profile, might be incomplete:', err.message)
+        console.warn('Failed to fetch profile:', err.message)
       })
     } else {
       setProfile(null)
+      setStaffProfile(null)
     }
   }, [user])
 
@@ -75,19 +77,26 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     if (!user) return null
     try {
-      const profileRes = await apiClient.get(`/api/profile/${user.id}`)
-      setProfile(profileRes.data)
-      
-      try {
-        const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
-        const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
-        setHasFine(pendingFines.length > 0)
-      } catch (err) {
-        console.warn('Failed to fetch fines:', err.message)
+      if (user.role === 'STUDENT') {
+        const profileRes = await apiClient.get(`/api/profile/${user.id}`)
+        setProfile(profileRes.data)
+        
+        try {
+          const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
+          const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
+          setHasFine(pendingFines.length > 0)
+        } catch (err) {
+          console.warn('Failed to fetch fines:', err.message)
+        }
+        return profileRes.data
+      } else if (user.role === 'STAFF') {
+        const staffRes = await apiClient.get(`/api/staff/profile/${user.id}`)
+        setStaffProfile(staffRes.data)
+        return staffRes.data
       }
-      return profileRes.data
     } catch (err) {
       setProfile(null)
+      setStaffProfile(null)
       if (err.message && err.message.includes('User not found')) {
         logout()
       }
@@ -120,11 +129,12 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null)
     setProfile(null)
+    setStaffProfile(null)
     localStorage.removeItem('library_user')
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, register, verifyRegistrationOtp, resendRegistrationOtp, logout, hasFine, completeProfile, fetchProfile }}>
+    <AuthContext.Provider value={{ user, profile, staffProfile, loading, login, register, verifyRegistrationOtp, resendRegistrationOtp, logout, hasFine, completeProfile, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

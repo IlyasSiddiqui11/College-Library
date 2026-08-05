@@ -21,6 +21,8 @@ export default function StudentFines() {
     }
   }, [user, navigate])
 
+  const homeRoute = user?.role === 'STAFF' ? '/staff' : '/student'
+
   useEffect(() => {
     const fetchFines = async () => {
       if (!user) return
@@ -144,7 +146,7 @@ export default function StudentFines() {
         <div className="flex items-center justify-around rounded-full border border-slate-200 glass-panel px-2 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
           <button
             type="button"
-            onClick={() => navigate('/student')}
+            onClick={() => navigate(homeRoute)}
             className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition"
           >
             <BookOpen className="size-5" />
