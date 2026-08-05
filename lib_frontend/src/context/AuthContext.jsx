@@ -25,13 +25,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  // Auto-fetch profile if logged in
+  // Auto-fetch profile on login
   useEffect(() => {
-    if (user) {
+    if (user && user.role === 'STUDENT') {
       fetchProfile().catch((err) => {
-        console.warn('Failed to fetch profile:', err.message)
+        console.warn('Failed to fetch student profile:', err.message)
       })
-    } else {
+    } else if (user && user.role === 'STAFF') {
+      fetchStaffProfile().catch((err) => {
+        console.warn('Failed to fetch staff profile:', err.message)
+      })
+    } else if (!user) {
       setProfile(null)
       setStaffProfile(null)
     }
@@ -51,7 +55,6 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      // Always register as STUDENT - no admin self-registration
       await apiClient.post('/api/auth/register', { name, email, password, role: 'STUDENT' })
     } catch (err) {
       throw new Error(err.message || 'Registration failed')
@@ -74,32 +77,48 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Fetch student profile
   const fetchProfile = async () => {
     if (!user) return null
     try {
-      if (user.role === 'STUDENT') {
-        const profileRes = await apiClient.get(`/api/profile/${user.id}`)
-        setProfile(profileRes.data)
-        
-        try {
-          const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
-          const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
-          setHasFine(pendingFines.length > 0)
-        } catch (err) {
-          console.warn('Failed to fetch fines:', err.message)
-        }
-        return profileRes.data
-      } else if (user.role === 'STAFF') {
-        const staffRes = await apiClient.get(`/api/staff/profile/${user.id}`)
-        setStaffProfile(staffRes.data)
-        return staffRes.data
+      const profileRes = await apiClient.get(`/api/profile/${user.id}`)
+      setProfile(profileRes.data)
+
+      try {
+        const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
+        const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
+        setHasFine(pendingFines.length > 0)
+      } catch (err) {
+        console.warn('Failed to fetch fines:', err.message)
       }
+      return profileRes.data
     } catch (err) {
       setProfile(null)
-      setStaffProfile(null)
       if (err.message && err.message.includes('User not found')) {
         logout()
       }
+      return null
+    }
+  }
+
+  // Fetch staff profile — correct endpoint: /api/staff/profile/user/:id
+  const fetchStaffProfile = async () => {
+    if (!user) return null
+    try {
+      const staffRes = await apiClient.get(`/api/staff/profile/user/${user.id}`)
+      setStaffProfile(staffRes.data)
+
+      try {
+        const finesRes = await apiClient.get(`/api/fines/user/${user.id}`)
+        const pendingFines = (finesRes.data || []).filter(f => f.status === 'PENDING')
+        setHasFine(pendingFines.length > 0)
+      } catch (err) {
+        console.warn('Failed to fetch staff fines:', err.message)
+      }
+
+      return staffRes.data
+    } catch (err) {
+      setStaffProfile(null)
       return null
     }
   }
@@ -134,7 +153,11 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, staffProfile, loading, login, register, verifyRegistrationOtp, resendRegistrationOtp, logout, hasFine, completeProfile, fetchProfile }}>
+    <AuthContext.Provider value={{
+      user, profile, staffProfile, loading,
+      login, register, verifyRegistrationOtp, resendRegistrationOtp,
+      logout, hasFine, completeProfile, fetchProfile, fetchStaffProfile
+    }}>
       {children}
     </AuthContext.Provider>
   )
