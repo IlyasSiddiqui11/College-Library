@@ -73,7 +73,7 @@ export default function StaffLogin() {
           fullName: '', employeeId: '', collegeEmail: '', mobileNumber: '', department: '', designation: '', employmentType: ''
         })
       } else {
-        const logged = await login(email, password)
+        const logged = await login(email, password, 'STAFF')
         if (logged.requiresPasswordChange) {
           setTempUser(logged)
           setIsChangePasswordMode(true)

@@ -40,7 +40,7 @@ export default function LibrarianLogin() {
     setLoading(true)
 
     try {
-      const logged = await login(email, password)
+      const logged = await login(email, password, 'ADMIN')
       if (logged.role !== 'ADMIN') {
         throw new Error('This account does not have librarian privileges. Please use the student login.')
       }

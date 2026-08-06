@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.library.repository.StaffProfileRepository;
+import com.example.library.repository.AuditLogRepository;
+import com.example.library.entity.AuditLog;
 import com.example.library.entity.StaffProfile;
 import com.example.library.enums.StaffStatus;
 
@@ -35,6 +37,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final StaffProfileRepository staffProfileRepository;
+    private final AuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Random random = new Random();
@@ -143,6 +146,28 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Invalid email or password");
+        }
+
+        // Role Validation
+        if (request.getExpectedRole() != null && user.getRole() != request.getExpectedRole()) {
+            AuditLog log = AuditLog.builder()
+                    .email(request.getEmail())
+                    .attemptedRole(request.getExpectedRole())
+                    .actualRole(user.getRole())
+                    .reason("Role mismatch on login")
+                    .build();
+            auditLogRepository.save(log);
+
+            switch (request.getExpectedRole()) {
+                case ADMIN:
+                    throw new BadRequestException("This account is not authorized to access the Admin Login portal. Please use the correct login page.");
+                case STUDENT:
+                    throw new BadRequestException("This account is not authorized to access the Student Login portal. Please use the correct login page.");
+                case STAFF:
+                    throw new BadRequestException("This account is not authorized to access the Staff Login portal. Please use the correct login page.");
+                default:
+                    throw new BadRequestException("Unauthorized access.");
+            }
         }
 
         if (user.getRole() == com.example.library.enums.Role.STAFF) {
