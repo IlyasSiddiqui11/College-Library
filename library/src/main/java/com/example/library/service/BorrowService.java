@@ -44,6 +44,12 @@ public class BorrowService {
     @Autowired
     @Lazy
     private FineService fineService;
+    
+    @Autowired
+    private com.example.library.repository.BookReservationRepository bookReservationRepository;
+    
+    @Autowired
+    private com.example.library.repository.FineRepository fineRepository;
 
     @Transactional
     public BorrowResponse submitBorrowRequest(BorrowRequestDto dto) {
@@ -532,5 +538,12 @@ public class BorrowService {
                 .availableCopies(availableCopies)
                 .extensionCount(request.getExtensionCount())
                 .build();
+    }
+    
+    @Transactional
+    public void wipeUserHistory(Long userId) {
+        fineRepository.deleteByUserId(userId);
+        bookReservationRepository.deleteByUserId(userId);
+        borrowRequestRepository.deleteByUserId(userId);
     }
 }
