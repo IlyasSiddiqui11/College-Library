@@ -39,7 +39,19 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
-        return ResponseEntity.ok("Password reset link sent to email if it exists.");
+        return ResponseEntity.ok("Verification code sent to email if it exists.");
+    }
+
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<java.util.Map<String, String>> verifyResetOtp(@Valid @RequestBody com.example.library.dto.request.VerifyResetOtpRequest request) {
+        String token = authService.verifyResetOtp(request);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("token", token));
+    }
+
+    @PostMapping("/resend-reset-otp")
+    public ResponseEntity<String> resendResetOtp(@Valid @RequestBody com.example.library.dto.request.ResendResetOtpRequest request) {
+        authService.resendResetOtp(request);
+        return ResponseEntity.ok("OTP has been resent successfully.");
     }
 
     @PostMapping("/reset-password")
