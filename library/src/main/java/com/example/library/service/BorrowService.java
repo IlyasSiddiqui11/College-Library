@@ -92,9 +92,11 @@ public class BorrowService {
                 .filter(req -> req.getStatus() == BorrowStatus.APPROVED || req.getStatus() == BorrowStatus.PENDING)
                 .count();
 
-        if (activeBorrowCount >= 2) {
+        int maxBorrowLimit = (user.getRole() == com.example.library.enums.Role.STAFF) ? 4 : 2;
+
+        if (activeBorrowCount >= maxBorrowLimit) {
             throw new BadRequestException(
-                    "Borrow limit reached: students may only borrow up to 2 books simultaneously.");
+                    "Borrow limit reached: You may only borrow up to " + maxBorrowLimit + " books simultaneously.");
         }
 
         // Title-level request: do NOT reserve a physical copy or set accession until admin approves
@@ -133,8 +135,11 @@ public class BorrowService {
         long approvedCount = borrowRequestRepository.findByUserId(request.getUser().getId()).stream()
                 .filter(req -> req.getStatus() == BorrowStatus.APPROVED)
                 .count();
-        if (approvedCount >= 2) {
-            throw new BadRequestException("Borrow limit reached: User already has 2 active borrowed books. They must return one before this request can be approved.");
+                
+        int maxBorrowLimit = (request.getUser().getRole() == com.example.library.enums.Role.STAFF) ? 4 : 2;
+        
+        if (approvedCount >= maxBorrowLimit) {
+            throw new BadRequestException("Borrow limit reached: User already has " + maxBorrowLimit + " active borrowed books. They must return one before this request can be approved.");
         }
 
         if (accessionNumber == null || accessionNumber.isBlank()) {
@@ -175,7 +180,13 @@ public class BorrowService {
         request.setAccessionNumber(selectedCopy.getAccessionNumber());
         request.setStatus(BorrowStatus.APPROVED);
         request.setApprovedDate(approvedAt);
-        request.setDueDate(approvedAt.plusDays(7));
+        
+        // No time limit for STAFF
+        if (request.getUser().getRole() == com.example.library.enums.Role.STAFF) {
+            request.setDueDate(null);
+        } else {
+            request.setDueDate(approvedAt.plusDays(7));
+        }
 
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
 
@@ -389,8 +400,12 @@ public class BorrowService {
                 .findFirstByUserIdAndAccessionNumberAndStatusOrderByRequestDateDesc(user.getId(), accessionNumber,
                         BorrowStatus.APPROVED)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "No active approved borrow request found for student ID: " + userId
+                        "No active approved borrow request found for user ID: " + userId
                                 + " and Accession Number: " + accessionNumber));
+
+        if (user.getRole() == com.example.library.enums.Role.STAFF) {
+            throw new BadRequestException("Staff members have no time limit on borrowed books and do not need extensions.");
+        }
 
         if (request.getExtensionCount() >= 2) {
             throw new BadRequestException("This book has already been extended the maximum number of times (2)");
