@@ -423,7 +423,7 @@ export default function StudentDashboard() {
             className="col-span-2 flex h-24 flex-row items-center justify-between rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 p-5 text-left text-white shadow-md shadow-purple-600/10 hover:shadow-lg transition active:scale-[0.98]"
           >
             <div>
-              <p className="font-semibold text-slate-900">QR Attendance</p>
+              <p className="font-semibold text-white">QR Attendance</p>
               <p className="text-[11px] text-purple-100 mt-0.5">Instant gate check-in and zone entry</p>
             </div>
             <QrCode className="size-7" />
