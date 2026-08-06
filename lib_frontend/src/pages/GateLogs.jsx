@@ -12,7 +12,7 @@ export default function GateLogs() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [logs, setLogs] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('ALL')

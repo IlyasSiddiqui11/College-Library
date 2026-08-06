@@ -16,7 +16,7 @@ export default function AdminDashboard() {
   const [borrowRequests, setBorrowRequests] = useState([])
   const [gateLogs, setGateLogs] = useState([])
   const [dashboardOverview, setDashboardOverview] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [approvingId, setApprovingId] = useState(null)
   const [accessionNumber, setAccessionNumber] = useState('')
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!user) return
-    loadData(true)
+    loadData(false)
 
     // Auto-refresh data every 30 seconds without showing loading spinner
     const intervalId = setInterval(() => {
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
 
             <div className="flex items-center gap-4">
               <button
-                onClick={() => loadData(true)}
+                onClick={() => loadData(false)}
                 className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 active:scale-[0.98] transition"
               >
                 <RefreshCw className="size-3.5" />

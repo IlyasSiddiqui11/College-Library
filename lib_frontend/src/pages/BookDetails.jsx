@@ -12,7 +12,7 @@ export default function BookDetails() {
   const navigate = useNavigate()
 
   const [book, setBook] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [requesting, setRequesting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')

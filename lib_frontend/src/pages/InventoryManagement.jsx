@@ -18,7 +18,7 @@ export default function InventoryManagement() {
 
   const [books, setBooks] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
 
   // Add modal states

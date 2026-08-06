@@ -13,7 +13,7 @@ export default function StudentCatalog() {
   const navigate = useNavigate()
 
   const [books, setBooks] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [requestingIsbn, setRequestingIsbn] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')

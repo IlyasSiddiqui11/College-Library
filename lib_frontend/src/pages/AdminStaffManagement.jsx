@@ -10,7 +10,7 @@ export default function AdminStaffManagement() {
   const navigate = useNavigate()
   
   const [requests, setRequests] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [successMsg, setSuccessMsg] = useState(null)

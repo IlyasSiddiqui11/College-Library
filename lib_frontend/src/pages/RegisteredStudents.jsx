@@ -26,7 +26,7 @@ export default function RegisteredStudents() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [profiles, setProfiles] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
 

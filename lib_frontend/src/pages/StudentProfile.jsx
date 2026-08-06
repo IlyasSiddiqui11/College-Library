@@ -14,7 +14,7 @@ export default function StudentProfile() {
 
   // State controls
   const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)

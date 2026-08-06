@@ -12,7 +12,7 @@ export default function StudentFines() {
   const navigate = useNavigate()
 
   const [fines, setFines] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
