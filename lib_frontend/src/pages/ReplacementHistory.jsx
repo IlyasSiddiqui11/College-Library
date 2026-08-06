@@ -14,7 +14,7 @@ export default function ReplacementHistory() {
   const [replacements, setReplacements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [userTypeFilter, setUserTypeFilter] = useState('ALL')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!user || user.role !== 'ADMIN') {

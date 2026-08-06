@@ -30,7 +30,7 @@ export default function BookReservations() {
   const navigate = useNavigate()
 
   const [reservations, setReservations] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [userTypeFilter, setUserTypeFilter] = useState('ALL')

@@ -17,7 +17,7 @@ export default function BorrowRequests() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('PENDING')
   const [userTypeFilter, setUserTypeFilter] = useState('ALL')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [accessionNumber, setAccessionNumber] = useState('')
   const [availableCopies, setAvailableCopies] = useState([])

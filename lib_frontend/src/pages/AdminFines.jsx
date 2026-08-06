@@ -15,7 +15,7 @@ export default function AdminFines() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [userTypeFilter, setUserTypeFilter] = useState('ALL')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [billNumbers, setBillNumbers] = useState({})
 

@@ -12,7 +12,7 @@ export default function StaffProfile() {
   const { user, staffProfile, fetchStaffProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [borrowRequests, setBorrowRequests] = useState([])
   const [attendanceStatus, setAttendanceStatus] = useState({ insideLibrary: false })
 

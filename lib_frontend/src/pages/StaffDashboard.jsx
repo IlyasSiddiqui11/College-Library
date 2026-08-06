@@ -23,7 +23,7 @@ export default function StaffDashboard() {
     entryTime: null,
     activeLogId: null
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [exiting, setExiting] = useState(false)
   const [cancellingId, setCancellingId] = useState(null)
   const [profileSaving, setProfileSaving] = useState(false)
@@ -85,10 +85,10 @@ export default function StaffDashboard() {
 
   useEffect(() => {
     if (!user || user.role !== 'STAFF') return
-    fetchData(true)
+    fetchData(false)
     const intervalId = setInterval(() => {
       if (!isProcessingQr.current && !exiting) fetchData(false)
-    }, 5000)
+    }, 30000)
     return () => clearInterval(intervalId)
   }, [user])
 

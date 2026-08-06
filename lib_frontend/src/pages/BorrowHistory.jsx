@@ -20,7 +20,7 @@ export default function BorrowHistory() {
   const [replacements, setReplacements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [cancellingId, setCancellingId] = useState(null)
 
   // Redirect if not logged in

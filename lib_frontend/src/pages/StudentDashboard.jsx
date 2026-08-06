@@ -25,7 +25,7 @@ export default function StudentDashboard() {
     entryTime: null,
     activeLogId: null
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [exiting, setExiting] = useState(false)
   const [cancellingId, setCancellingId] = useState(null)
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
@@ -103,14 +103,14 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     if (!user) return
-    fetchData(true)
+    fetchData(false)
 
     // Auto-refresh data every 5 seconds without showing loading spinner
     const intervalId = setInterval(() => {
       if (!isProcessingQr.current && !exiting) {
         fetchData(false)
       }
-    }, 5000)
+    }, 30000)
 
     return () => clearInterval(intervalId)
   }, [user])
