@@ -36,10 +36,12 @@ export default function AdminSidebar({ user, logout }) {
     fetchCounts();
     // Poll every 10 seconds to keep counts accurate across pages
     const intervalId = setInterval(fetchCounts, 10000);
+    window.addEventListener('refresh-sidebar', fetchCounts);
 
     return () => {
       isMounted = false;
       clearInterval(intervalId);
+      window.removeEventListener('refresh-sidebar', fetchCounts);
     };
   }, []);
 

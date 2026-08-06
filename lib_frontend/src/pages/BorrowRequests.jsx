@@ -101,6 +101,7 @@ export default function BorrowRequests() {
     try {
       await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
       await fetchRequests()
+      window.dispatchEvent(new Event('refresh-sidebar'))
       setAccessionNumber('')
       showNotification('Borrow request approved successfully!', 'success')
     } catch (err) {
@@ -115,6 +116,7 @@ export default function BorrowRequests() {
     try {
       await apiClient.post(`/api/admin/reject/${id}`)
       await fetchRequests()
+      window.dispatchEvent(new Event('refresh-sidebar'))
       showNotification('Borrow request rejected successfully.', 'success')
     } catch (err) {
       showNotification('Rejection failed: ' + err.message, 'error')
@@ -152,8 +154,9 @@ export default function BorrowRequests() {
 
   const filteredRequests = borrowRequests
     .filter((req) => {
-      const q = searchQuery.toLowerCase()
+      const q = searchQuery.toLowerCase().trim()
       const matchesSearch = 
+        q === '' ||
         (req.bookTitle?.toLowerCase() || '').includes(q) ||
         (req.userName?.toLowerCase() || '').includes(q) ||
         (req.isbn || '').includes(q)
