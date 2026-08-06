@@ -23,9 +23,9 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+              <img src="/logo.png" alt="Smart Library" className="h-9 w-9 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
               <span className="font-bold text-slate-900">
-                BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
+                Smart <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Library</span>
               </span>
             </div>
 
@@ -227,7 +227,7 @@ export default function Home() {
       <section className="px-4 py-20 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-violet-600">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">Ready to Transform Your Library?</h2>
-          <p className="mb-8 text-lg text-blue-100">Join the BCOE-lib ecosystem and experience modern library management.</p>
+          <p className="mb-8 text-lg text-blue-100">Join the Smart Library ecosystem and experience modern library management.</p>
           <Link
             to="/login"
             className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-blue-600 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20"
@@ -240,7 +240,7 @@ export default function Home() {
 
       <footer className="border-t border-slate-200 px-4 py-12 sm:px-6 lg:px-8 glass-panel">
         <div className="mx-auto max-w-6xl text-center text-sm text-slate-600">
-          <p>© 2026 BCOE-lib. Built for modern academic libraries.</p>
+          <p>© 2026 Smart Library. Built for modern academic libraries.</p>
         </div>
       </footer>
     </div>

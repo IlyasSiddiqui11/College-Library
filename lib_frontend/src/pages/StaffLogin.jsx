@@ -96,7 +96,7 @@ export default function StaffLogin() {
       <div className="relative flex w-full max-w-[460px] mx-auto flex-col gap-6 z-10">
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')} />
+            <img src="/logo.png" alt="Smart Library" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')} />
             <p className="text-2xl font-bold tracking-tight text-slate-900">
               Staff <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Portal</span>
             </p>
@@ -306,7 +306,7 @@ export default function StaffLogin() {
         </div>
 
         <p className="text-center text-[10px] tracking-wide text-slate-500">
-          © 2026 BCOE-lib. Built on secure REST Architecture.
+          © 2026 Smart Library. Built on secure REST Architecture.
         </p>
       </div>
 

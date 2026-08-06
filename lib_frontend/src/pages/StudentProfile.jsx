@@ -200,8 +200,13 @@ export default function StudentProfile() {
               <div className="flex size-24 items-center justify-center rounded-full pfp-circle bg-blue-600 text-white font-semibold text-3xl shadow-md ring-4 ring-white">
                 {name?.slice(0, 2).toUpperCase() || 'ST'}
               </div>
-              <div>
-                <h1 className="text-xl font-extrabold text-slate-900">{name}</h1>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-extrabold text-slate-900">{name}</h1>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-100 text-[10px] font-bold text-blue-600 uppercase tracking-wider border border-blue-200">
+                    Student
+                  </span>
+                </div>
                 <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
               </div>
 

@@ -98,8 +98,13 @@ export default function StaffProfile() {
               <div className="flex size-24 items-center justify-center rounded-full bg-emerald-600 text-white font-semibold text-3xl shadow-md ring-4 ring-white">
                 {displayName?.slice(0, 2).toUpperCase() || 'ST'}
               </div>
-              <div>
-                <h1 className="text-xl font-extrabold text-slate-900">{displayName}</h1>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-extrabold text-slate-900">{displayName}</h1>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-[10px] font-bold text-emerald-600 uppercase tracking-wider border border-emerald-200">
+                    Staff
+                  </span>
+                </div>
                 <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
                 {staffProfile?.designation && (
                   <p className="text-xs text-emerald-600 font-semibold mt-1">{staffProfile.designation}</p>

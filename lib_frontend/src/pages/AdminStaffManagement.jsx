@@ -229,8 +229,13 @@ export default function AdminStaffManagement() {
                     {filteredRequests.map((r) => (
                       <tr key={r.id} className="hover:bg-slate-50/50 transition">
                         <td className="px-6 py-4">
-                          <p className="font-bold text-slate-900 text-sm">{r.fullName}</p>
-                          <p className="text-slate-500 mt-0.5 font-mono">ID: {r.employeeId}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-slate-900 text-sm">{r.fullName}</p>
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-[10px] font-bold text-emerald-600 uppercase tracking-wider border border-emerald-200">
+                              Staff
+                            </span>
+                          </div>
+                          <p className="text-slate-500 mt-0.5 font-mono text-xs">ID: {r.employeeId}</p>
                           <p className="text-[10px] text-slate-400 mt-1">Req: {formatDate(r.createdAt)}</p>
                         </td>
                         <td className="px-6 py-4">

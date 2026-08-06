@@ -57,9 +57,9 @@ export default function AdminSidebar({ user, logout }) {
       <div className="flex flex-col">
         {/* Logo Brand */}
         <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
-          <img src="/logo.png" alt="BCOE-lib" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+          <img src="/logo.png" alt="Smart Library" className="h-9 w-9 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
           <span className="font-bold tracking-tight text-slate-900 text-base">
-            BCOE-lib
+            Smart Library
           </span>
         </div>
 
