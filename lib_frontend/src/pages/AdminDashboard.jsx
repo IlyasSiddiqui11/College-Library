@@ -13,7 +13,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
 
   // State controls
-  const [books, setBooks] = useState([])
   const [borrowRequests, setBorrowRequests] = useState([])
   const [gateLogs, setGateLogs] = useState([])
   const [dashboardOverview, setDashboardOverview] = useState(null)
@@ -37,13 +36,11 @@ export default function AdminDashboard() {
     if (showLoading) setLoading(true)
     try {
       // Fire all network requests concurrently
-      const [booksRes, borrowRes, dashboardRes] = await Promise.all([
-        apiClient.get('/api/books'),
+      const [borrowRes, dashboardRes] = await Promise.all([
         apiClient.get('/api/borrow'),
         apiClient.get('/api/dashboard/today')
       ]);
 
-      setBooks(booksRes.data)
       setBorrowRequests(borrowRes.data)
       setDashboardOverview(dashboardRes.data)
 
@@ -75,10 +72,10 @@ export default function AdminDashboard() {
     if (!user) return
     loadData(true)
 
-    // Auto-refresh data every 5 seconds without showing loading spinner
+    // Auto-refresh data every 30 seconds without showing loading spinner
     const intervalId = setInterval(() => {
       loadData(false)
-    }, 5000)
+    }, 30000)
 
     return () => clearInterval(intervalId)
   }, [user])
