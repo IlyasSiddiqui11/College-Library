@@ -103,9 +103,9 @@ export default function StudentLogin() {
       <div className="relative flex w-full max-w-[460px] mx-auto flex-col gap-6 z-10">
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <img src="/logo.png" alt="Smart Library" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
             <p className="text-2xl font-bold tracking-tight text-slate-900">
-              BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
+              Smart <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Library</span>
             </p>
           </div>
           <p className="text-center text-sm text-slate-500">
@@ -279,7 +279,7 @@ export default function StudentLogin() {
               ) : isRegister ? (
                 'Create Account'
               ) : (
-                'Sign In to BCOE-lib'
+                'Sign In to Smart Library'
               )}
             </button>
           </form>
@@ -313,7 +313,7 @@ export default function StudentLogin() {
           {!showOtp && (
             <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs">
               <span className="text-slate-500">
-                {isRegister ? 'Already have an account? ' : 'New to BCOE-lib? '}
+                {isRegister ? 'Already have an account? ' : 'New to Smart Library? '}
               </span>
               <button
                 type="button"
@@ -331,7 +331,7 @@ export default function StudentLogin() {
         </div>
 
         <p className="text-center text-[10px] tracking-wide text-slate-500">
-          © 2026 BCOE-lib. Built on secure REST Architecture.
+          © 2026 Smart Library. Built on secure REST Architecture.
         </p>
       </div>
 

@@ -312,9 +312,9 @@ export default function StudentDashboard() {
       <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="BCOE-lib" className="h-8 w-8 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <img src="/logo.png" alt="Smart Library" className="h-8 w-8 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
             <span className="text-xl font-bold tracking-tight text-slate-900">
-              BCOE-lib
+              Smart Library
             </span>
           </div>
           

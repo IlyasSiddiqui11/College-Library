@@ -68,13 +68,13 @@ export default function LibrarianLogin() {
 
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
+            <img src="/logo.png" alt="Smart Library" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />
             <p className="text-2xl font-bold tracking-tight text-slate-900">
-              BCOE<span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">-lib</span> Admin
+              Smart <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Library</span> Admin
             </p>
           </div>
           <p className="text-center text-sm text-slate-500">
-            BCOE-lib Admin Access
+            Smart Library Admin Access
           </p>
         </div>
 
@@ -185,7 +185,7 @@ export default function LibrarianLogin() {
         </div>
 
         <p className="text-center text-[10px] tracking-wide text-slate-500">
-          © 2026 BCOE-lib. Admin Portal.
+          © 2026 Smart Library. Admin Portal.
         </p>
       </div>
 

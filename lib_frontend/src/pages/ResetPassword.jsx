@@ -67,9 +67,9 @@ export default function ResetPassword() {
       <div className="relative w-full max-w-[460px] rounded-2xl border border-slate-200 glass-panel p-8 shadow-[0_20px_50px_rgba(0,74,198,0.04)] backdrop-blur-xl">
         <div className="mb-8 flex flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
-            <img src="/logo.png" alt="BCOE-lib" className="h-10 w-10 rounded-xl object-cover" />
+            <img src="/logo.png" alt="Smart Library" className="h-10 w-10 rounded-xl object-cover" />
             <p className="text-2xl font-bold tracking-tight text-slate-900">
-              BCOE<span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">-lib</span>
+              Smart <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Library</span>
             </p>
           </div>
           <h1 className="text-xl font-bold text-slate-900 mt-4">Reset Password</h1>
