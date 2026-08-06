@@ -53,7 +53,7 @@ export default function AdminSidebar({ user, logout }) {
   };
 
   return (
-    <aside className="w-64 border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 hidden md:flex">
+    <aside className="w-64 h-full border-r border-slate-200 glass-panel flex flex-col justify-between shrink-0 overflow-y-auto">
       <div className="flex flex-col">
         {/* Logo Brand */}
         <div className="flex items-center gap-2 px-6 py-6 border-b border-slate-200">
