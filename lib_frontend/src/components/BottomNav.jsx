@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { BookOpen, FileText, History, User, Banknote } from 'lucide-react'
+import { BookOpen, FileText, History, User } from 'lucide-react'
 
 export default function BottomNav() {
   const { user, hasFine } = useAuth()
@@ -20,7 +20,6 @@ export default function BottomNav() {
     { label: 'Home', path: homeRoute, icon: BookOpen },
     { label: 'Catalogue', path: '/catalog', icon: FileText },
     { label: 'History', path: '/history', icon: History, hasAlert: hasFine },
-    { label: 'Fines', path: '/student/fines', icon: Banknote },
     { label: 'Profile', path: profileRoute, icon: User }
   ]
 
