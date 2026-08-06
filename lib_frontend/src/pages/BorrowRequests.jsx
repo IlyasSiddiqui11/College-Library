@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
 import {
-  BookOpen, Search, Loader2, ClipboardList, Check, X, UserCheck, Download
+  BookOpen, Search, Loader2, ClipboardList, Check, X, UserCheck, Download, CheckCircle2, AlertCircle
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
@@ -28,7 +28,14 @@ export default function BorrowRequests() {
   const [selectedProfile, setSelectedProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
-  const [confirmModal, setConfirmModal] = useState({ show: false, action: null, id: null, accNum: null })
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
 
   useEffect(() => {
     if (!user) {
@@ -94,9 +101,11 @@ export default function BorrowRequests() {
     try {
       await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
       await fetchRequests()
+      window.dispatchEvent(new Event('refresh-sidebar'))
       setAccessionNumber('')
+      showNotification('Borrow request approved successfully!', 'success')
     } catch (err) {
-      alert('Approval failed: ' + err.message)
+      showNotification('Approval failed: ' + err.message, 'error')
     } finally {
       setActionLoading(false)
     }
@@ -107,8 +116,10 @@ export default function BorrowRequests() {
     try {
       await apiClient.post(`/api/admin/reject/${id}`)
       await fetchRequests()
+      window.dispatchEvent(new Event('refresh-sidebar'))
+      showNotification('Borrow request rejected successfully.', 'success')
     } catch (err) {
-      alert('Rejection failed: ' + err.message)
+      showNotification('Rejection failed: ' + err.message, 'error')
     } finally {
       setActionLoading(false)
     }
@@ -116,25 +127,14 @@ export default function BorrowRequests() {
 
   const confirmApprove = (id, accNum) => {
     if (!accNum || !accNum.trim()) {
-      alert('Please select an accession number to issue.')
+      showNotification('Please select an accession number to issue.', 'error')
       return
     }
-    setConfirmModal({ show: true, action: 'APPROVE', id, accNum })
+    handleApprove(id, accNum)
   }
 
   const confirmReject = (id) => {
-    setConfirmModal({ show: true, action: 'REJECT', id, accNum: null })
-  }
-
-  const proceedAction = async () => {
-    const { action, id, accNum } = confirmModal
-    setConfirmModal({ show: false, action: null, id: null, accNum: null })
-    
-    if (action === 'APPROVE') {
-      await handleApprove(id, accNum)
-    } else if (action === 'REJECT') {
-      await handleReject(id)
-    }
+    handleReject(id)
   }
 
   const handleViewProfile = async (userId) => {
@@ -154,8 +154,9 @@ export default function BorrowRequests() {
 
   const filteredRequests = borrowRequests
     .filter((req) => {
-      const q = searchQuery.toLowerCase()
+      const q = searchQuery.toLowerCase().trim()
       const matchesSearch = 
+        q === '' ||
         (req.bookTitle?.toLowerCase() || '').includes(q) ||
         (req.userName?.toLowerCase() || '').includes(q) ||
         (req.isbn || '').includes(q)
@@ -229,6 +230,14 @@ export default function BorrowRequests() {
 
   return (
     <div className="h-screen flex text-slate-900">
+      {notification.show && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl animate-in slide-in-from-right-8 duration-300 ${
+          notification.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          {notification.type === 'success' ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}
+          <p className="text-sm font-bold">{notification.message}</p>
+        </div>
+      )}
       <AdminSidebar user={user} logout={logout} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -574,35 +583,6 @@ export default function BorrowRequests() {
         </main>
       </div>
 
-      {confirmModal.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl border border-slate-200 glass-panel p-6 shadow-2xl animate-in fade-in duration-150">
-            <h3 className="font-bold text-slate-900 text-base mb-2">Confirm Action</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              Are you sure you want to {confirmModal.action === 'APPROVE' ? 'approve' : 'reject'} this borrow request?
-              {confirmModal.action === 'APPROVE' && confirmModal.accNum && (
-                <span className="block mt-1">Accession Number: <span className="font-mono font-bold text-blue-600">{confirmModal.accNum}</span></span>
-              )}
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setConfirmModal({ show: false, action: null, id: null, accNum: null })}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={proceedAction}
-                className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition ${
-                  confirmModal.action === 'APPROVE' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'
-                }`}
-              >
-                Yes, {confirmModal.action === 'APPROVE' ? 'Approve' : 'Reject'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showProfileModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">

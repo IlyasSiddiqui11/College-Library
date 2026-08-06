@@ -90,6 +90,7 @@ export default function AdminDashboard() {
     try {
       await apiClient.post(`/api/admin/approve/${id}?accessionNumber=${encodeURIComponent(accNum.trim())}`)
       await loadData()
+      window.dispatchEvent(new Event('refresh-sidebar'))
       setApprovingId(null)
       setAccessionNumber('')
       setAvailableCopies([])
@@ -122,6 +123,7 @@ export default function AdminDashboard() {
     try {
       await apiClient.post(`/api/admin/reject/${id}`)
       await loadData()
+      window.dispatchEvent(new Event('refresh-sidebar'))
     } catch (err) {
       alert('Rejection error: ' + err.message)
     } finally {
