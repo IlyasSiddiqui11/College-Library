@@ -105,6 +105,9 @@ export default function BookScanner() {
 
   useEffect(() => {
     startScanner()
+    return () => stopScanner()
+  }, [])
+
   useEffect(() => {
     if (errorMsg) {
       setTimeout(() => {
@@ -113,9 +116,6 @@ export default function BookScanner() {
       }, 100)
     }
   }, [errorMsg])
-
-    return () => stopScanner()
-  }, [])
 
   const onScanSuccess = (decodedText) => {
     if (isProcessing.current) return
