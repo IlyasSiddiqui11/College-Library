@@ -63,6 +63,10 @@ public class User {
     @Builder.Default
     private Boolean isVerified = false;
 
+    @Column(name = "requires_password_change")
+    @Builder.Default
+    private Boolean requiresPasswordChange = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

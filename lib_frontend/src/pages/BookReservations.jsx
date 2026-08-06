@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import CustomSelect from '../components/CustomSelect.jsx'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
@@ -106,15 +107,16 @@ export default function BookReservations() {
               />
 
               {/* Status Filter */}
-              <select
+              <CustomSelect
                 value={userTypeFilter}
-                onChange={(e) => setUserTypeFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
-              >
-                <option value="ALL">All Users</option>
-                <option value="STUDENT">Students</option>
-                <option value="STAFF">Staff</option>
-              </select>
+                onChange={(val) => setUserTypeFilter(val)}
+                options={[
+                  { value: 'ALL', label: 'All Users' },
+                  { value: 'STUDENT', label: 'Students' },
+                  { value: 'STAFF', label: 'Staff' }
+                ]}
+                className="w-32"
+              />
 
               <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                 {['ALL', 'PENDING', 'FULFILLED', 'CANCELLED'].map(s => (

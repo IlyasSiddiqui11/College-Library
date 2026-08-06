@@ -7,6 +7,7 @@ import com.example.library.dto.request.LoginRequest;
 import com.example.library.dto.request.RegisterRequest;
 import com.example.library.dto.request.ForgotPasswordRequest;
 import com.example.library.dto.request.ResetPasswordRequest;
+import com.example.library.dto.request.ChangePasswordRequest;
 import com.example.library.dto.response.AuthResponse;
 import com.example.library.dto.response.LoginResponse;
 import com.example.library.service.AuthService;
@@ -45,6 +46,12 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok("Password has been reset successfully.");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok("Password changed successfully.");
     }
 
     @PostMapping("/verify-registration-otp")

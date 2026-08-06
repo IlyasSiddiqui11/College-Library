@@ -11,6 +11,7 @@ import com.example.library.dto.request.ResendOtpRequest;
 import com.example.library.dto.response.AuthResponse;
 import com.example.library.dto.response.LoginResponse;
 import com.example.library.dto.response.UserResponse;
+import com.example.library.dto.request.ChangePasswordRequest;
 import com.example.library.entity.User;
 import com.example.library.exception.BadRequestException;
 import com.example.library.repository.UserRepository;
@@ -162,7 +163,18 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .requiresPasswordChange(user.getRequiresPasswordChange())
                 .build();
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setRequiresPasswordChange(false);
+        userRepository.save(user);
     }
 
     @Transactional

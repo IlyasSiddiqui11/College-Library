@@ -6,12 +6,16 @@ import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 import { apiClient } from "../api/client"
 
 export default function StaffLogin() {
-  const { login, user } = useAuth()
+  const { login, changePassword, user } = useAuth()
   const navigate = useNavigate()
 
   const [isRequestAccess, setIsRequestAccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false)
+  const [isChangePasswordMode, setIsChangePasswordMode] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [tempUser, setTempUser] = useState(null)
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +36,7 @@ export default function StaffLogin() {
   const [successMsg, setSuccessMsg] = useState(null)
 
   React.useEffect(() => {
-    if (user) {
+    if (user && !isChangePasswordMode) {
       if (user.role === 'ADMIN') {
         navigate('/admin')
       } else if (user.role === 'STAFF') {
@@ -41,7 +45,7 @@ export default function StaffLogin() {
         navigate('/student')
       }
     }
-  }, [user, navigate])
+  }, [user, navigate, isChangePasswordMode])
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -69,12 +73,17 @@ export default function StaffLogin() {
         })
       } else {
         const logged = await login(email, password)
-        if (logged.role === 'ADMIN') {
-          navigate('/admin')
-        } else if (logged.role === 'STAFF') {
-          navigate('/staff/dashboard')
+        if (logged.requiresPasswordChange) {
+          setTempUser(logged)
+          setIsChangePasswordMode(true)
         } else {
-          navigate('/student')
+          if (logged.role === 'ADMIN') {
+            navigate('/admin')
+          } else if (logged.role === 'STAFF') {
+            navigate('/staff')
+          } else {
+            navigate('/student')
+          }
         }
       }
     } catch (err) {
@@ -82,6 +91,50 @@ export default function StaffLogin() {
         setError(err.response.data.message)
       } else {
         setError(err.message || 'An error occurred during submission')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChangePasswordSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
+    setSuccessMsg(null)
+    
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
+
+    setLoading(true)
+    try {
+      await changePassword(tempUser.id, newPassword)
+      
+      // Update local storage to remove requiresPasswordChange flag just in case, but really we can just navigate now.
+      const updatedUser = { ...tempUser, requiresPasswordChange: false }
+      localStorage.setItem('library_user', JSON.stringify(updatedUser))
+      
+      setSuccessMsg("Password changed successfully! Redirecting...")
+      setTimeout(() => {
+        if (updatedUser.role === 'ADMIN') {
+          navigate('/admin')
+        } else if (updatedUser.role === 'STAFF') {
+          navigate('/staff')
+        } else {
+          navigate('/student')
+        }
+      }, 1000)
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message)
+      } else {
+        setError(err.message || 'Failed to change password')
       }
     } finally {
       setLoading(false)
@@ -266,28 +319,97 @@ export default function StaffLogin() {
               </>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg transition duration-200 hover:shadow-xl active:scale-[0.98] disabled:opacity-75"
-              style={{
-                backgroundImage: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Processing...
-                </>
-              ) : isRequestAccess ? (
-                'Submit Request'
-              ) : (
-                'Sign In as Staff'
-              )}
-            </button>
+            {!isChangePasswordMode && (
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg transition duration-200 hover:shadow-xl active:scale-[0.98] disabled:opacity-75"
+                style={{
+                  backgroundImage: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : isRequestAccess ? (
+                  'Submit Request'
+                ) : (
+                  'Sign In as Staff'
+                )}
+              </button>
+            )}
           </form>
 
-          {!isRequestAccess && (
+          {isChangePasswordMode && (
+            <form onSubmit={handleChangePasswordSubmit} className="flex flex-col gap-5 mt-4">
+              <div className="text-sm text-slate-600 mb-2">
+                This is your first time logging in. Please change your password to continue.
+              </div>
+              
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  New Password
+                </label>
+                <div className="relative mt-1.5">
+                  <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-10 text-sm outline-none transition focus:border-emerald-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-600 transition"
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Confirm Password
+                </label>
+                <div className="relative mt-1.5">
+                  <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-10 text-sm outline-none transition focus:border-emerald-600"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg transition duration-200 hover:shadow-xl active:scale-[0.98] disabled:opacity-75"
+                style={{
+                  backgroundImage: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  'Change Password'
+                )}
+              </button>
+            </form>
+          )}
+
+          {!isRequestAccess && !isChangePasswordMode && (
             <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs">
               <span className="text-slate-500">Don't have an account? </span>
               <button

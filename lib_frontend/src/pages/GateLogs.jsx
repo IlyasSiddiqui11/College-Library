@@ -300,15 +300,16 @@ export default function GateLogs() {
             </div>
 
             <div className="flex gap-2">
-              <select
+              <CustomSelect
                 value={userTypeFilter}
-                onChange={(e) => setUserTypeFilter(e.target.value)}
-                className="w-28 rounded-lg border border-slate-200 glass-input px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
-              >
-                <option value="ALL">All Users</option>
-                <option value="STUDENT">Students</option>
-                <option value="STAFF">Staff</option>
-              </select>
+                onChange={(val) => setUserTypeFilter(val)}
+                options={[
+                  { value: 'ALL', label: 'All Users' },
+                  { value: 'STUDENT', label: 'Students' },
+                  { value: 'STAFF', label: 'Staff' }
+                ]}
+                className="w-32"
+              />
               <CustomSelect
                 value={branchFilter}
                 onChange={(val) => setBranchFilter(val)}
