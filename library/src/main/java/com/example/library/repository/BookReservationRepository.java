@@ -22,4 +22,6 @@ public interface BookReservationRepository extends JpaRepository<BookReservation
     long countByUserIdAndStatus(Long userId, ReservationStatus status);
 
     boolean existsByUserIdAndIsbnAndStatus(Long userId, String isbn, ReservationStatus status);
+    
+    void deleteByUserId(Long userId);
 }

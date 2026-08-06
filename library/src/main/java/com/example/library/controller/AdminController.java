@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,5 +31,11 @@ public class AdminController {
     public ResponseEntity<BorrowResponse> rejectRequest(@PathVariable Long id) {
         BorrowResponse response = borrowService.rejectBorrowRequest(id);
         return ResponseEntity.ok(response);
+    }
+    
+    @DeleteMapping("/user/{userId}/history")
+    public ResponseEntity<String> wipeUserHistory(@PathVariable Long userId) {
+        borrowService.wipeUserHistory(userId);
+        return ResponseEntity.ok("User history successfully wiped.");
     }
 }

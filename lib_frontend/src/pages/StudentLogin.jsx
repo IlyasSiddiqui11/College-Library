@@ -62,7 +62,7 @@ export default function StudentLogin() {
         setSuccessMsg('Account created! Please check your email for the 6-digit OTP.')
         setShowOtp(true)
       } else {
-        const logged = await login(email, password)
+        const logged = await login(email, password, 'STUDENT')
         if (logged.role === 'ADMIN') {
           navigate('/admin')
         } else {

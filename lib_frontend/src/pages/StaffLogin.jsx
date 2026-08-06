@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { Mail, Lock, User, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle, Hash, Phone, Building2, Briefcase } from 'lucide-react'
+import { Mail, Lock, User, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle, Hash, Phone, Building2, Briefcase, ChevronDown } from 'lucide-react'
 import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 import { apiClient } from "../api/client"
 
@@ -12,6 +12,7 @@ export default function StaffLogin() {
   const [isRequestAccess, setIsRequestAccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false)
+  const [isEmploymentDropdownOpen, setIsEmploymentDropdownOpen] = useState(false)
   const [isChangePasswordMode, setIsChangePasswordMode] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -72,7 +73,7 @@ export default function StaffLogin() {
           fullName: '', employeeId: '', collegeEmail: '', mobileNumber: '', department: '', designation: '', employmentType: ''
         })
       } else {
-        const logged = await login(email, password)
+        const logged = await login(email, password, 'STAFF')
         if (logged.requiresPasswordChange) {
           setTempUser(logged)
           setIsChangePasswordMode(true)
@@ -255,9 +256,53 @@ export default function StaffLogin() {
                   </div>
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Employment Type</label>
-                  <select name="employmentType" required value={formData.employmentType} onChange={handleInputChange} className="mt-1.5 w-full rounded-xl border border-slate-200 py-3.5 px-4 text-sm outline-none transition focus:border-emerald-600 bg-white">
+                  
+                  <div className="relative mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsEmploymentDropdownOpen(!isEmploymentDropdownOpen)}
+                      className={`flex w-full items-center justify-between rounded-xl border py-3.5 px-4 text-sm outline-none transition bg-white ${
+                        isEmploymentDropdownOpen ? 'border-emerald-600 ring-1 ring-emerald-600' : 'border-slate-200 hover:border-emerald-600'
+                      }`}
+                    >
+                      <span className={formData.employmentType ? 'text-slate-900' : 'text-slate-500'}>
+                        {formData.employmentType || 'Select Type'}
+                      </span>
+                      <ChevronDown className={`size-4 text-slate-400 transition-transform ${isEmploymentDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isEmploymentDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsEmploymentDropdownOpen(false)}
+                        ></div>
+                        <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/5 overflow-hidden origin-top animate-in fade-in zoom-in-95 duration-200">
+                          {['Full-Time', 'Part-Time', 'Contract'].map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, employmentType: type })
+                                setIsEmploymentDropdownOpen(false)
+                              }}
+                              className={`flex w-full items-center rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                                formData.employmentType === type
+                                  ? 'bg-emerald-50 text-emerald-700 font-medium'
+                                  : 'text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  <select name="employmentType" required value={formData.employmentType} onChange={handleInputChange} className="sr-only" tabIndex={-1}>
                     <option value="">Select Type</option>
                     <option value="Full-Time">Full-Time</option>
                     <option value="Part-Time">Part-Time</option>

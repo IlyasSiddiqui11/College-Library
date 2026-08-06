@@ -13,6 +13,8 @@ import com.example.library.dto.response.LoginResponse;
 import com.example.library.dto.response.UserResponse;
 import com.example.library.dto.request.ChangePasswordRequest;
 import com.example.library.entity.User;
+import com.example.library.dto.request.VerifyResetOtpRequest;
+import com.example.library.dto.request.ResendResetOtpRequest;
 import com.example.library.exception.BadRequestException;
 import com.example.library.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.library.repository.StaffProfileRepository;
+import com.example.library.repository.AuditLogRepository;
+import com.example.library.entity.AuditLog;
 import com.example.library.entity.StaffProfile;
 import com.example.library.enums.StaffStatus;
 
@@ -33,6 +37,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final StaffProfileRepository staffProfileRepository;
+    private final AuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Random random = new Random();
@@ -143,6 +148,28 @@ public class AuthService {
             throw new BadRequestException("Invalid email or password");
         }
 
+        // Role Validation
+        if (request.getExpectedRole() != null && user.getRole() != request.getExpectedRole()) {
+            AuditLog log = AuditLog.builder()
+                    .email(request.getEmail())
+                    .attemptedRole(request.getExpectedRole())
+                    .actualRole(user.getRole())
+                    .reason("Role mismatch on login")
+                    .build();
+            auditLogRepository.save(log);
+
+            switch (request.getExpectedRole()) {
+                case ADMIN:
+                    throw new BadRequestException("This account is not authorized to access the Admin Login portal. Please use the correct login page.");
+                case STUDENT:
+                    throw new BadRequestException("This account is not authorized to access the Student Login portal. Please use the correct login page.");
+                case STAFF:
+                    throw new BadRequestException("This account is not authorized to access the Staff Login portal. Please use the correct login page.");
+                default:
+                    throw new BadRequestException("Unauthorized access.");
+            }
+        }
+
         if (user.getRole() == com.example.library.enums.Role.STAFF) {
             staffProfileRepository.findByCollegeEmail(user.getEmail()).ifPresent(profile -> {
                 if (profile.getStatus() == StaffStatus.INACTIVE) {
@@ -158,12 +185,17 @@ public class AuthService {
             throw new BadRequestException("Please verify your email to log in.");
         }
 
+        Boolean requiresChange = user.getRequiresPasswordChange();
+        if (requiresChange == null) {
+            requiresChange = (user.getRole() == com.example.library.enums.Role.STAFF);
+        }
+
         return LoginResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
-                .requiresPasswordChange(user.getRequiresPasswordChange())
+                .requiresPasswordChange(requiresChange)
                 .build();
     }
 
@@ -180,22 +212,100 @@ public class AuthService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("User not found with this email"));
+                .orElse(null);
 
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+        if (user == null) {
+            // Do not reveal if email exists, just return
+            return;
+        }
+
+        String otp = generateOtp();
+        user.setResetOtp(otp); // Store plain OTP, usually hashed is better, but since it's short lived and sent via email, this is acceptable for now.
+        user.setResetOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        user.setResetOtpAttempts(0);
         userRepository.save(user);
 
-        String resetLink = frontendUrl + "/reset-password?token=" + token;
-        
         String emailBody = "Hello " + user.getName() + ",\n\n"
-                + "You requested to reset your password. Please click the link below to set a new password:\n\n"
-                + resetLink + "\n\n"
-                + "This link will expire in 1 hour.\n\n"
+                + "You requested to reset your password. Here is your 6-digit verification code:\n\n"
+                + otp + "\n\n"
+                + "This code will expire in 5 minutes.\n\n"
                 + "If you did not request this, please ignore this email.";
                 
-        emailService.sendEmail(user.getEmail(), "Password Reset Request", emailBody);
+        emailService.sendEmail(user.getEmail(), "Password Reset Code", emailBody);
+    }
+
+    @Transactional
+    public String verifyResetOtp(VerifyResetOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid email or OTP"));
+
+        if (user.getResetOtp() == null || !user.getResetOtp().equals(request.getOtp())) {
+            if (user.getResetOtp() != null) {
+                user.setResetOtpAttempts(user.getResetOtpAttempts() + 1);
+                userRepository.save(user);
+                if (user.getResetOtpAttempts() >= 3) {
+                    user.setResetOtp(null);
+                    user.setResetOtpExpiry(null);
+                    userRepository.save(user);
+                    throw new BadRequestException("Maximum OTP attempts reached. Please request a new one.");
+                }
+            }
+            throw new BadRequestException("Invalid OTP");
+        }
+
+        if (user.getResetOtpExpiry() == null || user.getResetOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("OTP has expired. Please request a new one.");
+        }
+
+        // OTP is valid, generate a short-lived reset token
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        
+        // Clear OTP fields
+        user.setResetOtp(null);
+        user.setResetOtpExpiry(null);
+        user.setResetOtpAttempts(0);
+        
+        userRepository.save(user);
+        
+        return resetToken;
+    }
+
+    @Transactional
+    public void resendResetOtp(ResendResetOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElse(null);
+
+        if (user == null) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getResetOtpResendWindowStart() == null || user.getResetOtpResendWindowStart().isBefore(now.minusMinutes(15))) {
+            user.setResetOtpResendCount(0);
+            user.setResetOtpResendWindowStart(now);
+        }
+
+        if (user.getResetOtpResendCount() >= 3) {
+            throw new BadRequestException("Maximum resend limit reached. Please try again after 15 minutes.");
+        }
+
+        String otp = generateOtp();
+        user.setResetOtp(otp);
+        user.setResetOtpExpiry(now.plusMinutes(5));
+        user.setResetOtpAttempts(0);
+        user.setResetOtpResendCount(user.getResetOtpResendCount() + 1);
+        
+        userRepository.save(user);
+
+        String emailBody = "Hello " + user.getName() + ",\n\n"
+                + "You requested to resend your password reset code. Here is your new 6-digit verification code:\n\n"
+                + otp + "\n\n"
+                + "This code will expire in 5 minutes.\n\n"
+                + "If you did not request this, please ignore this email.";
+                
+        emailService.sendEmail(user.getEmail(), "New Password Reset Code", emailBody);
     }
 
     @Transactional
@@ -205,6 +315,10 @@ public class AuthService {
 
         if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Reset token has expired");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new BadRequestException("New password cannot be the same as the current password.");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));

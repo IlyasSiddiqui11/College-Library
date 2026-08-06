@@ -10,6 +10,7 @@ import lombok.Data;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import com.example.library.enums.Role;
 
 @Data
 @Builder
@@ -23,4 +24,6 @@ public class LoginRequest {
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    private Role expectedRole;
 }

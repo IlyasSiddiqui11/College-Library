@@ -49,4 +49,6 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
     java.util.List<BorrowRequest> findTop10ByStatusOrderByReturnedDateDesc(BorrowStatus status);
     
     List<BorrowRequest> findByAccessionNumber(String accessionNumber);
+    
+    void deleteByUserId(Long userId);
 }

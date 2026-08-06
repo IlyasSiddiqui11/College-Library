@@ -64,8 +64,10 @@ public class BookReservationService {
 
 
         long pendingReservations = bookReservationRepository.countByUserIdAndStatus(user.getId(), ReservationStatus.PENDING);
-        if (pendingReservations >= 2) {
-            throw new BadRequestException("You have reached the maximum limit of 2 pending reservations.");
+        int maxReservationLimit = (user.getRole() == com.example.library.enums.Role.STAFF) ? 4 : 2;
+        
+        if (pendingReservations >= maxReservationLimit) {
+            throw new BadRequestException("You have reached the maximum limit of " + maxReservationLimit + " pending reservations.");
         }
 
         boolean alreadyReserved = bookReservationRepository.existsByUserIdAndIsbnAndStatus(user.getId(), isbn, ReservationStatus.PENDING);
@@ -136,6 +138,8 @@ public class BookReservationService {
                 .filter(req -> req.getStatus() == BorrowStatus.APPROVED || req.getStatus() == BorrowStatus.PENDING)
                 .count();
 
+        int maxBorrowLimit = (user.getRole() == com.example.library.enums.Role.STAFF) ? 4 : 2;
+
         // Check if user already has a pending borrow request for this ISBN
         boolean hasActiveRequest = borrowRequestRepository.findByUserId(user.getId()).stream()
                 .anyMatch(req -> {
@@ -144,7 +148,7 @@ public class BookReservationService {
                             && (req.getStatus() == BorrowStatus.PENDING || req.getStatus() == BorrowStatus.APPROVED);
                 });
 
-        if (activeBorrowCount >= 2 || hasActiveRequest) {
+        if (activeBorrowCount >= maxBorrowLimit || hasActiveRequest) {
             // In a real system we might skip this user and go to the next, 
             // or we might cancel their reservation. Let's just cancel it for now to avoid blocking the queue.
             log.warn("Cannot fulfill reservation for user {} due to limits. Cancelling reservation.", user.getId());
@@ -204,7 +208,9 @@ public class BookReservationService {
 
             // Check if user already reached the limit of pending reservations
             long pendingReservations = bookReservationRepository.countByUserIdAndStatus(user.getId(), ReservationStatus.PENDING);
-            if (pendingReservations >= 2) {
+            int maxReservationLimit = (user.getRole() == com.example.library.enums.Role.STAFF) ? 4 : 2;
+            
+            if (pendingReservations >= maxReservationLimit) {
                 log.warn("Cannot convert request to reservation for user {} due to limits. Cancelling borrow request.", user.getId());
                 req.setStatus(BorrowStatus.CANCELLED);
                 borrowRequestRepository.save(req);

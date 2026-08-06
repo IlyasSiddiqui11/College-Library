@@ -29,4 +29,6 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     Page<Fine> searchAndFilterFines(@Param("status") FineStatus status, 
                                     @Param("search") String search, 
                                     Pageable pageable);
+                                    
+    void deleteByUserId(Long userId);
 }

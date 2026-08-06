@@ -41,9 +41,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user])
 
-  const login = async (email, password) => {
+  const login = async (email, password, expectedRole) => {
     try {
-      const response = await apiClient.post('/api/auth/login', { email, password })
+      const response = await apiClient.post('/api/auth/login', { email, password, expectedRole })
       const loggedUser = response.data
       setUser(loggedUser)
       localStorage.setItem('library_user', JSON.stringify(loggedUser))
