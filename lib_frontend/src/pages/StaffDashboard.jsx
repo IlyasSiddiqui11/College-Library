@@ -1,3 +1,4 @@
+import BottomNav from '../components/BottomNav.jsx';
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -613,54 +614,7 @@ export default function StaffDashboard() {
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-4 left-4 right-4 z-30 mx-auto max-w-sm">
-        <div className="flex items-center justify-around rounded-full border border-slate-200 glass-panel px-4 py-2 shadow-xl shadow-black/20 backdrop-blur-lg">
-          <button
-            type="button"
-            onClick={() => navigate('/staff')}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full bg-slate-100 text-emerald-600 transition"
-          >
-            <BookOpen className="size-5" />
-            <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/catalog')}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-slate-100 transition"
-          >
-            <FileText className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Catalogue</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/history')}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full transition ${hasFine ? 'text-red-600 animate-pulse hover:bg-red-50' : 'text-slate-500 hover:text-emerald-600 hover:bg-slate-100'}`}
-          >
-            <History className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">History</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/student/fines')}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-slate-100 transition"
-          >
-            <Banknote className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Fines</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/staff/profile')}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-slate-100 transition"
-          >
-            <User className="size-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Profile</span>
-          </button>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   )
 }
