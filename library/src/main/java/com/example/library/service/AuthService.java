@@ -158,12 +158,17 @@ public class AuthService {
             throw new BadRequestException("Please verify your email to log in.");
         }
 
+        Boolean requiresChange = user.getRequiresPasswordChange();
+        if (requiresChange == null) {
+            requiresChange = (user.getRole() == com.example.library.enums.Role.STAFF);
+        }
+
         return LoginResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
-                .requiresPasswordChange(user.getRequiresPasswordChange())
+                .requiresPasswordChange(requiresChange)
                 .build();
     }
 
