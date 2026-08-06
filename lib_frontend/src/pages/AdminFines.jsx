@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CustomSelect from '../components/CustomSelect.jsx'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
@@ -159,15 +160,16 @@ export default function AdminFines() {
                 <Download className="size-3.5" />
                 Export
               </button>
-              <select
+              <CustomSelect
                 value={userTypeFilter}
-                onChange={(e) => setUserTypeFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
-              >
-                <option value="ALL">All Users</option>
-                <option value="STUDENT">Students</option>
-                <option value="STAFF">Staff</option>
-              </select>
+                onChange={(val) => setUserTypeFilter(val)}
+                options={[
+                  { value: 'ALL', label: 'All Users' },
+                  { value: 'STUDENT', label: 'Students' },
+                  { value: 'STAFF', label: 'Staff' }
+                ]}
+                className="w-32"
+              />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
                 <input

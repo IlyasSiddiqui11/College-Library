@@ -77,6 +77,14 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const changePassword = async (userId, newPassword) => {
+    try {
+      await apiClient.post('/api/auth/change-password', { userId, newPassword })
+    } catch (err) {
+      throw new Error(err.message || 'Failed to change password')
+    }
+  }
+
   // Fetch student profile
   const fetchProfile = async () => {
     if (!user) return null
@@ -156,7 +164,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user, profile, staffProfile, loading,
       login, register, verifyRegistrationOtp, resendRegistrationOtp,
-      logout, hasFine, completeProfile, fetchProfile, fetchStaffProfile
+      logout, hasFine, completeProfile, fetchProfile, fetchStaffProfile, changePassword
     }}>
       {children}
     </AuthContext.Provider>

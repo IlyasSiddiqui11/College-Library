@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CustomSelect from '../components/CustomSelect.jsx'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../api/client'
@@ -104,15 +105,16 @@ export default function ReplacementHistory() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <select
+              <CustomSelect
                 value={userTypeFilter}
-                onChange={(e) => setUserTypeFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 glass-input px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 bg-white"
-              >
-                <option value="ALL">All Users</option>
-                <option value="STUDENT">Students</option>
-                <option value="STAFF">Staff</option>
-              </select>
+                onChange={(val) => setUserTypeFilter(val)}
+                options={[
+                  { value: 'ALL', label: 'All Users' },
+                  { value: 'STUDENT', label: 'Students' },
+                  { value: 'STAFF', label: 'Staff' }
+                ]}
+                className="w-32"
+              />
               {/* Search */}
               <input
                 type="text"

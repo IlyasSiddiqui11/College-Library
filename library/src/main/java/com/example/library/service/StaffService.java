@@ -81,6 +81,7 @@ public class StaffService {
                 .password(passwordEncoder.encode(rawPassword))
                 .role(Role.STAFF)
                 .isVerified(true)
+                .requiresPasswordChange(true)
                 .build();
 
         User savedUser = userRepository.save(user);

@@ -36,6 +36,13 @@ export default function AddAssetModal({
 
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef(null)
+  const scrollContainerRef = useRef(null)
+
+  useEffect(() => {
+    if (errorMsg && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [errorMsg])
 
   useEffect(() => {
     if (isOpen) {
@@ -258,8 +265,8 @@ export default function AddAssetModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-5xl rounded-2xl border border-slate-300 glass-panel shadow-2xl animate-in fade-in duration-150 my-auto">
+    <div ref={scrollContainerRef} className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 px-4 py-6 sm:py-12 backdrop-blur-sm overflow-y-auto">
+      <div className="w-full max-w-5xl rounded-2xl border border-slate-300 glass-panel shadow-2xl animate-in fade-in duration-150 m-auto">
         {/* Modal Header */}
         <div className="flex justify-between items-center px-8 py-5 border-b border-slate-300 bg-white/50">
           <div>

@@ -38,6 +38,10 @@ export default function StudentProfile() {
   useEffect(() => {
     if (!user) {
       navigate('/login')
+    } else if (user.role === 'ADMIN') {
+      navigate('/admin')
+    } else if (user.role === 'STAFF') {
+      navigate('/staff')
     }
   }, [user, navigate])
 
