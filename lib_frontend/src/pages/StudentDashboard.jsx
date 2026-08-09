@@ -9,6 +9,7 @@ import {
   GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
+import RoleBadge from '../components/RoleBadge.jsx'
 
 export default function StudentDashboard() {
   const { user, profile, completeProfile, logout, hasFine } = useAuth()
