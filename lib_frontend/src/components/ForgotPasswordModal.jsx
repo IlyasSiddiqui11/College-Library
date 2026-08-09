@@ -81,8 +81,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
 
     try {
       const res = await apiClient.post('/api/auth/verify-reset-otp', { email, otp })
-      if (res.token) {
-        setResetToken(res.token)
+      const token = res.data?.token || res.token
+      if (token) {
+        setResetToken(token)
         setStep(3)
       }
     } catch (err) {
