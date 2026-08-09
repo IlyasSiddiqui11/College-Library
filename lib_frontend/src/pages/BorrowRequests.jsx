@@ -191,7 +191,8 @@ export default function BorrowRequests() {
   )
 
   const handleExport = () => {
-    const headers = ['Request ID', 'Book Title', 'Book Author', 'ISBN', 'Requester Name', 'Requester ID', 'Request Date', 'Due Date', 'Accession Number', 'Status', 'Approved Date', 'Returned Date', 'Rejected/Cancelled Date']
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const headers = ['Request ID', 'Book Title', 'Book Author', 'ISBN', `${userHeader} Name`, `${userHeader} ID`, 'Request Date', 'Due Date', 'Accession Number', 'Status', 'Approved Date', 'Returned Date', 'Rejected/Cancelled Date']
     const csvRows = [
       headers.join(','),
       ...filteredRequests.map(req => {
@@ -360,7 +361,7 @@ export default function BorrowRequests() {
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-slate-500 truncate">{req.userName || `ID #${req.userId}`}</p>
-                          <RoleBadge role={req.userRole} />
+                          {userTypeFilter === 'ALL' && <RoleBadge role={req.userRole} />}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-1 font-mono">ISBN: {req.isbn || '—'}</p>
                         <div className="flex justify-between items-center mt-2">

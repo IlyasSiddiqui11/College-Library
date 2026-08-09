@@ -55,7 +55,8 @@ export default function ReplacementHistory() {
   // Date formatter
   
   const handleExport = () => {
-    const headers = ['Original Title', 'Original Accession', 'Replacement Title', 'Replacement Accession', 'Student Name', 'Replaced By', 'Date']
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const headers = ['Original Title', 'Original Accession', 'Replacement Title', 'Replacement Accession', `${userHeader} Name`, 'Replaced By', 'Date']
     const csvRows = [
       headers.join(','),
       ...filteredItems.map(item => {
@@ -158,7 +159,7 @@ export default function ReplacementHistory() {
                     <th className="px-6 py-4">Replacement Info</th>
                     <th className="px-6 py-4">Original Book</th>
                     <th className="px-6 py-4">Replacement Book</th>
-                    <th className="px-6 py-4">Student</th>
+                    <th className="px-6 py-4">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -204,7 +205,7 @@ export default function ReplacementHistory() {
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-slate-900 text-xs">{item.studentName}</span>
-                                {item.userRole === 'STAFF' && (
+                                {userTypeFilter === 'ALL' && item.userRole === 'STAFF' && (
                                   <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
                                     STAFF
                                   </span>
