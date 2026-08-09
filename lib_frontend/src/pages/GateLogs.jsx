@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
+import RoleBadge from '../components/RoleBadge.jsx'
 
 export default function GateLogs() {
   const { user, logout } = useAuth()
