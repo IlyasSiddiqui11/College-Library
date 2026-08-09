@@ -455,7 +455,7 @@ export default function BorrowRequests() {
                       </div>
                       <div>
                         <p className="text-slate-500">Default Schedule Duration</p>
-                        <p className="font-bold text-blue-600 mt-0.5">7 Days Loan</p>
+                        <p className="font-bold text-blue-600 mt-0.5">{selectedReq.userRole === 'STAFF' ? 'No limit' : '7 Days Loan'}</p>
                       </div>
                       {selectedReq.accessionNumber && (
                         <div>
