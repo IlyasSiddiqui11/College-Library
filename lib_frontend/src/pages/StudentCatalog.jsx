@@ -241,7 +241,7 @@ export default function StudentCatalog() {
           <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-100 px-3 py-2.5">
             <span className="shrink-0 text-base">📋</span>
             <div className="text-[10px] text-slate-500 leading-relaxed">
-              <span className="font-bold text-slate-600">Rules:</span> Max <span className="font-bold text-slate-900">2 books</span> active &nbsp;•&nbsp; Duration: <span className="font-bold text-slate-900">7 days</span>
+              <span className="font-bold text-slate-600">Rules:</span> Max <span className="font-bold text-slate-900">{user?.role === 'STAFF' ? '4 books' : '2 books'}</span> active &nbsp;•&nbsp; Duration: <span className="font-bold text-slate-900">{user?.role === 'STAFF' ? 'No limit' : '7 days'}</span> &nbsp;•&nbsp; Max <span className="font-bold text-slate-900">2 reservations</span>
             </div>
           </div>
         </section>
