@@ -106,7 +106,8 @@ export default function GateLogs() {
       (log.userEmail || '').toLowerCase().includes(q)
     const matchesStatus = filterBy === 'ALL' || log.status === filterBy
     const matchesBranch = branchFilter === 'ALL' || log.branch === branchFilter
-    const matchesUserType = userTypeFilter === 'ALL' || log.userRole === userTypeFilter
+    const actualRole = log.userRole || log.role || 'STUDENT'
+    const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
     return matchesSearch && matchesStatus && matchesBranch && matchesUserType
   })
 
@@ -390,7 +391,7 @@ export default function GateLogs() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900">{log.userName}</p>
-                                {userTypeFilter === 'ALL' && <RoleBadge role={log.userRole || 'STUDENT'} />}
+                                {userTypeFilter === 'ALL' && <RoleBadge role={log.userRole || log.role || 'STUDENT'} />}
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{log.userEmail}</p>
                             </div>

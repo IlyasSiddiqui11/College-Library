@@ -163,7 +163,8 @@ export default function BorrowRequests() {
         (req.isbn || '').includes(q)
       
       const matchesStatus = filterStatus === 'ALL' || req.status === filterStatus
-      const matchesUserType = userTypeFilter === 'ALL' || req.userRole === userTypeFilter
+      const actualRole = req.userRole || req.role || 'STUDENT'
+      const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
       return matchesSearch && matchesStatus && matchesUserType
     })
     .sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime())
@@ -361,7 +362,7 @@ export default function BorrowRequests() {
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-slate-500 truncate">{req.userName || `ID #${req.userId}`}</p>
-                          {userTypeFilter === 'ALL' && <RoleBadge role={req.userRole} />}
+                          {userTypeFilter === 'ALL' && <RoleBadge role={req.userRole || req.role || 'STUDENT'} />}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-1 font-mono">ISBN: {req.isbn || '—'}</p>
                         <div className="flex justify-between items-center mt-2">

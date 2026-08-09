@@ -7,6 +7,7 @@ import {
   Search, History, Download
 } from 'lucide-react'
 import AdminSidebar from '../components/AdminSidebar.jsx';
+import RoleBadge from '../components/RoleBadge.jsx';
 
 export default function ReplacementHistory() {
   const { user, logout } = useAuth()
@@ -48,7 +49,8 @@ export default function ReplacementHistory() {
       (item.replacementIsbn?.includes(query)) ||
       (item.studentName?.toLowerCase().includes(query))
     )
-    const matchesUserType = userTypeFilter === 'ALL' || item.userRole === userTypeFilter
+    const actualRole = item.userRole || item.role || 'STUDENT'
+    const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
     return matchesSearch && matchesUserType
   })
 
@@ -205,11 +207,7 @@ export default function ReplacementHistory() {
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-slate-900 text-xs">{item.studentName}</span>
-                                {userTypeFilter === 'ALL' && item.userRole === 'STAFF' && (
-                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                    STAFF
-                                  </span>
-                                )}
+                                {userTypeFilter === 'ALL' && <RoleBadge role={item.userRole || item.role || 'STUDENT'} />}
                               </div>
                               <span className="text-[10px] text-slate-500">ID: {item.studentId}</span>
                             </div>
