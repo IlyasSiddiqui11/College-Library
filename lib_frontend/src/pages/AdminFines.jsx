@@ -107,7 +107,8 @@ export default function AdminFines() {
     .reduce((sum, f) => sum + (f.totalFine || 0), 0)
 
   const handleExport = () => {
-    const headers = ['Fine ID', 'Student', 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date', 'Bill Number']
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const headers = ['Fine ID', `${userHeader} Name`, 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date', 'Bill Number']
     const csvRows = [
       headers.join(','),
       ...filteredFines.map(fine => {
@@ -252,7 +253,7 @@ export default function AdminFines() {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                    <th className="pb-3 px-4 font-semibold">Student</th>
+                    <th className="pb-3 px-4 font-semibold">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                     <th className="pb-3 px-4 font-semibold">Book Title</th>
                     <th className="pb-3 px-4 font-semibold text-center">Delay</th>
                     <th className="pb-3 px-4 font-semibold text-right">Delay (₹)</th>
@@ -281,7 +282,7 @@ export default function AdminFines() {
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <p className="font-bold text-slate-900">{fine.studentName}</p>
-                            {fine.userRole === 'STAFF' && (
+                            {userTypeFilter === 'ALL' && fine.userRole === 'STAFF' && (
                               <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
                                 STAFF
                               </span>

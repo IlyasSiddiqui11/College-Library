@@ -167,7 +167,8 @@ export default function GateLogs() {
   const insideCount = monthlyStats?.studentsCurrentlyInside || logs.filter(l => l.status === 'INSIDE').length
 
   const handleExport = () => {
-    const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const headers = [`${userHeader} Name`, `${userHeader} Email`, 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
     const csvRows = [
       headers.join(','),
       ...filteredLogs.map(log => [
@@ -375,7 +376,7 @@ export default function GateLogs() {
                   <table className="w-full text-left text-xs border-collapse">
                     <thead className="border-b border-slate-200 glass-panel">
                       <tr className="text-slate-500 font-bold uppercase tracking-wider">
-                        <th className="px-6 py-3 font-semibold">Student</th>
+                        <th className="px-6 py-3 font-semibold">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                         <th className="px-6 py-3 font-semibold">Branch</th>
                         <th className="px-6 py-3 font-semibold">Entry Time</th>
                         <th className="px-6 py-3 font-semibold">Exit Time</th>
@@ -389,7 +390,7 @@ export default function GateLogs() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900">{log.userName}</p>
-                                <RoleBadge role={log.userRole || 'STUDENT'} />
+                                {userTypeFilter === 'ALL' && <RoleBadge role={log.userRole || 'STUDENT'} />}
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{log.userEmail}</p>
                             </div>

@@ -188,7 +188,7 @@ export default function BookReservations() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      <th className="text-left px-6 py-3">Student</th>
+                      <th className="text-left px-6 py-3">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                       <th className="text-left px-6 py-3">Book Title</th>
                       <th className="text-left px-6 py-3">ISBN</th>
                       <th className="text-left px-6 py-3">Reserved On</th>
@@ -210,7 +210,7 @@ export default function BookReservations() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900">{r.user?.name || `User #${r.user?.id}`}</p>
-                                {r.userRole === 'STAFF' && (
+                                {userTypeFilter === 'ALL' && r.userRole === 'STAFF' && (
                                   <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
                                     STAFF
                                   </span>

@@ -136,9 +136,10 @@ export default function LostBooks() {
   }, [sortedLostBooks, searchQuery, userTypeFilter])
 
   const getExportRows = () => {
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
     const headers = [
       'Accession', 'ISBN', 'Title', 'Author',
-      'Student Name', 'Student Email', 'Branch', 'Year',
+      `${userHeader} Name`, `${userHeader} Email`, 'Branch', 'Year',
       'Borrow Date', 'Due Date', 'Reason', 'Remarks', 'Price', 'Reported By', 'Reported At'
     ]
     const rows = filteredLostBooks.map(item => [
@@ -353,7 +354,7 @@ export default function LostBooks() {
                   <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                     <th className="pb-3 pr-3">Accession</th>
                     <th className="pb-3 pr-3">Title</th>
-                    <th className="pb-3 pr-3">Student</th>
+                    <th className="pb-3 pr-3">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                     <th className="pb-3 pr-3">Borrow</th>
                     <th className="pb-3 pr-3">Reason</th>
                     <th className="pb-3 pr-3">Price</th>
@@ -373,7 +374,7 @@ export default function LostBooks() {
                         <td className="py-3 pr-3">
                           <div className="flex items-center gap-2">
                             <p className="text-slate-600 font-semibold">{item.studentName}</p>
-                            {item.userRole === 'STAFF' && (
+                            {userTypeFilter === 'ALL' && item.userRole === 'STAFF' && (
                               <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
                                 STAFF
                               </span>

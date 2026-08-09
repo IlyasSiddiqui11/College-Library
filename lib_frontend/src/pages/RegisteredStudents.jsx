@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client.js'
 import RoleBadge from '../components/RoleBadge.jsx'
+import CustomSelect from '../components/CustomSelect.jsx'
 import {
   Users,
   LogOut,
@@ -30,6 +31,7 @@ export default function RegisteredStudents() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [userTypeFilter, setUserTypeFilter] = useState('ALL')
 
   // Admin-only page
   useEffect(() => {
@@ -70,15 +72,16 @@ export default function RegisteredStudents() {
     }
   }
 
-  // Filter logs
   const filteredProfiles = profiles.filter((p) => {
     const q = searchTerm.toLowerCase()
-    return (
+    const matchesSearch = (
       (p.userName || '').toLowerCase().includes(q) ||
       (p.userEmail || '').toLowerCase().includes(q) ||
       (p.branch || '').toLowerCase().includes(q) ||
       (p.contactNumber || '').includes(q)
     )
+    const matchesUserType = userTypeFilter === 'ALL' || p.role === userTypeFilter || p.userRole === userTypeFilter
+    return matchesSearch && matchesUserType
   })
 
   // Format Date Helper: 26 May 2026, 10:45 AM
@@ -101,7 +104,8 @@ export default function RegisteredStudents() {
   }
 
   const handleExport = () => {
-    const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Contact Number', 'Address', 'Registered At']
+    const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const headers = [`${userHeader} Name`, `${userHeader} Email`, 'Branch', 'Year', 'Contact Number', 'Address', 'Registered At']
     const csvRows = [
       headers.join(','),
       ...filteredProfiles.map(p => [
@@ -118,7 +122,7 @@ export default function RegisteredStudents() {
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement("a")
     link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `registered_students_${new Date().getTime()}.csv`)
+    link.setAttribute("download", `registered_users_${new Date().getTime()}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -140,13 +144,23 @@ export default function RegisteredStudents() {
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                 <UserCheck className="size-5 text-blue-600" />
-                Registered Students
+                Registered Users
               </h1>
               <p className="text-xs text-slate-500 mt-0.5">
-                {filteredProfiles.length} students found • View all students who have completed their profiles
+                {filteredProfiles.length} users found • View all users who have completed their profiles
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <CustomSelect
+                value={userTypeFilter}
+                onChange={(val) => setUserTypeFilter(val)}
+                options={[
+                  { value: 'ALL', label: 'All Users' },
+                  { value: 'STUDENT', label: 'Students' },
+                  { value: 'STAFF', label: 'Staff' }
+                ]}
+                className="w-32"
+              />
               {/* Search */}
               <input
                 type="text"
@@ -201,14 +215,14 @@ export default function RegisteredStudents() {
             <div className="overflow-hidden rounded-xl border border-slate-200 glass-panel shadow-xl">
               {filteredProfiles.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-slate-600">No student profiles found</p>
+                  <p className="text-slate-600">No user profiles found</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead className="border-b border-slate-200 glass-panel">
                       <tr className="text-slate-500 font-bold uppercase tracking-wider">
-                        <th className="px-6 py-3 font-semibold">Student</th>
+                        <th className="px-6 py-3 font-semibold">{userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'}</th>
                         <th className="px-6 py-3 font-semibold">Branch & Year</th>
                         <th className="px-6 py-3 font-semibold">Contact & Address</th>
                         <th className="px-6 py-3 font-semibold">Registered At</th>
@@ -221,7 +235,7 @@ export default function RegisteredStudents() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900 text-sm">{p.userName}</p>
-                                <RoleBadge role="STUDENT" />
+                                {userTypeFilter === 'ALL' && <RoleBadge role={p.role || p.userRole || 'STUDENT'} />}
                                 <span className="px-1.5 py-0.5 rounded-md bg-blue-500/20 border border-blue-500/30 text-[10px] text-slate-500 font-mono">
                                   ID: {p.userId || p.id}
                                 </span>
@@ -251,7 +265,7 @@ export default function RegisteredStudents() {
 
           {/* Records count */}
           <p className="text-xs text-slate-500 font-medium">
-            Showing {filteredProfiles.length} of {profiles.length} registered students
+            Showing {filteredProfiles.length} of {profiles.length} registered users
           </p>
         </main>
       </div>
