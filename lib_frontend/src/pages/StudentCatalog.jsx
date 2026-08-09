@@ -9,7 +9,7 @@ import {
 import CustomSelect from '../components/CustomSelect.jsx'
 
 export default function StudentCatalog() {
-  const { user, profile, hasFine, logout, loading: authLoading } = useAuth()
+  const { user, profile, staffProfile, hasFine, logout, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [books, setBooks] = useState([])
@@ -54,8 +54,10 @@ export default function StudentCatalog() {
     fetchBooks()
   }, [])
 
+  const isProfileComplete = user?.role === 'STAFF' ? staffProfile?.profileCompleted : !!profile;
+
   const handleRequestBorrow = async (isbn) => {
-    if (!user || !profile) {
+    if (!user || !isProfileComplete) {
       setErrorMsg('Please complete your profile from the Dashboard first to borrow books.')
       return
     }
@@ -83,7 +85,7 @@ export default function StudentCatalog() {
   }
 
   const handleReserveBook = async (isbn) => {
-    if (!user || !profile) {
+    if (!user || !isProfileComplete) {
       setErrorMsg('Please complete your profile from the Dashboard first to reserve books.')
       return
     }
