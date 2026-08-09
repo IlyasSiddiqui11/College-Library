@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
+import RoleBadge from '../components/RoleBadge.jsx'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   BookOpen, QrCode, ScanLine, Clock, Calendar,
@@ -285,8 +286,9 @@ export default function StaffDashboard() {
       <main className="mx-auto w-full max-w-md px-4 pt-6 flex flex-col gap-6">
         {/* Welcome Section */}
         <section className="flex flex-col gap-1.5 glass-panel p-5 rounded-2xl border border-slate-200 shadow-xl">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center">
             Welcome Back, {staffProfile?.fullName || user.name}
+            <RoleBadge role={user.role} />
           </h1>
           <p className="text-xs text-slate-500">
             {staffProfile?.profileCompleted ? (

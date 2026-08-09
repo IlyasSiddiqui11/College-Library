@@ -6,6 +6,7 @@ import {
   Users, ClipboardList, ArrowRight, ShieldAlert, Loader2, LogOut, Check, X, RefreshCw
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
+import RoleBadge from '../components/RoleBadge.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 
 export default function AdminDashboard() {
@@ -315,11 +316,7 @@ export default function AdminDashboard() {
                           <td className="py-4">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-slate-900">{req.userName || `User #${req.userId}`}</span>
-                              {req.userRole === 'STAFF' && (
-                                <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                  STAFF
-                                </span>
-                              )}
+                              <RoleBadge role={req.userRole} />
                             </div>
                           </td>
                           <td className="py-4">
@@ -458,11 +455,7 @@ export default function AdminDashboard() {
                           <p className="text-xs font-bold text-slate-900">
                             {log.userName || `User ID #${log.userId}`}
                           </p>
-                          {log.userRole === 'STAFF' && (
-                            <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                              STAFF
-                            </span>
-                          )}
+                          <RoleBadge role={log.userRole} />
                         </div>
                         <p className="text-[10px] text-slate-500 mt-0.5">
                           {log.action === 'ENTRY' ? 'Checked into Library' : 'Checked out of Library'}

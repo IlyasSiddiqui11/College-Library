@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client.js'
+import RoleBadge from '../components/RoleBadge.jsx'
 import {
   Users,
   LogOut,
@@ -220,9 +221,7 @@ export default function RegisteredStudents() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900 text-sm">{p.userName}</p>
-                                <span className="px-1.5 py-0.5 rounded bg-blue-100 text-[10px] font-bold text-blue-600 uppercase tracking-wider border border-blue-200">
-                                  Student
-                                </span>
+                                <RoleBadge role="STUDENT" />
                                 <span className="px-1.5 py-0.5 rounded-md bg-blue-500/20 border border-blue-500/30 text-[10px] text-slate-500 font-mono">
                                   ID: {p.userId || p.id}
                                 </span>

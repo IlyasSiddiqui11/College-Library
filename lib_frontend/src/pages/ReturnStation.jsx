@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
+import RoleBadge from '../components/RoleBadge.jsx'
 import {
   ChevronLeft, CheckCircle2, AlertCircle, Loader2, Laptop, Users, History
 } from 'lucide-react'
@@ -305,11 +306,7 @@ export default function ReturnStation() {
                       <span className="text-slate-500">Student</span>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-900">{successDetails.userName}</span>
-                        {successDetails.userRole === 'STAFF' && (
-                          <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                            STAFF
-                          </span>
-                        )}
+                        <RoleBadge role={successDetails.userRole || 'STUDENT'} />
                       </div>
                     </div>
                     <div className="flex justify-between">

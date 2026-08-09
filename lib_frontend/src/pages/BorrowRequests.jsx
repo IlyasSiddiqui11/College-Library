@@ -6,6 +6,7 @@ import {
   BookOpen, Search, Loader2, ClipboardList, Check, X, UserCheck, Download, CheckCircle2, AlertCircle
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
+import RoleBadge from '../components/RoleBadge.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 
 export default function BorrowRequests() {
@@ -359,11 +360,7 @@ export default function BorrowRequests() {
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-slate-500 truncate">{req.userName || `ID #${req.userId}`}</p>
-                          {req.userRole === 'STAFF' && (
-                            <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                              STAFF
-                            </span>
-                          )}
+                          <RoleBadge role={req.userRole} />
                         </div>
                         <p className="text-[9px] text-slate-500 mt-1 font-mono">ISBN: {req.isbn || '—'}</p>
                         <div className="flex justify-between items-center mt-2">
@@ -429,11 +426,7 @@ export default function BorrowRequests() {
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-bold text-slate-900 text-sm">{selectedReq.userName || `User ID #${selectedReq.userId}`}</p>
-                            {selectedReq.userRole === 'STAFF' && (
-                              <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 tracking-wider">
-                                STAFF
-                              </span>
-                            )}
+                            <RoleBadge role={selectedReq.userRole} />
                           </div>
                         </div>
                       </div>
