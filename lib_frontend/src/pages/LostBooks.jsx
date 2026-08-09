@@ -6,6 +6,7 @@ import { apiClient } from '../api/client.js'
 import {
   AlertCircle, CheckCircle2, Loader2, Search, RefreshCw
 } from 'lucide-react'
+import RoleBadge from '../components/RoleBadge.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 
 function exportToCsv(rows, filename) {
@@ -130,7 +131,8 @@ export default function LostBooks() {
         (item.studentEmail || '').toLowerCase().includes(q) ||
         (item.reason || '').toLowerCase().includes(q)
       
-      const matchesUserType = userTypeFilter === 'ALL' || item.userRole === userTypeFilter
+      const actualRole = item.userRole || item.role || 'STUDENT'
+      const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
       return matchesSearch && matchesUserType
     })
   }, [sortedLostBooks, searchQuery, userTypeFilter])
@@ -374,13 +376,9 @@ export default function LostBooks() {
                         <td className="py-3 pr-3">
                           <div className="flex items-center gap-2">
                             <p className="text-slate-600 font-semibold">{item.studentName}</p>
-                            {userTypeFilter === 'ALL' && item.userRole === 'STAFF' && (
-                              <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                STAFF
-                              </span>
-                            )}
+                            {userTypeFilter === 'ALL' && <RoleBadge role={item.userRole || item.role || 'STUDENT'} />}
                           </div>
-                          {item.userRole !== 'STAFF' && (
+                          {(item.userRole || item.role || 'STUDENT') !== 'STAFF' && (
                             <p className="text-[10px] text-slate-400">{item.studentBranch} / Yr {item.studentYear}</p>
                           )}
                         </td>

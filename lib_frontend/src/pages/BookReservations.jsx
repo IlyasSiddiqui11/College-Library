@@ -7,6 +7,7 @@ import {
   BookMarked, RefreshCw, Loader2, CheckCircle2, XCircle, AlertCircle
 } from 'lucide-react'
 import AdminSidebar from '../components/AdminSidebar.jsx';
+import RoleBadge from '../components/RoleBadge.jsx';
 
 function StatusBadge({ status }) {
   if (status === 'PENDING') return (
@@ -71,7 +72,8 @@ export default function BookReservations() {
         (r.isbn || '').toLowerCase().includes(q) ||
         (r.user?.name || '').toLowerCase().includes(q)
       const matchesStatus = filterStatus === 'ALL' || r.status === filterStatus
-      const matchesUserType = userTypeFilter === 'ALL' || r.userRole === userTypeFilter
+      const actualRole = r.userRole || r.role || 'STUDENT'
+      const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
       return matchesSearch && matchesStatus && matchesUserType
     })
     .sort((a, b) => new Date(b.reservationDate) - new Date(a.reservationDate))
@@ -210,11 +212,7 @@ export default function BookReservations() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900">{r.user?.name || `User #${r.user?.id}`}</p>
-                                {userTypeFilter === 'ALL' && r.userRole === 'STAFF' && (
-                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                    STAFF
-                                  </span>
-                                )}
+                                {userTypeFilter === 'ALL' && <RoleBadge role={r.userRole || r.role || 'STUDENT'} />}
                               </div>
                               <p className="text-[10px] text-slate-500">{r.user?.email || ''}</p>
                             </div>

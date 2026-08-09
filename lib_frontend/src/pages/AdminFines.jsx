@@ -7,6 +7,7 @@ import {
   Banknote, Search, Loader2, Check, Clock, Download, ShieldAlert
 } from 'lucide-react'
 import AdminSidebar from '../components/AdminSidebar.jsx';
+import RoleBadge from '../components/RoleBadge.jsx';
 
 export default function AdminFines() {
   const { user, logout } = useAuth()
@@ -87,7 +88,8 @@ export default function AdminFines() {
         (fine.bookTitle?.toLowerCase() || '').includes(q)
       
       const matchesStatus = filterStatus === 'ALL' || fine.status === filterStatus
-      const matchesUserType = userTypeFilter === 'ALL' || fine.userRole === userTypeFilter
+      const actualRole = fine.userRole || fine.role || 'STUDENT'
+      const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
       return matchesSearch && matchesStatus && matchesUserType
     })
 
@@ -282,11 +284,7 @@ export default function AdminFines() {
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <p className="font-bold text-slate-900">{fine.studentName}</p>
-                            {userTypeFilter === 'ALL' && fine.userRole === 'STAFF' && (
-                              <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                STAFF
-                              </span>
-                            )}
+                            {userTypeFilter === 'ALL' && <RoleBadge role={fine.userRole || fine.role || 'STUDENT'} />}
                           </div>
                           <p className="text-[10px] text-slate-500">{fine.enrollmentNumber}</p>
                         </td>

@@ -80,7 +80,8 @@ export default function RegisteredStudents() {
       (p.branch || '').toLowerCase().includes(q) ||
       (p.contactNumber || '').includes(q)
     )
-    const matchesUserType = userTypeFilter === 'ALL' || p.role === userTypeFilter || p.userRole === userTypeFilter
+    const actualRole = p.role || p.userRole || 'STUDENT'
+    const matchesUserType = userTypeFilter === 'ALL' || actualRole === userTypeFilter
     return matchesSearch && matchesUserType
   })
 
