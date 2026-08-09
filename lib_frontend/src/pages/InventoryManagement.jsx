@@ -320,13 +320,15 @@ export default function InventoryManagement() {
                               </button>
                             ) : (
                               <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() => openEditModal(book)}
-                                  className="p-1 rounded text-slate-400 hover:text-blue-100 hover:bg-slate-100 transition"
-                                  title="Edit Copy"
-                                >
-                                  <PencilLine className="size-4" />
-                                </button>
+                                {!isReplaced && (
+                                  <button
+                                    onClick={() => openEditModal(book)}
+                                    className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition"
+                                    title="Edit Copy"
+                                  >
+                                    <PencilLine className="size-4" />
+                                  </button>
+                                )}
                               </div>
                             )}
                           </td>
