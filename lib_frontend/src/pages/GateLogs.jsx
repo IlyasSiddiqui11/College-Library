@@ -388,11 +388,7 @@ export default function GateLogs() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-bold text-slate-900">{log.userName}</p>
-                                {log.userRole === 'STAFF' && (
-                                  <span className="inline-flex rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 tracking-wider">
-                                    STAFF
-                                  </span>
-                                )}
+                                <RoleBadge role={log.userRole || 'STUDENT'} />
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">{log.userEmail}</p>
                             </div>

@@ -335,8 +335,9 @@ export default function StudentDashboard() {
       <main className="mx-auto w-full max-w-md px-4 pt-6 flex flex-col gap-6">
         {/* Welcome Section */}
         <section className="flex flex-col gap-1.5 glass-panel p-5 rounded-2xl border border-slate-200 shadow-xl">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center">
             Welcome Back, {user.name}
+            <RoleBadge role={user.role} />
           </h1>
           <p className="text-xs text-slate-500">
             {profile ? (
