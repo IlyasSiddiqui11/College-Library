@@ -13,20 +13,28 @@ export default function AdminSidebar({ user, logout }) {
 
   const [pendingBorrowCount, setPendingBorrowCount] = useState(0);
   const [pendingReservationCount, setPendingReservationCount] = useState(0);
+  const [pendingStaffCount, setPendingStaffCount] = useState(0);
+  const [pendingFineCount, setPendingFineCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
     const fetchCounts = async () => {
       try {
-        const [borrowRes, resRes] = await Promise.all([
+        const [borrowRes, resRes, staffRes, finesRes] = await Promise.all([
           apiClient.get('/api/borrow'),
-          apiClient.get('/api/reservations')
+          apiClient.get('/api/reservations'),
+          apiClient.get('/api/staff/requests'),
+          apiClient.get('/api/fines?size=1000')
         ]);
         if (isMounted) {
           const pendingBorrows = borrowRes.data.filter(r => r.status === 'PENDING').length;
           const pendingRes = resRes.data.filter(r => r.status === 'PENDING').length;
+          const pendingStaff = (staffRes.data || []).filter(r => r.status === 'PENDING').length;
+          const pendingFines = (finesRes.data?.content || []).filter(r => r.status === 'PENDING').length;
           setPendingBorrowCount(pendingBorrows);
           setPendingReservationCount(pendingRes);
+          setPendingStaffCount(pendingStaff);
+          setPendingFineCount(pendingFines);
         }
       } catch (err) {
         console.error('Failed to fetch pending counts for sidebar:', err);
@@ -111,10 +119,20 @@ export default function AdminSidebar({ user, logout }) {
           
           <button onClick={() => navigate('/admin/fines')} className={getLinkClass('/admin/fines')}>
             <Banknote className="size-4.5" /> Fine Management
+            {pendingFineCount > 0 && (
+              <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">
+                {pendingFineCount}
+              </span>
+            )}
           </button>
           
           <button onClick={() => navigate('/admin/staff')} className={getLinkClass('/admin/staff')}>
             <UserCheck className="size-4.5" /> Staff Management
+            {pendingStaffCount > 0 && (
+              <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">
+                {pendingStaffCount}
+              </span>
+            )}
           </button>
           
           <button onClick={() => navigate('/admin/students')} className={getLinkClass('/admin/students')}>
