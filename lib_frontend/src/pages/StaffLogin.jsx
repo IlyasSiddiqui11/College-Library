@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { Mail, Lock, User, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle, Hash, Phone, Building2, Briefcase, ChevronDown } from 'lucide-react'
+import { Mail, Lock, User, AlertTriangle, Loader2, Eye, EyeOff, CheckCircle, Hash, Phone, Building2, Briefcase, ChevronDown, ArrowLeft } from 'lucide-react'
 import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx'
 import { apiClient } from "../api/client"
 
@@ -148,6 +148,14 @@ export default function StaffLogin() {
       <div className="absolute bottom-[-100px] right-[-100px] size-[400px] rounded-full bg-teal-500/10 blur-[80px] pointer-events-none" />
 
       <div className="relative flex w-full max-w-[460px] mx-auto flex-col gap-6 z-10">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Link>
+
         <div className="flex w-full flex-col items-center">
           <div className="flex items-center gap-2 pb-2">
             <img src="/logo.png" alt="Smart Library" className="h-10 w-10 rounded-xl object-cover cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')} />
