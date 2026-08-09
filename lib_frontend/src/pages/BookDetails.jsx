@@ -8,7 +8,7 @@ import {
 
 export default function BookDetails() {
   const { isbn } = useParams()
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, profile, staffProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [book, setBook] = useState(null)
@@ -46,8 +46,10 @@ export default function BookDetails() {
     fetchDetails()
   }, [isbn])
 
+  const isProfileComplete = user?.role === 'STAFF' ? staffProfile?.profileCompleted : !!profile;
+
   const handleRequestBorrow = async () => {
-    if (!user || !profile) {
+    if (!user || !isProfileComplete) {
       setErrorMsg('Please complete your profile from the Dashboard first to borrow books.')
       return
     }
