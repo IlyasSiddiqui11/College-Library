@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { BookOpen, QrCode, BarChart3, Users, Lock, Zap, ArrowRight, Menu, X } from 'lucide-react'
+import { BookOpen, QrCode, BarChart3, Users, Lock, Zap, ArrowRight, Menu, X, User, Briefcase } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -194,32 +194,79 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="workflow" className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section id="workflow" className="px-4 py-20 sm:px-6 lg:px-8 bg-slate-50/50">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-slate-900 sm:text-4xl">Student Workflow</h2>
-            <p className="text-lg text-slate-600">From registration to book return in seconds</p>
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 sm:text-4xl">System Workflows</h2>
+            <p className="text-lg text-slate-600">Seamless experiences for both students and staff</p>
           </div>
 
-          <div className="space-y-6">
-            {[
-              { num: '1', title: 'Register Account', desc: 'Create your student account with email and password' },
-              { num: '2', title: 'Complete Profile', desc: 'Add branch, year, and contact information' },
-              { num: '3', title: 'Scan Books', desc: 'Use camera to scan ISBN barcodes or manually search' },
-              { num: '4', title: 'Request Borrowing', desc: 'Submit book requests for librarian approval' },
-              { num: '5', title: 'Track Borrowing', desc: 'View history and manage your borrowed books' },
-              { num: '6', title: 'Return Books', desc: 'Use return station kiosk for quick returns' },
-            ].map((step, idx) => (
-              <div key={idx} className="flex gap-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-lg font-bold text-white shadow-lg shadow-blue-600/20">
-                  {step.num}
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
+            {/* Student Workflow */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                  <User className="h-6 w-6" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="mb-2 text-lg font-semibold text-slate-900">{step.title}</h3>
-                  <p className="text-slate-600">{step.desc}</p>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900">Student Workflow</h3>
+                  <p className="text-sm text-slate-600">From registration to book return in seconds</p>
                 </div>
               </div>
-            ))}
+              <div className="space-y-6">
+                {[
+                  { num: '1', title: 'Register Account', desc: 'Create your student account with email and password' },
+                  { num: '2', title: 'Complete Profile', desc: 'Add branch, year, and contact information' },
+                  { num: '3', title: 'Scan Books', desc: 'Use camera to scan ISBN barcodes or manually search' },
+                  { num: '4', title: 'Request Borrowing', desc: 'Submit book requests for librarian approval' },
+                  { num: '5', title: 'Track Borrowing', desc: 'View history and manage your borrowed books' },
+                  { num: '6', title: 'Return Books', desc: 'Use return station kiosk for quick returns' },
+                ].map((step, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-base font-bold text-white shadow-lg shadow-blue-600/20">
+                      {step.num}
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <h4 className="mb-1 text-base font-semibold text-slate-900">{step.title}</h4>
+                      <p className="text-sm text-slate-600">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Staff Workflow */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                  <Briefcase className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900">Staff Workflow</h3>
+                  <p className="text-sm text-slate-600">Streamlined management and inventory control</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                {[
+                  { num: '1', title: 'Request Access', desc: 'Submit an access request with your employee details' },
+                  { num: '2', title: 'Admin Approval', desc: 'System administrators review and approve your staff account' },
+                  { num: '3', title: 'Manage Inventory', desc: 'Add new books, handle replacements, and audit copies' },
+                  { num: '4', title: 'Approve Requests', desc: 'Review, approve, or reject student book borrowing requests' },
+                  { num: '5', title: 'Monitor Returns', desc: 'Track returning books via kiosk logs and process late fines' },
+                  { num: '6', title: 'Generate Reports', desc: 'Export data on library usage, missing books, and gate logs' },
+                ].map((step, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-base font-bold text-white shadow-lg shadow-emerald-600/20">
+                      {step.num}
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <h4 className="mb-1 text-base font-semibold text-slate-900">{step.title}</h4>
+                      <p className="text-sm text-slate-600">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
