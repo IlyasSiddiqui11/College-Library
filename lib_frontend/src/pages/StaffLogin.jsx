@@ -49,7 +49,13 @@ export default function StaffLogin() {
   }, [user, navigate, isChangePasswordMode])
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target;
+    if (name === 'mobileNumber') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [name]: numericValue });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -243,7 +249,7 @@ export default function StaffLogin() {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Mobile Number</label>
                   <div className="relative mt-1.5">
                     <Phone className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
-                    <input type="text" name="mobileNumber" required value={formData.mobileNumber} onChange={handleInputChange} placeholder="+1234567890" className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-600" />
+                    <input type="text" inputMode="numeric" name="mobileNumber" required value={formData.mobileNumber} onChange={handleInputChange} placeholder="1234567890" pattern="\d{10}" title="Mobile number must be exactly 10 digits" maxLength="10" className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-600" />
                   </div>
                 </div>
 
