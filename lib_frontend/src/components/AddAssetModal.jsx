@@ -162,17 +162,17 @@ export default function AddAssetModal({
       try {
         const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(isbn.trim())}/details`);
         if (res.data) {
-          if (!title) setTitle(res.data.title || '');
-          if (!author) setAuthor(res.data.author || '');
-          if (!publisher) setPublisher(res.data.publisher || '');
-          if (!edition) setEdition(res.data.edition || '');
-          if (!series) setSeries(res.data.series || '');
-          if (!publicationYear) setPublicationYear(res.data.publicationYear || '');
-          if (!category) setCategory(res.data.category || '');
-          if (!totalPages) setTotalPages(res.data.totalPages || '');
-          if (!language) setLanguage(res.data.language || '');
-          if (!source) setSource(res.data.source || '');
-          if (!classificationNumber) setClassificationNumber(res.data.classificationNumber || '');
+          setTitle(prev => prev || res.data.title || '');
+          setAuthor(prev => prev || res.data.author || '');
+          setPublisher(prev => prev || res.data.publisher || '');
+          setEdition(prev => prev || res.data.edition || '');
+          setSeries(prev => prev || res.data.series || '');
+          setPublicationYear(prev => prev || res.data.publicationYear || '');
+          setCategory(prev => prev || res.data.category || '');
+          setTotalPages(prev => prev || res.data.totalPages || '');
+          setLanguage(prev => prev || res.data.language || '');
+          setSource(prev => prev || res.data.source || '');
+          setClassificationNumber(prev => prev || res.data.classificationNumber || '');
         }
       } catch (err) {
         // Ignore errors
@@ -181,7 +181,7 @@ export default function AddAssetModal({
     
     const timeoutId = setTimeout(fetchBookDetails, 500);
     return () => clearTimeout(timeoutId);
-  }, [isbn, editingBook, title, author, publisher, edition, series, publicationYear, category, totalPages, language, source, classificationNumber]);
+  }, [isbn, editingBook]);
 
   const handleQuantityChange = (e) => {
     if (isReplaceMode) return;
