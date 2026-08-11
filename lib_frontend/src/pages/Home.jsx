@@ -287,7 +287,10 @@ export default function Home() {
 
       <footer className="border-t border-slate-200 px-4 py-12 sm:px-6 lg:px-8 glass-panel">
         <div className="mx-auto max-w-6xl text-center text-sm text-slate-600">
-          <p>© 2026 Smart Library. Built for modern academic libraries.</p>
+          <p className="mb-2">© 2026 Smart Library. Built for modern academic libraries.</p>
+          <p className="font-medium text-slate-500">
+            Developed by Mohammed Ilyas Siddiqui & Prince Premchand Yadav
+          </p>
         </div>
       </footer>
     </div>
