@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { BookOpen, QrCode, BarChart3, Users, Lock, Zap, ArrowRight, Menu, X, User, Briefcase } from 'lucide-react'
+import { BookOpen, QrCode, BarChart3, Users, Lock, Zap, ArrowRight, Menu, X, User, Briefcase, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -201,7 +201,7 @@ export default function Home() {
             <p className="text-lg text-slate-600">Seamless experiences for both students and staff</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {/* Student Workflow */}
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
               <div className="mb-8 flex items-center gap-4">
@@ -238,8 +238,8 @@ export default function Home() {
             {/* Admin Workflow */}
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
               <div className="mb-8 flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                  <Briefcase className="h-6 w-6" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                  <Shield className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-slate-900">Admin Workflow</h3>
@@ -254,6 +254,39 @@ export default function Home() {
                   { num: '4', title: 'Gate Tracking', desc: 'Scan student QR codes to record library entry and exit' },
                   { num: '5', title: 'Process Returns', desc: 'Handle returning books and manage automated late fines' },
                   { num: '6', title: 'Lost Books', desc: 'Mark books as lost and generate replacement fines' },
+                ].map((step, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-violet-600 text-base font-bold text-white shadow-lg shadow-purple-600/20">
+                      {step.num}
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <h4 className="mb-1 text-base font-semibold text-slate-900">{step.title}</h4>
+                      <p className="text-sm text-slate-600">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Staff Workflow */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                  <Briefcase className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900">Staff Workflow</h3>
+                  <p className="text-sm text-slate-600">Daily library operations and assistance</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                {[
+                  { num: '1', title: 'Verify Profile', desc: 'Confirm employee details to activate your staff account' },
+                  { num: '2', title: 'QR Attendance', desc: 'Scan the official gate QR code for instant check-in' },
+                  { num: '3', title: 'Digital Catalogue', desc: 'Search and place requests for library books online' },
+                  { num: '4', title: 'Scan & Borrow', desc: 'Use your camera to scan ISBN barcodes on the shelf' },
+                  { num: '5', title: 'Track Borrows', desc: 'Monitor active borrowings, due dates, and pending requests' },
+                  { num: '6', title: 'Zone Logs', desc: 'View your personal history of library entries and exits' },
                 ].map((step, idx) => (
                   <div key={idx} className="flex gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-base font-bold text-white shadow-lg shadow-emerald-600/20">
