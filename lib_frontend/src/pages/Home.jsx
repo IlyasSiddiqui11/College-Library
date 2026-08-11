@@ -235,25 +235,25 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Staff Workflow */}
+            {/* Admin Workflow */}
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
               <div className="mb-8 flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                   <Briefcase className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900">Staff Workflow</h3>
-                  <p className="text-sm text-slate-600">Streamlined management and inventory control</p>
+                  <h3 className="text-2xl font-bold text-slate-900">Admin Workflow</h3>
+                  <p className="text-sm text-slate-600">Streamlined library management and control</p>
                 </div>
               </div>
               <div className="space-y-6">
                 {[
-                  { num: '1', title: 'Request Access', desc: 'Submit an access request with your employee details' },
-                  { num: '2', title: 'Admin Approval', desc: 'System administrators review and approve your staff account' },
-                  { num: '3', title: 'Manage Inventory', desc: 'Add new books, handle replacements, and audit copies' },
-                  { num: '4', title: 'Approve Requests', desc: 'Review, approve, or reject student book borrowing requests' },
-                  { num: '5', title: 'Monitor Returns', desc: 'Track returning books via kiosk logs and process late fines' },
-                  { num: '6', title: 'Generate Reports', desc: 'Export data on library usage, missing books, and gate logs' },
+                  { num: '1', title: 'Live Dashboard', desc: 'Monitor real-time gate entries, exits, and borrow stats' },
+                  { num: '2', title: 'Manage Inventory', desc: 'Add books and assign unique accession numbers' },
+                  { num: '3', title: 'Borrow Approval', desc: 'Review requests and assign physical copies to students' },
+                  { num: '4', title: 'Gate Tracking', desc: 'Scan student QR codes to record library entry and exit' },
+                  { num: '5', title: 'Process Returns', desc: 'Handle returning books and manage automated late fines' },
+                  { num: '6', title: 'Lost Books', desc: 'Mark books as lost and generate replacement fines' },
                 ].map((step, idx) => (
                   <div key={idx} className="flex gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-base font-bold text-white shadow-lg shadow-emerald-600/20">
