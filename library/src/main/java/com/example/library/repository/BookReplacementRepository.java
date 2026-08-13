@@ -10,4 +10,5 @@ import java.util.List;
 public interface BookReplacementRepository extends JpaRepository<BookReplacement, Long> {
     List<BookReplacement> findByStudentIdOrderByReplacementDateDesc(Long studentId);
     List<BookReplacement> findAllByOrderByReplacementDateDesc();
+    boolean existsByOriginalBookId(Long originalBookId);
 }

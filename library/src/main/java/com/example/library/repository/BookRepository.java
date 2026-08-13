@@ -29,4 +29,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         List<Book> list = findAllByIsbnAndStatus(isbn, status);
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
+
+    List<Book> findByStatus(String status);
 }

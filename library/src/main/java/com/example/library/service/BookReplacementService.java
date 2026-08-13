@@ -26,9 +26,7 @@ public class BookReplacementService {
     @PostConstruct
     @Transactional
     public void syncLegacyReplacements() {
-        List<Book> replacedBooks = bookRepository.findAll().stream()
-                .filter(b -> "REPLACED".equals(b.getStatus()))
-                .collect(Collectors.toList());
+        List<Book> replacedBooks = bookRepository.findByStatus("REPLACED");
 
         for (Book original : replacedBooks) {
             String replacementAcc = original.getAccessionNumber() + "-R";
@@ -37,8 +35,7 @@ public class BookReplacementService {
             if (replacementBookOpt.isPresent()) {
                 Book replacementBook = replacementBookOpt.get();
                 // Check if it's already in the replacement table
-                boolean exists = replacementRepository.findAll().stream()
-                        .anyMatch(r -> r.getOriginalBook() != null && r.getOriginalBook().getId().equals(original.getId()));
+                boolean exists = replacementRepository.existsByOriginalBookId(original.getId());
                 
                 if (!exists) {
                     BookReplacement record = BookReplacement.builder()
