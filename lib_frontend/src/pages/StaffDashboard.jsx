@@ -40,6 +40,14 @@ export default function StaffDashboard() {
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3500)
   }
 
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   // Redirect guards
   useEffect(() => {
     if (authLoading) return
@@ -103,7 +111,7 @@ export default function StaffDashboard() {
         }
       }
       if (staffProfile?.profileCompleted) {
-        setShowProfileModal(false)
+          setShowProfileModal(false)
       }
     }
   }, [user, staffProfile, loading])
@@ -266,7 +274,7 @@ export default function StaffDashboard() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-slate-200 glass-panel px-4 py-4 shadow-xl backdrop-blur-md">
+      <header className={`sticky top-0 z-20 px-4 py-4 transition-all duration-300 ${isScrolled ? 'bg-white/60 backdrop-blur-lg backdrop-saturate-150 shadow-sm' : 'bg-transparent'}`}>
         <div className="mx-auto flex max-w-md items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Smart Library" className="h-8 w-8 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onClick={() => window.location.reload()} />

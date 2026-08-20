@@ -6,7 +6,6 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  border-radius: 8px !important;
 }
 
 .pfp-circle {
@@ -29,6 +28,7 @@ body,
   color: #0f172a;
   forced-color-adjust: none;
   overflow-x: hidden;
+  overflow-y: overlay;
 }
 
 body {
@@ -71,14 +71,7 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Disable inline blur classes */
-.backdrop-blur-sm,
-.backdrop-blur-md,
-.backdrop-blur-lg,
-.backdrop-blur-xl {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
+
 
 /* ─── Animations ─────────────────────────────────────────────── */
 @keyframes fade-in {
@@ -151,17 +144,16 @@ body {
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.25);
   }
 }
 
