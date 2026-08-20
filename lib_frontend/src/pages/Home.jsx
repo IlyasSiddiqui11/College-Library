@@ -1,12 +1,21 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { BookOpen, QrCode, BarChart3, Users, Lock, Zap, ArrowRight, Menu, X, User, Briefcase, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Home() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   if (user) {
     if (user.role === 'ADMIN') {
@@ -19,7 +28,7 @@ export default function Home() {
 
   return (
     <div className="w-full text-slate-900">
-      <nav className="sticky top-0 z-50 border-b border-slate-200 glass-panel backdrop-blur-xl">
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/60 backdrop-blur-lg backdrop-saturate-150 shadow-sm' : 'bg-transparent'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
@@ -87,7 +96,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden px-4 py-20 mt-16 sm:px-6 lg:px-8">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-1/4 h-96 w-96 bg-gradient-to-br from-blue-400/20 to-transparent rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-1/4 h-96 w-96 bg-gradient-to-tr from-violet-400/20 to-transparent rounded-full blur-3xl" />
