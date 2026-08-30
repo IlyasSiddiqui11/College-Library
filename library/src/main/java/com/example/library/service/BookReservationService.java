@@ -75,7 +75,18 @@ public class BookReservationService {
             throw new BadRequestException("You have already reserved this book.");
         }
 
-
+        // RULES.md §10.1 — A user who is currently borrowing any copy of this
+        // book title (matched by ISBN, not accession number) cannot place a
+        // reservation for another copy until they return the borrowed copy.
+        boolean alreadyBorrowing = borrowRequestRepository.findByUserId(user.getId()).stream()
+                .anyMatch(req -> {
+                    String reqIsbn = resolveIsbn(req);
+                    return isbn.equals(reqIsbn) && req.getStatus() == BorrowStatus.APPROVED;
+                });
+        if (alreadyBorrowing) {
+            throw new BadRequestException(
+                    "You already have a borrowed copy of this book. Please return it before reserving another copy.");
+        }
 
         Book sampleBook = copies.get(0);
 

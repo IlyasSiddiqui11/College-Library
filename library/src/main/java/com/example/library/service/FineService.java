@@ -27,6 +27,7 @@ public class FineService {
 
     private final FineRepository fineRepository;
     private final com.example.library.repository.LostBookRepository lostBookRepository;
+    private final com.example.library.repository.AuditLogRepository auditLogRepository;
     private final EmailService emailService;
 
     @Transactional
@@ -139,6 +140,16 @@ public class FineService {
         }
 
         Fine updatedFine = fineRepository.save(fine);
+
+        // RULES.md §20 — Audit log: fine payment verified by admin
+        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                .email(fine.getUser().getEmail())
+                .action("FINE_STATUS_UPDATED")
+                .module("FINE")
+                .targetResource("fineId=" + fineId + ",status=" + request.getStatus())
+                .result("SUCCESS")
+                .reason("Fine status updated to " + request.getStatus() + " by admin: " + adminName)
+                .build());
 
         if (request.getStatus() == FineStatus.PAID && wasNotPaid) {
             try {

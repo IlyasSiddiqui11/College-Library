@@ -21,6 +21,7 @@ import {
   ShieldAlert,
   BookMarked
 , Banknote, History} from 'lucide-react'
+import { downloadCsv } from '../utils/csvExport.js'
 
 import AdminSidebar from '../components/AdminSidebar.jsx';
 
@@ -106,27 +107,18 @@ export default function RegisteredStudents() {
 
   const handleExport = () => {
     const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const mapped = filteredProfiles.map(p => ({
+      userName: p.userName || '',
+      userEmail: p.userEmail || '',
+      branch: p.branch || 'N/A',
+      year: p.year || '',
+      contactNumber: p.contactNumber || '',
+      address: p.address || '',
+      registeredAt: formatDateFull(p.createdAt)
+    }))
+    const fields = ['userName', 'userEmail', 'branch', 'year', 'contactNumber', 'address', 'registeredAt']
     const headers = [`${userHeader} Name`, `${userHeader} Email`, 'Branch', 'Year', 'Contact Number', 'Address', 'Registered At']
-    const csvRows = [
-      headers.join(','),
-      ...filteredProfiles.map(p => [
-        `"${p.userName || ''}"`,
-        `"${p.userEmail || ''}"`,
-        `"${p.branch || 'N/A'}"`,
-        `"${p.year || ''}"`,
-        `"${p.contactNumber || ''}"`,
-        `"${(p.address || '').replace(/"/g, '""')}"`,
-        `"${formatDateFull(p.createdAt)}"`
-      ].join(','))
-    ]
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `registered_users_${new Date().getTime()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    downloadCsv(mapped, fields, headers, 'registered_users')
   }
 
   if (user?.role !== 'ADMIN') {

@@ -7,6 +7,7 @@ import {
   BookOpen, ChevronLeft, Search, Clock, CheckCircle2, 
   XCircle, Loader2, Award, BookMarked, User, History as HistoryIcon, FileText, Banknote
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function BorrowHistory() {
   const { user, hasFine, loading: authLoading } = useAuth()
@@ -71,7 +72,7 @@ export default function BorrowHistory() {
       await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
       await fetchHistory(false)
     } catch (err) {
-      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+      toast.error('Cancel failed: ' + (err.response?.data?.message || err.message))
     } finally {
       setCancellingId(null)
     }
@@ -79,13 +80,12 @@ export default function BorrowHistory() {
 
   const handleCancelReservation = async (resId) => {
     if (!user) return
-    if (!window.confirm('Are you sure you want to cancel this reservation?')) return
     setCancellingId(resId)
     try {
       await apiClient.delete(`/api/reservations/${resId}?userId=${user.id}`)
       await fetchHistory(false)
     } catch (err) {
-      alert('Cancel failed: ' + (err.response?.data?.message || err.message))
+      toast.error('Cancel failed: ' + (err.response?.data?.message || err.message))
     } finally {
       setCancellingId(null)
     }

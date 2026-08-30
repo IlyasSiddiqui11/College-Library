@@ -8,6 +8,8 @@ import { apiClient } from '../api/client.js'
 import {
   Banknote, Search, Loader2, Check, Clock, Download, ShieldAlert
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { downloadCsv } from '../utils/csvExport.js'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 import RoleBadge from '../components/RoleBadge.jsx';
 
@@ -67,7 +69,7 @@ export default function AdminFines() {
       })
       await fetchFines()
     } catch (err) {
-      alert('Failed to mark as paid: ' + err.message)
+      toast.error('Failed to mark as paid: ' + err.message)
     } finally {
       setActionLoadingId(null)
     }
@@ -112,34 +114,9 @@ export default function AdminFines() {
 
   const handleExport = () => {
     const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const fields = ['id', 'studentName', 'enrollmentNumber', 'bookTitle', 'delayDays', 'delayAmount', 'lostBookAmount', 'totalFine', 'status', 'verifiedBy', 'verificationDate', 'billNumber']
     const headers = ['Fine ID', `${userHeader} Name`, 'Email', 'Book Title', 'Delay Days', 'Delay Amount (Rs)', 'Lost Book Amount (Rs)', 'Total Fine (Rs)', 'Status', 'Verified By', 'Verification Date', 'Bill Number']
-    const csvRows = [
-      headers.join(','),
-      ...filteredFines.map(fine => {
-        return [
-          `"${fine.id}"`,
-          `"${(fine.studentName || '').replace(/"/g, '""')}"`,
-          `"${(fine.enrollmentNumber || '').replace(/"/g, '""')}"`,
-          `"${(fine.bookTitle || '').replace(/"/g, '""')}"`,
-          `"${fine.delayDays || 0}"`,
-          `"${fine.delayAmount || 0}"`,
-          `"${fine.lostBookAmount || 0}"`,
-          `"${fine.totalFine || 0}"`,
-          `"${fine.status}"`,
-          `"${fine.verifiedBy || ''}"`,
-          `"${fine.verificationDate ? new Date(fine.verificationDate).toLocaleString() : ''}"`,
-          `"${fine.billNumber || ''}"`
-        ].join(',')
-      })
-    ]
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `fines_report_${new Date().getTime()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    downloadCsv(filteredFines, fields, headers, 'fines_report')
   }
 
   return (

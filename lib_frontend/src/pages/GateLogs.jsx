@@ -5,6 +5,7 @@ import { apiClient } from '../api/client.js'
 import {
   Users, Clock, LogIn, Search, RefreshCw, Download, AlertTriangle, Loader2, ArrowLeft, UserCheck
 } from 'lucide-react'
+import { downloadCsv } from '../utils/csvExport.js'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 import RoleBadge from '../components/RoleBadge.jsx'
@@ -169,27 +170,18 @@ export default function GateLogs() {
 
   const handleExport = () => {
     const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const mapped = filteredLogs.map(log => ({
+      userName: log.userName || '',
+      userEmail: log.userEmail || '',
+      branch: log.branch || 'N/A',
+      year: log.year || '',
+      entryTime: formatDateFull(log.entryTime),
+      exitTime: formatDateFull(log.exitTime),
+      status: log.status
+    }))
+    const fields = ['userName', 'userEmail', 'branch', 'year', 'entryTime', 'exitTime', 'status']
     const headers = [`${userHeader} Name`, `${userHeader} Email`, 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
-    const csvRows = [
-      headers.join(','),
-      ...filteredLogs.map(log => [
-        `"${log.userName || ''}"`,
-        `"${log.userEmail || ''}"`,
-        `"${log.branch || 'N/A'}"`,
-        `"${log.year || ''}"`,
-        `"${formatDateFull(log.entryTime)}"`,
-        `"${formatDateFull(log.exitTime)}"`,
-        `"${log.status}"`
-      ].join(','))
-    ]
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `gate_logs_${new Date().getTime()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    downloadCsv(mapped, fields, headers, 'gate_logs')
   }
 
   if (user?.role !== 'ADMIN') {

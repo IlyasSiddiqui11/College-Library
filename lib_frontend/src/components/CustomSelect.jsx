@@ -42,14 +42,16 @@ export default function CustomSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 glass-panel shadow-xl">
+        <div role="listbox" className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 glass-panel shadow-xl">
           <ul className="py-1">
             {normalizedOptions.length === 0 ? (
               <li className="px-3 py-2 text-xs text-slate-500">No options</li>
             ) : (
-              normalizedOptions.map((opt, idx) => (
+              normalizedOptions.map((opt) => (
                 <li
-                  key={idx}
+                  key={opt.value}
+                  role="option"
+                  aria-selected={value === opt.value}
                   onClick={() => {
                     onChange(opt.value)
                     setIsOpen(false)

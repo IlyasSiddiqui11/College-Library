@@ -6,6 +6,7 @@ import { apiClient } from '../api/client'
 import {
   Search, History, Download
 } from 'lucide-react'
+import { downloadCsv } from '../utils/csvExport.js'
 import AdminSidebar from '../components/AdminSidebar.jsx';
 import RoleBadge from '../components/RoleBadge.jsx';
 
@@ -58,29 +59,18 @@ export default function ReplacementHistory() {
   
   const handleExport = () => {
     const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const mapped = filteredItems.map(item => ({
+      originalTitle: item.originalTitle || '',
+      originalAccession: item.originalAccession || '',
+      replacementTitle: item.replacementTitle || '',
+      replacementAccession: item.replacementAccession || '',
+      studentName: item.studentName || '',
+      replacedByAdmin: item.replacedByAdmin || '',
+      replacementDate: item.replacementDate ? new Date(item.replacementDate).toLocaleString() : ''
+    }))
+    const fields = ['originalTitle', 'originalAccession', 'replacementTitle', 'replacementAccession', 'studentName', 'replacedByAdmin', 'replacementDate']
     const headers = ['Original Title', 'Original Accession', 'Replacement Title', 'Replacement Accession', `${userHeader} Name`, 'Replaced By', 'Date']
-    const csvRows = [
-      headers.join(','),
-      ...filteredItems.map(item => {
-        return [
-          `"${(item.originalTitle || '').replace(/"/g, '""')}"`,
-          `"${(item.originalAccession || '')}"`,
-          `"${(item.replacementTitle || '').replace(/"/g, '""')}"`,
-          `"${(item.replacementAccession || '')}"`,
-          `"${(item.studentName || '').replace(/"/g, '""')}"`,
-          `"${(item.replacedByAdmin || '')}"`,
-          `"${item.replacementDate ? new Date(item.replacementDate).toLocaleString() : ''}"`
-        ].join(',')
-      })
-    ]
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `replacement_history_${new Date().getTime()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    downloadCsv(mapped, fields, headers, 'replacement_history')
   }
 
   const formatDate = (dateString) => {

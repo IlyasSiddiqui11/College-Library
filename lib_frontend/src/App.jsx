@@ -1,5 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Home from './pages/Home.jsx'
 import BorrowRequests from './pages/BorrowRequests.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
@@ -30,33 +32,42 @@ function App() {
   return (
     <AuthProvider>
       <HashRouter>
+        {/* Global toast provider — replaces per-page custom notification state */}
+        <Toaster position="top-center" richColors closeButton />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<StudentLogin />} />
           <Route path="/admin/login" element={<LibrarianLogin />} />
           <Route path="/staff/login" element={<StaffLogin />} />
-          <Route path="/staff" element={<StaffDashboard />} />
+
+          {/* Staff routes */}
+          <Route path="/staff" element={<ProtectedRoute role="STAFF"><StaffDashboard /></ProtectedRoute>} />
           <Route path="/staff/dashboard" element={<Navigate to="/staff" replace />} />
-          <Route path="/staff/profile" element={<StaffProfile />} />
-          <Route path="/lending" element={<BorrowRequests />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/staff" element={<AdminStaffManagement />} />
-          <Route path="/admin/gate-logs" element={<GateLogs />} />
-          <Route path="/admin/students" element={<RegisteredStudents />} />
-          <Route path="/inventory" element={<InventoryManagement />} />
-          <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/staff/profile" element={<ProtectedRoute role="STAFF"><StaffProfile /></ProtectedRoute>} />
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/lending" element={<ProtectedRoute role="ADMIN"><BorrowRequests /></ProtectedRoute>} />
+          <Route path="/admin/staff" element={<ProtectedRoute role="ADMIN"><AdminStaffManagement /></ProtectedRoute>} />
+          <Route path="/admin/gate-logs" element={<ProtectedRoute role="ADMIN"><GateLogs /></ProtectedRoute>} />
+          <Route path="/admin/students" element={<ProtectedRoute role="ADMIN"><RegisteredStudents /></ProtectedRoute>} />
+          <Route path="/inventory" element={<ProtectedRoute role="ADMIN"><InventoryManagement /></ProtectedRoute>} />
+          <Route path="/admin/lost-books" element={<ProtectedRoute role="ADMIN"><LostBooks /></ProtectedRoute>} />
+          <Route path="/admin/reservations" element={<ProtectedRoute role="ADMIN"><BookReservations /></ProtectedRoute>} />
+          <Route path="/admin/replacements" element={<ProtectedRoute role="ADMIN"><ReplacementHistory /></ProtectedRoute>} />
+          <Route path="/admin/fines" element={<ProtectedRoute role="ADMIN"><AdminFines /></ProtectedRoute>} />
+          <Route path="/scanner" element={<ProtectedRoute role="ADMIN"><BookScanner /></ProtectedRoute>} />
+          <Route path="/returns" element={<ProtectedRoute role="ADMIN"><ReturnStation /></ProtectedRoute>} />
+
+          {/* Student / shared routes */}
+          <Route path="/student" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
           <Route path="/catalog" element={<StudentCatalog />} />
           <Route path="/catalog/:isbn" element={<BookDetails />} />
-          <Route path="/student/profile" element={<StudentProfile />} />
-          <Route path="/history" element={<BorrowHistory />} />
-          <Route path="/returns" element={<ReturnStation />} />
-          <Route path="/scanner" element={<BookScanner />} />
-          <Route path="/admin/lost-books" element={<LostBooks />} />
-          <Route path="/admin/reservations" element={<BookReservations />} />
-          <Route path="/admin/replacements" element={<ReplacementHistory />} />
-          <Route path="/admin/fines" element={<AdminFines />} />
+          <Route path="/student/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><BorrowHistory /></ProtectedRoute>} />
+          <Route path="/student/fines" element={<ProtectedRoute><StudentFines /></ProtectedRoute>} />
+
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/student/fines" element={<StudentFines />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

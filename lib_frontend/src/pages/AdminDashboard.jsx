@@ -5,6 +5,7 @@ import { apiClient } from '../api/client.js'
 import {
   Users, ClipboardList, ArrowRight, ShieldAlert, Loader2, LogOut, Check, X, RefreshCw
 } from 'lucide-react'
+import { toast } from 'sonner'
 import CustomSelect from '../components/CustomSelect.jsx'
 import RoleBadge from '../components/RoleBadge.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
@@ -84,7 +85,7 @@ export default function AdminDashboard() {
   // Handle Quick Approval
   const handleApprove = async (id, accNum) => {
     if (!accNum || accNum.trim() === '') {
-      alert('Please select an accession number.')
+      toast.error('Please select an accession number.')
       return
     }
     setActionLoadingId(id)
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
       setAccessionNumber('')
       setAvailableCopies([])
     } catch (err) {
-      alert('Approval error: ' + err.message)
+      toast.error('Approval error: ' + err.message)
     } finally {
       setActionLoadingId(null)
     }
@@ -111,7 +112,7 @@ export default function AdminDashboard() {
       const res = await apiClient.get(`/api/books/isbn/${encodeURIComponent(req.isbn)}/available-copies`)
       setAvailableCopies(res.data || [])
     } catch (err) {
-      alert('Could not load available copies: ' + err.message)
+      toast.error('Could not load available copies: ' + err.message)
       setApprovingId(null)
     } finally {
       setCopiesLoading(false)
@@ -126,7 +127,7 @@ export default function AdminDashboard() {
       await loadData()
       window.dispatchEvent(new Event('refresh-sidebar'))
     } catch (err) {
-      alert('Rejection error: ' + err.message)
+      toast.error('Rejection error: ' + err.message)
     } finally {
       setActionLoadingId(null)
     }
