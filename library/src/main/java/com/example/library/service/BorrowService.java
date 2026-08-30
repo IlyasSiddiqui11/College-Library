@@ -36,6 +36,7 @@ public class BorrowService {
     private final UserRepository userRepository;
     private final BorrowingService borrowingService;
     private final LostBookRepository lostBookRepository;
+    private final com.example.library.repository.AuditLogRepository auditLogRepository;
     
     @Autowired
     @Lazy
@@ -195,6 +196,16 @@ public class BorrowService {
         }
 
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
+
+        // RULES.md §20 — Audit log: borrow approved
+        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                .email(approvedRequest.getUser().getEmail())
+                .action("BORROW_APPROVED")
+                .module("BORROW")
+                .targetResource("borrowRequestId=" + approvedRequest.getId() + ",accession=" + normalizedAccession)
+                .result("SUCCESS")
+                .reason("Admin approved borrow request for user " + approvedRequest.getUser().getId())
+                .build());
 
         String userEmail = approvedRequest.getUser().getEmail();
         if (userEmail != null && !userEmail.isBlank()) {
@@ -363,6 +374,17 @@ public class BorrowService {
         if (delayDays > 0) {
             fineService.generateFine(returnedRequest, delayDays);
         }
+
+        // RULES.md §20 — Audit log: book returned
+        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                .email(returnedRequest.getUser().getEmail())
+                .action("BOOK_RETURNED")
+                .module("RETURN")
+                .targetResource("borrowRequestId=" + returnedRequest.getId() + ",accession=" + accessionNumber
+                        + (delayDays > 0 ? ",delayDays=" + delayDays : ""))
+                .result("SUCCESS")
+                .reason("Book returned" + (delayDays > 0 ? " with " + delayDays + " day(s) delay" : " on time"))
+                .build());
 
         String userEmail = returnedRequest.getUser().getEmail();
         if (userEmail != null && !userEmail.isBlank()) {

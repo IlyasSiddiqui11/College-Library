@@ -6,6 +6,7 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   Plus, Search, Loader2, Download, RefreshCw, ChevronLeft, ChevronRight, PencilLine
 } from 'lucide-react'
+import { toast } from 'sonner'
 import CustomSelect from '../components/CustomSelect.jsx'
 import AddAssetModal from '../components/AddAssetModal.jsx'
 import AdminSidebar from '../components/AdminSidebar.jsx';
@@ -68,12 +69,11 @@ export default function InventoryManagement() {
   }
 
   const handleDeleteCopy = async (id, accession) => {
-    if (!window.confirm(`Delete copy with Accession Number: ${accession}?`)) return
     try {
       await apiClient.delete(`/api/books/${id}`)
       fetchBooks()
     } catch (err) {
-      alert('Delete failed: ' + err.message)
+      toast.error('Delete failed: ' + err.message)
     }
   }
 

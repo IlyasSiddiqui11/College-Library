@@ -7,8 +7,9 @@ import RoleBadge from '../components/RoleBadge.jsx'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   BookOpen, QrCode, ScanLine, Clock, Calendar,
-  Briefcase, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText, Banknote
+  Briefcase, LogOut, History, User, Loader2, Library, FileText, Banknote
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function StaffDashboard() {
   const { user, staffProfile, fetchStaffProfile, logout, hasFine, loading: authLoading } = useAuth()
@@ -29,18 +30,13 @@ export default function StaffDashboard() {
   const [cancellingId, setCancellingId] = useState(null)
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError] = useState(null)
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
+
+
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const scannerRef = useRef(null)
   const isProcessingQr = useRef(false)
   const profileChecked = useRef(false)
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type })
-    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3500)
-  }
-
-  const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -124,7 +120,7 @@ export default function StaffDashboard() {
     try {
       await apiClient.post(`/api/staff/profile/complete/${user.id}`)
       setShowProfileModal(false)
-      showNotification('Profile completed successfully! Welcome aboard.', 'success')
+      toast.success('Profile completed successfully! Welcome aboard.')
       fetchStaffProfile()
     } catch (err) {
       setProfileError(err.response?.data?.message || err.message || 'Failed to complete profile')
@@ -185,10 +181,9 @@ export default function StaffDashboard() {
     try {
       await apiClient.post('/api/gate/scan', { userId: user.id })
       fetchData()
-      showNotification('Checked in successfully at the gate!', 'success')
-      setShowQrModal(false)
+      toast.success('Checked in successfully at the gate!')
     } catch (err) {
-      showNotification('Check-in error: ' + (err.response?.data?.message || err.message), 'error')
+      toast.error('Check-in error: ' + (err.response?.data?.message || err.message))
       setShowQrModal(false)
     } finally {
       isProcessingQr.current = false
@@ -201,9 +196,9 @@ export default function StaffDashboard() {
     try {
       await apiClient.post(`/api/gate/exit/${user.id}`)
       fetchData()
-      showNotification('Successfully marked as OUTSIDE. Thank you for visiting!', 'success')
+      toast.success('Successfully marked as OUTSIDE. Thank you for visiting!')
     } catch (err) {
-      showNotification('Exit error: ' + err.message, 'error')
+      toast.error('Exit error: ' + err.message)
     } finally {
       setExiting(false)
     }
@@ -216,7 +211,7 @@ export default function StaffDashboard() {
       await apiClient.delete(`/api/borrow/${requestId}/cancel?userId=${user.id}`)
       await fetchData(false)
     } catch (err) {
-      showNotification('Cancel failed: ' + (err.response?.data?.message || err.message), 'error')
+      toast.error('Cancel failed: ' + (err.response?.data?.message || err.message))
     } finally {
       setCancellingId(null)
     }
@@ -229,7 +224,7 @@ export default function StaffDashboard() {
       await apiClient.delete(`/api/reservations/${reservationId}?userId=${user.id}`)
       await fetchData(false)
     } catch (err) {
-      showNotification('Cancel failed: ' + (err.response?.data?.message || err.message), 'error')
+      toast.error('Cancel failed: ' + (err.response?.data?.message || err.message))
     } finally {
       setCancellingId(null)
     }
@@ -261,17 +256,7 @@ export default function StaffDashboard() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col text-slate-900 pb-32 bg-[#f8fafc]">
-      {/* Toast Notification */}
-      {notification.show && (
-        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-sm rounded-xl px-4 py-3 shadow-2xl transition-all animate-in slide-in-from-top-5 fade-in ${
-          notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
-        }`}>
-          <div className="flex items-center gap-3">
-            {notification.type === 'error' ? <AlertCircle className="size-5 shrink-0" /> : <CheckCircle2 className="size-5 shrink-0" />}
-            <p className="text-sm font-semibold leading-tight">{notification.message}</p>
-          </div>
-        </div>
-      )}
+
 
       {/* Header */}
       <header className={`sticky top-0 z-20 px-4 py-4 transition-all duration-300 ${isScrolled ? 'bg-white/60 backdrop-blur-lg backdrop-saturate-150 shadow-sm' : 'bg-transparent'}`}>

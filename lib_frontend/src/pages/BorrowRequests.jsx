@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiClient } from '../api/client.js'
+import { toast } from 'sonner'
+import { downloadCsv } from '../utils/csvExport.js'
 import {
-  BookOpen, Search, Loader2, ClipboardList, Check, X, UserCheck, Download, CheckCircle2, AlertCircle
+  BookOpen, Search, Loader2, ClipboardList, Check, X, UserCheck, Download
 } from 'lucide-react'
 import CustomSelect from '../components/CustomSelect.jsx'
 import RoleBadge from '../components/RoleBadge.jsx'
@@ -29,14 +31,7 @@ export default function BorrowRequests() {
   const [selectedProfile, setSelectedProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type })
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, show: false }))
-    }, 3000)
-  }
 
   useEffect(() => {
     if (!user) {
@@ -104,9 +99,9 @@ export default function BorrowRequests() {
       await fetchRequests()
       window.dispatchEvent(new Event('refresh-sidebar'))
       setAccessionNumber('')
-      showNotification('Borrow request approved successfully!', 'success')
+      toast.success('Borrow request approved successfully!')
     } catch (err) {
-      showNotification('Approval failed: ' + err.message, 'error')
+      toast.error('Approval failed: ' + err.message)
     } finally {
       setActionLoading(false)
     }
@@ -118,9 +113,9 @@ export default function BorrowRequests() {
       await apiClient.post(`/api/admin/reject/${id}`)
       await fetchRequests()
       window.dispatchEvent(new Event('refresh-sidebar'))
-      showNotification('Borrow request rejected successfully.', 'success')
+      toast.success('Borrow request rejected successfully.')
     } catch (err) {
-      showNotification('Rejection failed: ' + err.message, 'error')
+      toast.error('Rejection failed: ' + err.message)
     } finally {
       setActionLoading(false)
     }
@@ -128,7 +123,7 @@ export default function BorrowRequests() {
 
   const confirmApprove = (id, accNum) => {
     if (!accNum || !accNum.trim()) {
-      showNotification('Please select an accession number to issue.', 'error')
+      toast.error('Please select an accession number to issue.')
       return
     }
     handleApprove(id, accNum)
@@ -193,54 +188,29 @@ export default function BorrowRequests() {
 
   const handleExport = () => {
     const userHeader = userTypeFilter === 'STUDENT' ? 'STUDENT' : userTypeFilter === 'STAFF' ? 'STAFF' : 'USER'
+    const mapped = filteredRequests.map(req => ({
+      id: req.id,
+      bookTitle: req.bookTitle || '',
+      bookAuthor: req.bookAuthor || req.author || '',
+      isbn: req.isbn || '',
+      userName: req.userName || '',
+      userId: req.userId || '',
+      requestDate: req.requestDate ? new Date(req.requestDate).toLocaleString() : '',
+      dueDate: req.dueDate ? new Date(req.dueDate).toLocaleString() : '',
+      accessionNumber: req.accessionNumber || '',
+      status: req.status,
+      approvedDate: req.approvedDate ? new Date(req.approvedDate).toLocaleString() : '',
+      returnedDate: req.returnedDate ? new Date(req.returnedDate).toLocaleString() : '',
+      rejectedDate: (req.status === 'REJECTED' || req.status === 'CANCELLED') && req.updatedAt ? new Date(req.updatedAt).toLocaleString() : ''
+    }))
+    const fields = ['id', 'bookTitle', 'bookAuthor', 'isbn', 'userName', 'userId', 'requestDate', 'dueDate', 'accessionNumber', 'status', 'approvedDate', 'returnedDate', 'rejectedDate']
     const headers = ['Request ID', 'Book Title', 'Book Author', 'ISBN', `${userHeader} Name`, `${userHeader} ID`, 'Request Date', 'Due Date', 'Accession Number', 'Status', 'Approved Date', 'Returned Date', 'Rejected/Cancelled Date']
-    const csvRows = [
-      headers.join(','),
-      ...filteredRequests.map(req => {
-        const approvedDate = req.approvedDate ? new Date(req.approvedDate).toLocaleString() : ''
-        const returnedDate = req.returnedDate ? new Date(req.returnedDate).toLocaleString() : ''
-        let rejectedDate = ''
-        if ((req.status === 'REJECTED' || req.status === 'CANCELLED') && req.updatedAt) {
-          rejectedDate = new Date(req.updatedAt).toLocaleString()
-        }
-
-        return [
-          `"${req.id}"`,
-          `"${(req.bookTitle || '').replace(/"/g, '""')}"`,
-          `"${(req.bookAuthor || req.author || '').replace(/"/g, '""')}"`,
-          `"${req.isbn || ''}"`,
-          `"${(req.userName || '').replace(/"/g, '""')}"`,
-          `"${req.userId || ''}"`,
-          `"${new Date(req.requestDate).toLocaleString()}"`,
-          `"${req.dueDate ? new Date(req.dueDate).toLocaleString() : ''}"`,
-          `"${req.accessionNumber || ''}"`,
-          `"${req.status}"`,
-          `"${approvedDate}"`,
-          `"${returnedDate}"`,
-          `"${rejectedDate}"`
-        ].join(',')
-      })
-    ]
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `borrow_requests_${new Date().getTime()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    downloadCsv(mapped, fields, headers, 'borrow_requests')
   }
 
   return (
     <div className="h-screen flex text-slate-900">
-      {notification.show && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl animate-in slide-in-from-right-8 duration-300 ${
-          notification.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
-        }`}>
-          {notification.type === 'success' ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}
-          <p className="text-sm font-bold">{notification.message}</p>
-        </div>
-      )}
+
       <AdminSidebar user={user} logout={logout} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">

@@ -27,8 +27,11 @@ import com.example.library.entity.AuditLog;
 import com.example.library.entity.StaffProfile;
 import com.example.library.enums.StaffStatus;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 @Service
@@ -40,13 +43,31 @@ public class AuthService {
     private final AuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    private final Random random = new Random();
+    private final SecureRandom secureRandom = new SecureRandom();
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
     private String generateOtp() {
-        return String.format("%06d", random.nextInt(1000000));
+        return String.format("%06d", secureRandom.nextInt(1000000));
+    }
+
+    /**
+     * RULES.md §16.2 — Store OTP securely as a SHA-256 hash.
+     * The raw OTP is sent by email; only the hash is persisted in DB.
+     */
+    private String hashOtp(String otp) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(otp.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hashBytes) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
+        }
     }
 
     @Transactional
@@ -220,7 +241,8 @@ public class AuthService {
         }
 
         String otp = generateOtp();
-        user.setResetOtp(otp); // Store plain OTP, usually hashed is better, but since it's short lived and sent via email, this is acceptable for now.
+        // RULES.md §16.2 — Store hash of OTP, never the plaintext.
+        user.setResetOtp(hashOtp(otp));
         user.setResetOtpExpiry(LocalDateTime.now().plusMinutes(5));
         user.setResetOtpAttempts(0);
         userRepository.save(user);
@@ -239,7 +261,9 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid email or OTP"));
 
-        if (user.getResetOtp() == null || !user.getResetOtp().equals(request.getOtp())) {
+        // RULES.md §16.2 — Compare against stored SHA-256 hash, not plaintext.
+        String submittedHash = hashOtp(request.getOtp());
+        if (user.getResetOtp() == null || !user.getResetOtp().equals(submittedHash)) {
             if (user.getResetOtp() != null) {
                 user.setResetOtpAttempts(user.getResetOtpAttempts() + 1);
                 userRepository.save(user);
@@ -292,7 +316,8 @@ public class AuthService {
         }
 
         String otp = generateOtp();
-        user.setResetOtp(otp);
+        // RULES.md §16.2 — Store hash, send plain OTP by email only.
+        user.setResetOtp(hashOtp(otp));
         user.setResetOtpExpiry(now.plusMinutes(5));
         user.setResetOtpAttempts(0);
         user.setResetOtpResendCount(user.getResetOtpResendCount() + 1);
@@ -322,8 +347,15 @@ public class AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // RULES.md §16.3 — Invalidate the reset token and all OTP state immediately
+        // after a successful password reset so the token cannot be reused.
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
+        user.setResetOtp(null);
+        user.setResetOtpExpiry(null);
+        user.setResetOtpAttempts(0);
+        user.setResetOtpResendCount(0);
+        user.setResetOtpResendWindowStart(null);
         userRepository.save(user);
     }
 

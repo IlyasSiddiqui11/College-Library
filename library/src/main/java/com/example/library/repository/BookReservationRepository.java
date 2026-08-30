@@ -23,5 +23,7 @@ public interface BookReservationRepository extends JpaRepository<BookReservation
 
     boolean existsByUserIdAndIsbnAndStatus(Long userId, String isbn, ReservationStatus status);
     
+    List<BookReservation> findByStatusAndReservationDateBefore(ReservationStatus status, java.time.LocalDateTime cutoff);
+
     void deleteByUserId(Long userId);
 }
