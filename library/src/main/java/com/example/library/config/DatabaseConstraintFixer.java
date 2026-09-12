@@ -77,6 +77,34 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
                 System.out.println("[DatabaseConstraintFixer] Note on audit_logs column migration: " + e.getMessage());
             }
 
+            // Fix book_reservations_status_check — must include EXPIRED
+            try {
+                System.out.println("[DatabaseConstraintFixer] Checking book_reservations_status_check constraint...");
+                String reservationConstraint = null;
+                try {
+                    reservationConstraint = jdbcTemplate.queryForObject(
+                            "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'book_reservations_status_check'",
+                            String.class
+                    );
+                } catch (Exception ex) {
+                    System.out.println("[DatabaseConstraintFixer] Could not read book_reservations_status_check: " + ex.getMessage());
+                }
+
+                if (reservationConstraint == null || !reservationConstraint.contains("EXPIRED")) {
+                    System.out.println("[DatabaseConstraintFixer] Fixing book_reservations_status_check to include EXPIRED...");
+                    jdbcTemplate.execute("ALTER TABLE book_reservations DROP CONSTRAINT IF EXISTS book_reservations_status_check");
+                    jdbcTemplate.execute(
+                            "ALTER TABLE book_reservations ADD CONSTRAINT book_reservations_status_check " +
+                            "CHECK (status IN ('PENDING', 'FULFILLED', 'CANCELLED', 'EXPIRED'))"
+                    );
+                    System.out.println("[DatabaseConstraintFixer] ✅ book_reservations_status_check updated with EXPIRED.");
+                } else {
+                    System.out.println("[DatabaseConstraintFixer] book_reservations_status_check already includes EXPIRED. No fix needed.");
+                }
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Note on book_reservations constraint: " + e.getMessage());
+            }
+
         } catch (Exception e) {
             // Log but don't crash — the app can still run even if this fails
             System.err.println("[DatabaseConstraintFixer] ⚠️ Failed to fix constraint: " + e.getMessage());
