@@ -21,6 +21,7 @@ public class ReservationResponse {
     private String bookAuthor;
     private ReservationStatus status;
     private LocalDateTime reservationDate;
+    private LocalDateTime expiryDate;
     private LocalDateTime fulfilledDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

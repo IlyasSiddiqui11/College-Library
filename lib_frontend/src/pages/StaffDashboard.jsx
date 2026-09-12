@@ -482,7 +482,9 @@ export default function StaffDashboard() {
                   <div key={`res-${req.id}`} className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 flex justify-between items-center text-xs">
                     <div className="min-w-0 flex-1 pr-4">
                       <p className="font-semibold text-slate-900 truncate">{req.bookTitle || 'Unknown Title'}</p>
-                      <p className="text-[10px] text-slate-500">ISBN: {req.isbn}</p>
+                      <p className="text-[10px] text-slate-500">
+                        ISBN: {req.isbn} • {req.expiryDate ? `Expires: ${formatDateFull(req.expiryDate).split(',')[0]}` : 'Expires in 7 days'}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200/40">{req.status}</span>
