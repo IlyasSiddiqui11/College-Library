@@ -7,13 +7,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs once at startup to fix the users_role_check constraint in PostgreSQL.
+ * Runs once at startup to fix PostgreSQL CHECK / NOT NULL constraints
+ * that Hibernate's ddl-auto=update cannot modify.
  *
- * Problem: The constraint was originally created with only ('STUDENT', 'ADMIN').
- * Hibernate's ddl-auto=update cannot modify existing CHECK constraints,
- * so STAFF role insertions fail with a constraint violation error.
- *
- * This fix only runs on PostgreSQL (Render production) and is safely skipped on H2 (local dev).
+ * Each fix is INDEPENDENT — a short-circuit in one section never skips others.
+ * Safe to run on every restart (idempotent).
+ * Skipped entirely on H2 (local dev).
  */
 @Component
 @RequiredArgsConstructor
@@ -24,91 +23,86 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // Detect database type — skip all fixes on H2 (local dev)
+        String dbProductName;
         try {
-            // Detect database type — skip fix on H2 (local dev)
-            String dbProductName = jdbcTemplate.getDataSource()
+            dbProductName = jdbcTemplate.getDataSource()
                     .getConnection()
                     .getMetaData()
                     .getDatabaseProductName();
-
-            if (dbProductName == null || !dbProductName.toLowerCase().contains("postgresql")) {
-                System.out.println("[DatabaseConstraintFixer] Skipping — not PostgreSQL (detected: " + dbProductName + ")");
-                return;
-            }
-
-            System.out.println("[DatabaseConstraintFixer] PostgreSQL detected. Checking users_role_check constraint...");
-
-            // Check current constraint definition
-            String constraintDef = null;
-            try {
-                constraintDef = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'users_role_check'",
-                        String.class
-                );
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read constraint: " + e.getMessage());
-            }
-
-            // If constraint already includes STAFF, nothing to do
-            if (constraintDef != null && constraintDef.contains("STAFF")) {
-                System.out.println("[DatabaseConstraintFixer] Constraint already includes STAFF. No fix needed.");
-                return;
-            }
-
-            System.out.println("[DatabaseConstraintFixer] Current constraint: " + constraintDef);
-            System.out.println("[DatabaseConstraintFixer] Fixing constraint to include STAFF role...");
-
-            // Drop the old constraint and recreate with STAFF included
-            jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
-            jdbcTemplate.execute(
-                    "ALTER TABLE users ADD CONSTRAINT users_role_check " +
-                    "CHECK (role IN ('STUDENT', 'ADMIN', 'STAFF'))"
-            );
-
-            System.out.println("[DatabaseConstraintFixer] ✅ users_role_check constraint successfully updated to include STAFF.");
-
-            // Drop NOT NULL on audit_logs columns if they exist in PostgreSQL
-            try {
-                System.out.println("[DatabaseConstraintFixer] Relaxing NOT NULL constraints on audit_logs columns...");
-                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN attempted_role DROP NOT NULL");
-                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN actual_role DROP NOT NULL");
-                System.out.println("[DatabaseConstraintFixer] ✅ audit_logs constraints relaxed successfully.");
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Note on audit_logs column migration: " + e.getMessage());
-            }
-
-            // Fix book_reservations_status_check — must include EXPIRED
-            try {
-                System.out.println("[DatabaseConstraintFixer] Checking book_reservations_status_check constraint...");
-                String reservationConstraint = null;
-                try {
-                    reservationConstraint = jdbcTemplate.queryForObject(
-                            "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'book_reservations_status_check'",
-                            String.class
-                    );
-                } catch (Exception ex) {
-                    System.out.println("[DatabaseConstraintFixer] Could not read book_reservations_status_check: " + ex.getMessage());
-                }
-
-                if (reservationConstraint == null || !reservationConstraint.contains("EXPIRED")) {
-                    System.out.println("[DatabaseConstraintFixer] Fixing book_reservations_status_check to include EXPIRED...");
-                    jdbcTemplate.execute("ALTER TABLE book_reservations DROP CONSTRAINT IF EXISTS book_reservations_status_check");
-                    jdbcTemplate.execute(
-                            "ALTER TABLE book_reservations ADD CONSTRAINT book_reservations_status_check " +
-                            "CHECK (status IN ('PENDING', 'FULFILLED', 'CANCELLED', 'EXPIRED'))"
-                    );
-                    System.out.println("[DatabaseConstraintFixer] ✅ book_reservations_status_check updated with EXPIRED.");
-                } else {
-                    System.out.println("[DatabaseConstraintFixer] book_reservations_status_check already includes EXPIRED. No fix needed.");
-                }
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Note on book_reservations constraint: " + e.getMessage());
-            }
-
         } catch (Exception e) {
-            // Log but don't crash — the app can still run even if this fails
-            System.err.println("[DatabaseConstraintFixer] ⚠️ Failed to fix constraint: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("[DatabaseConstraintFixer] Could not detect DB type: " + e.getMessage());
+            return;
         }
+
+        if (dbProductName == null || !dbProductName.toLowerCase().contains("postgresql")) {
+            System.out.println("[DatabaseConstraintFixer] Skipping — not PostgreSQL (detected: " + dbProductName + ")");
+            return;
+        }
+
+        System.out.println("[DatabaseConstraintFixer] PostgreSQL detected. Running all constraint fixes...");
+
+        // ── Fix 1: users_role_check — must include STAFF ─────────────────────────
+        try {
+            String def = null;
+            try {
+                def = jdbcTemplate.queryForObject(
+                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'users_role_check'",
+                        String.class);
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Could not read users_role_check: " + e.getMessage());
+            }
+
+            if (def == null || !def.contains("STAFF")) {
+                System.out.println("[DatabaseConstraintFixer] Fixing users_role_check to include STAFF...");
+                jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+                jdbcTemplate.execute(
+                        "ALTER TABLE users ADD CONSTRAINT users_role_check " +
+                        "CHECK (role IN ('STUDENT', 'ADMIN', 'STAFF'))");
+                System.out.println("[DatabaseConstraintFixer] ✅ users_role_check updated.");
+            } else {
+                System.out.println("[DatabaseConstraintFixer] users_role_check already includes STAFF. OK.");
+            }
+        } catch (Exception e) {
+            System.err.println("[DatabaseConstraintFixer] ⚠️ users_role_check fix failed: " + e.getMessage());
+        }
+
+        // ── Fix 2: audit_logs — drop NOT NULL on role columns ────────────────────
+        try {
+            System.out.println("[DatabaseConstraintFixer] Relaxing NOT NULL on audit_logs role columns...");
+            jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN attempted_role DROP NOT NULL");
+            jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN actual_role DROP NOT NULL");
+            System.out.println("[DatabaseConstraintFixer] ✅ audit_logs NOT NULL constraints relaxed.");
+        } catch (Exception e) {
+            // Columns may already be nullable — this is fine
+            System.out.println("[DatabaseConstraintFixer] audit_logs note (may already be nullable): " + e.getMessage());
+        }
+
+        // ── Fix 3: book_reservations_status_check — must include EXPIRED ─────────
+        try {
+            String def = null;
+            try {
+                def = jdbcTemplate.queryForObject(
+                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'book_reservations_status_check'",
+                        String.class);
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Could not read book_reservations_status_check: " + e.getMessage());
+            }
+
+            if (def == null || !def.contains("EXPIRED")) {
+                System.out.println("[DatabaseConstraintFixer] Fixing book_reservations_status_check to include EXPIRED...");
+                jdbcTemplate.execute("ALTER TABLE book_reservations DROP CONSTRAINT IF EXISTS book_reservations_status_check");
+                jdbcTemplate.execute(
+                        "ALTER TABLE book_reservations ADD CONSTRAINT book_reservations_status_check " +
+                        "CHECK (status IN ('PENDING', 'FULFILLED', 'CANCELLED', 'EXPIRED'))");
+                System.out.println("[DatabaseConstraintFixer] ✅ book_reservations_status_check updated with EXPIRED.");
+            } else {
+                System.out.println("[DatabaseConstraintFixer] book_reservations_status_check already includes EXPIRED. OK.");
+            }
+        } catch (Exception e) {
+            System.err.println("[DatabaseConstraintFixer] ⚠️ book_reservations_status_check fix failed: " + e.getMessage());
+        }
+
+        System.out.println("[DatabaseConstraintFixer] All constraint fixes completed.");
     }
 }
