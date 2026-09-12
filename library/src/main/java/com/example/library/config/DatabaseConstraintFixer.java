@@ -40,117 +40,38 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
             return;
         }
 
-        System.out.println("[DatabaseConstraintFixer] PostgreSQL detected. Running all constraint fixes...");
+        System.out.println("[DatabaseConstraintFixer] PostgreSQL detected. Running unconditional constraint cleanups...");
 
-        // ── Fix 1: users_role_check — must include STAFF ─────────────────────────
-        try {
-            String def = null;
+        String[] tables = {"book_reservations", "borrow_requests", "fines", "users", "audit_logs", "staff_profiles", "books"};
+        for (String table : tables) {
             try {
-                def = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'users_role_check'",
-                        String.class);
+                // Drop any constraint dynamically by querying pg_constraint
+                jdbcTemplate.query(
+                    "SELECT c.conname FROM pg_constraint c " +
+                    "JOIN pg_class t ON c.conrelid = t.oid " +
+                    "WHERE c.contype = 'c' AND t.relname = ?",
+                    (rs, rowNum) -> rs.getString("conname"),
+                    table
+                ).forEach(conname -> {
+                    try {
+                        System.out.println("[DatabaseConstraintFixer] Dropping check constraint: " + table + "." + conname);
+                        jdbcTemplate.execute("ALTER TABLE " + table + " DROP CONSTRAINT IF EXISTS \"" + conname + "\"");
+                    } catch (Exception e) {
+                        System.out.println("[DatabaseConstraintFixer] Could not drop " + conname + ": " + e.getMessage());
+                    }
+                });
             } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read users_role_check: " + e.getMessage());
+                System.out.println("[DatabaseConstraintFixer] Error querying constraints for " + table + ": " + e.getMessage());
             }
-
-            if (def == null || !def.contains("STAFF")) {
-                System.out.println("[DatabaseConstraintFixer] Fixing users_role_check to include STAFF...");
-                jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
-                jdbcTemplate.execute(
-                        "ALTER TABLE users ADD CONSTRAINT users_role_check " +
-                        "CHECK (role IN ('STUDENT', 'ADMIN', 'STAFF'))");
-                System.out.println("[DatabaseConstraintFixer] ✅ users_role_check updated.");
-            } else {
-                System.out.println("[DatabaseConstraintFixer] users_role_check already includes STAFF. OK.");
-            }
-        } catch (Exception e) {
-            System.err.println("[DatabaseConstraintFixer] ⚠️ users_role_check fix failed: " + e.getMessage());
         }
 
-        // ── Fix 2: audit_logs — drop NOT NULL on role columns ────────────────────
+        // Drop NOT NULL on audit_logs role columns
         try {
-            System.out.println("[DatabaseConstraintFixer] Relaxing NOT NULL on audit_logs role columns...");
             jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN attempted_role DROP NOT NULL");
             jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN actual_role DROP NOT NULL");
             System.out.println("[DatabaseConstraintFixer] ✅ audit_logs NOT NULL constraints relaxed.");
         } catch (Exception e) {
-            // Columns may already be nullable — this is fine
-            System.out.println("[DatabaseConstraintFixer] audit_logs note (may already be nullable): " + e.getMessage());
-        }
-
-        // ── Fix 3: book_reservations_status_check — must include EXPIRED ─────────
-        try {
-            String def = null;
-            try {
-                def = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'book_reservations_status_check'",
-                        String.class);
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read book_reservations_status_check: " + e.getMessage());
-            }
-
-            if (def == null || !def.contains("EXPIRED")) {
-                System.out.println("[DatabaseConstraintFixer] Fixing book_reservations_status_check to include EXPIRED...");
-                jdbcTemplate.execute("ALTER TABLE book_reservations DROP CONSTRAINT IF EXISTS book_reservations_status_check");
-                jdbcTemplate.execute(
-                        "ALTER TABLE book_reservations ADD CONSTRAINT book_reservations_status_check " +
-                        "CHECK (status IN ('PENDING', 'FULFILLED', 'CANCELLED', 'EXPIRED'))");
-                System.out.println("[DatabaseConstraintFixer] ✅ book_reservations_status_check updated with EXPIRED.");
-            } else {
-                System.out.println("[DatabaseConstraintFixer] book_reservations_status_check already includes EXPIRED. OK.");
-            }
-        } catch (Exception e) {
-            System.err.println("[DatabaseConstraintFixer] ⚠️ book_reservations_status_check fix failed: " + e.getMessage());
-        }
-
-        // ── Fix 4: borrow_requests_status_check — must include LOST ─────────────
-        try {
-            String def = null;
-            try {
-                def = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'borrow_requests_status_check'",
-                        String.class);
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read borrow_requests_status_check: " + e.getMessage());
-            }
-
-            if (def == null || !def.contains("LOST")) {
-                System.out.println("[DatabaseConstraintFixer] Fixing borrow_requests_status_check to include LOST...");
-                jdbcTemplate.execute("ALTER TABLE borrow_requests DROP CONSTRAINT IF EXISTS borrow_requests_status_check");
-                jdbcTemplate.execute(
-                        "ALTER TABLE borrow_requests ADD CONSTRAINT borrow_requests_status_check " +
-                        "CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'ISSUED', 'RETURNED', 'LOST'))");
-                System.out.println("[DatabaseConstraintFixer] ✅ borrow_requests_status_check updated.");
-            } else {
-                System.out.println("[DatabaseConstraintFixer] borrow_requests_status_check already includes LOST. OK.");
-            }
-        } catch (Exception e) {
-            System.err.println("[DatabaseConstraintFixer] ⚠️ borrow_requests_status_check fix failed: " + e.getMessage());
-        }
-
-        // ── Fix 5: fines_status_check — must include UNPAID ──────────────────────
-        try {
-            String def = null;
-            try {
-                def = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'fines_status_check'",
-                        String.class);
-            } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read fines_status_check: " + e.getMessage());
-            }
-
-            if (def == null || !def.contains("UNPAID")) {
-                System.out.println("[DatabaseConstraintFixer] Fixing fines_status_check to include UNPAID...");
-                jdbcTemplate.execute("ALTER TABLE fines DROP CONSTRAINT IF EXISTS fines_status_check");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fines ADD CONSTRAINT fines_status_check " +
-                        "CHECK (status IN ('PENDING', 'PAID', 'UNPAID'))");
-                System.out.println("[DatabaseConstraintFixer] ✅ fines_status_check updated.");
-            } else {
-                System.out.println("[DatabaseConstraintFixer] fines_status_check already includes UNPAID. OK.");
-            }
-        } catch (Exception e) {
-            System.err.println("[DatabaseConstraintFixer] ⚠️ fines_status_check fix failed: " + e.getMessage());
+            System.out.println("[DatabaseConstraintFixer] audit_logs note: " + e.getMessage());
         }
 
         System.out.println("[DatabaseConstraintFixer] All constraint fixes completed.");
