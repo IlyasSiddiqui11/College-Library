@@ -39,18 +39,28 @@ export default function BorrowHistory() {
     if (!user) return
     if (showLoading) setLoading(true)
     try {
-      const [historyRes, resRes, finesRes, replRes] = await Promise.all([
+      // Use allSettled so one failing endpoint doesn't blank the whole page
+      const [historyRes, resRes, finesRes, replRes] = await Promise.allSettled([
         apiClient.get(`/api/borrow/user/${user.id}`),
         apiClient.get(`/api/reservations/user/${user.id}`),
         apiClient.get(`/api/fines/user/${user.id}`),
         apiClient.get(`/api/replacements/user/${user.id}`)
       ])
-      setBorrowRequests(historyRes.data)
-      setReservations(resRes.data)
-      setFines(finesRes.data || [])
-      setReplacements(replRes.data || [])
+
+      if (historyRes.status === 'fulfilled') setBorrowRequests(historyRes.value.data || [])
+      else console.warn('Borrow history fetch failed:', historyRes.reason)
+
+      if (resRes.status === 'fulfilled') setReservations(resRes.value.data || [])
+      else console.warn('Reservations fetch failed:', resRes.reason)
+
+      if (finesRes.status === 'fulfilled') setFines(finesRes.value.data || [])
+      else console.warn('Fines fetch failed:', finesRes.reason)
+
+      if (replRes.status === 'fulfilled') setReplacements(replRes.value.data || [])
+      else console.warn('Replacements fetch failed:', replRes.reason)
+
     } catch (err) {
-      console.error('Error fetching data:', err)
+      console.error('Unexpected error in fetchHistory:', err)
     } finally {
       if (showLoading) setLoading(false)
     }
