@@ -6,7 +6,7 @@ import { apiClient } from '../api/client.js'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { 
   BookOpen, QrCode, ScanLine, Clock, Calendar, 
-  GraduationCap, LogOut, History, User, Loader2, Library, FileText, AlertCircle
+  GraduationCap, LogOut, History, User, Loader2, Library, FileText, AlertCircle, CheckCircle2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CustomSelect from '../components/CustomSelect.jsx'

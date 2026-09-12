@@ -7,7 +7,7 @@ import RoleBadge from '../components/RoleBadge.jsx'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import {
   BookOpen, QrCode, ScanLine, Clock, Calendar,
-  Briefcase, LogOut, History, User, Loader2, Library, FileText, Banknote, AlertCircle
+  Briefcase, LogOut, History, User, Loader2, Library, FileText, Banknote, AlertCircle, CheckCircle2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
