@@ -38,6 +38,7 @@ public class BookReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationRequestDto dto) {
+        expireStaleReservationsInternal();
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + dto.getUserId()));
 
@@ -130,6 +131,7 @@ public class BookReservationService {
     @Transactional
     public void fulfillReservation(String isbn) {
         if (isbn == null || isbn.isBlank()) return;
+        expireStaleReservationsInternal();
 
         // Check if there are available copies
         long availableCount = bookRepository.findAllByIsbnAndStatus(isbn, "AVAILABLE").size();
@@ -276,15 +278,30 @@ public class BookReservationService {
         return null;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
+    public void expireStaleReservationsInternal() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(7);
+        List<BookReservation> stale = bookReservationRepository
+                .findByStatusAndReservationDateBefore(ReservationStatus.PENDING, cutoff);
+        if (!stale.isEmpty()) {
+            for (BookReservation r : stale) {
+                r.setStatus(ReservationStatus.EXPIRED);
+                bookReservationRepository.save(r);
+            }
+        }
+    }
+
+    @Transactional
     public List<ReservationResponse> getAllReservations() {
+        expireStaleReservationsInternal();
         return bookReservationRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ReservationResponse> getUserReservations(Long userId) {
+        expireStaleReservationsInternal();
         return bookReservationRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -300,15 +317,18 @@ public class BookReservationService {
                     .build();
         }
 
+        LocalDateTime expiryDate = res.getReservationDate() != null ? res.getReservationDate().plusDays(7) : null;
+
         return ReservationResponse.builder()
                 .id(res.getId())
                 .user(userDto)
-                .userRole(res.getUser().getRole())
+                .userRole(res.getUser() != null ? res.getUser().getRole() : null)
                 .isbn(res.getIsbn())
                 .bookTitle(res.getBookTitle())
                 .bookAuthor(res.getBookAuthor())
                 .status(res.getStatus())
                 .reservationDate(res.getReservationDate())
+                .expiryDate(expiryDate)
                 .fulfilledDate(res.getFulfilledDate())
                 .createdAt(res.getCreatedAt())
                 .updatedAt(res.getUpdatedAt())
