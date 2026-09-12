@@ -67,6 +67,16 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
 
             System.out.println("[DatabaseConstraintFixer] ✅ users_role_check constraint successfully updated to include STAFF.");
 
+            // Drop NOT NULL on audit_logs columns if they exist in PostgreSQL
+            try {
+                System.out.println("[DatabaseConstraintFixer] Relaxing NOT NULL constraints on audit_logs columns...");
+                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN attempted_role DROP NOT NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN actual_role DROP NOT NULL");
+                System.out.println("[DatabaseConstraintFixer] ✅ audit_logs constraints relaxed successfully.");
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Note on audit_logs column migration: " + e.getMessage());
+            }
+
         } catch (Exception e) {
             // Log but don't crash — the app can still run even if this fails
             System.err.println("[DatabaseConstraintFixer] ⚠️ Failed to fix constraint: " + e.getMessage());

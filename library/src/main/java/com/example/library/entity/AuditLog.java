@@ -59,6 +59,16 @@ public class AuditLog {
 
     @PrePersist
     protected void onCreate() {
-        timestamp = LocalDateTime.now();
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
+        }
+        if (attemptedRole == null && actualRole != null) {
+            attemptedRole = actualRole;
+        } else if (actualRole == null && attemptedRole != null) {
+            actualRole = attemptedRole;
+        } else if (attemptedRole == null && actualRole == null) {
+            attemptedRole = Role.STUDENT;
+            actualRole = Role.STUDENT;
+        }
     }
 }
