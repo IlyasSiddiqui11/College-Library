@@ -142,14 +142,21 @@ public class FineService {
         Fine updatedFine = fineRepository.save(fine);
 
         // RULES.md §20 — Audit log: fine payment verified by admin
-        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
-                .email(fine.getUser().getEmail())
-                .action("FINE_STATUS_UPDATED")
-                .module("FINE")
-                .targetResource("fineId=" + fineId + ",status=" + request.getStatus())
-                .result("SUCCESS")
-                .reason("Fine status updated to " + request.getStatus() + " by admin: " + adminName)
-                .build());
+        // Wrapped in try-catch so audit log constraint issues don't roll back the fine status update
+        try {
+            auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                    .email(fine.getUser().getEmail())
+                    .attemptedRole(com.example.library.enums.Role.ADMIN)
+                    .actualRole(com.example.library.enums.Role.ADMIN)
+                    .action("FINE_STATUS_UPDATED")
+                    .module("FINE")
+                    .targetResource("fineId=" + fineId + ",status=" + request.getStatus())
+                    .result("SUCCESS")
+                    .reason("Fine status updated to " + request.getStatus() + " by admin: " + adminName)
+                    .build());
+        } catch (Exception auditEx) {
+            System.err.println("[FineService] Audit log save failed (fine status was still updated): " + auditEx.getMessage());
+        }
 
         if (request.getStatus() == FineStatus.PAID && wasNotPaid) {
             try {
@@ -212,10 +219,10 @@ public class FineService {
 
         return FineResponse.builder()
                 .id(fine.getId())
-                .userId(user.getId())
-                .userRole(user.getRole())
-                .studentName(user.getName())
-                .enrollmentNumber(user.getEmail()) // Using email as enrollment number fallback
+                .userId(user != null ? user.getId() : null)
+                .userRole(user != null ? user.getRole() : null)
+                .studentName(user != null ? user.getName() : "Unknown")
+                .enrollmentNumber(user != null ? user.getEmail() : "N/A") // Using email as enrollment number fallback
                 .borrowRequestId(request != null ? request.getId() : null)
                 .bookTitle(bookTitle)
                 .bookIsbn(bookIsbn)

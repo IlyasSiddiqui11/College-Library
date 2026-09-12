@@ -103,6 +103,56 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
             System.err.println("[DatabaseConstraintFixer] ⚠️ book_reservations_status_check fix failed: " + e.getMessage());
         }
 
+        // ── Fix 4: borrow_requests_status_check — must include LOST ─────────────
+        try {
+            String def = null;
+            try {
+                def = jdbcTemplate.queryForObject(
+                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'borrow_requests_status_check'",
+                        String.class);
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Could not read borrow_requests_status_check: " + e.getMessage());
+            }
+
+            if (def == null || !def.contains("LOST")) {
+                System.out.println("[DatabaseConstraintFixer] Fixing borrow_requests_status_check to include LOST...");
+                jdbcTemplate.execute("ALTER TABLE borrow_requests DROP CONSTRAINT IF EXISTS borrow_requests_status_check");
+                jdbcTemplate.execute(
+                        "ALTER TABLE borrow_requests ADD CONSTRAINT borrow_requests_status_check " +
+                        "CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'ISSUED', 'RETURNED', 'LOST'))");
+                System.out.println("[DatabaseConstraintFixer] ✅ borrow_requests_status_check updated.");
+            } else {
+                System.out.println("[DatabaseConstraintFixer] borrow_requests_status_check already includes LOST. OK.");
+            }
+        } catch (Exception e) {
+            System.err.println("[DatabaseConstraintFixer] ⚠️ borrow_requests_status_check fix failed: " + e.getMessage());
+        }
+
+        // ── Fix 5: fines_status_check — must include UNPAID ──────────────────────
+        try {
+            String def = null;
+            try {
+                def = jdbcTemplate.queryForObject(
+                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'fines_status_check'",
+                        String.class);
+            } catch (Exception e) {
+                System.out.println("[DatabaseConstraintFixer] Could not read fines_status_check: " + e.getMessage());
+            }
+
+            if (def == null || !def.contains("UNPAID")) {
+                System.out.println("[DatabaseConstraintFixer] Fixing fines_status_check to include UNPAID...");
+                jdbcTemplate.execute("ALTER TABLE fines DROP CONSTRAINT IF EXISTS fines_status_check");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fines ADD CONSTRAINT fines_status_check " +
+                        "CHECK (status IN ('PENDING', 'PAID', 'UNPAID'))");
+                System.out.println("[DatabaseConstraintFixer] ✅ fines_status_check updated.");
+            } else {
+                System.out.println("[DatabaseConstraintFixer] fines_status_check already includes UNPAID. OK.");
+            }
+        } catch (Exception e) {
+            System.err.println("[DatabaseConstraintFixer] ⚠️ fines_status_check fix failed: " + e.getMessage());
+        }
+
         System.out.println("[DatabaseConstraintFixer] All constraint fixes completed.");
     }
 }

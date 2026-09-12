@@ -198,14 +198,20 @@ public class BorrowService {
         BorrowRequest approvedRequest = borrowRequestRepository.save(request);
 
         // RULES.md §20 — Audit log: borrow approved
-        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
-                .email(approvedRequest.getUser().getEmail())
-                .action("BORROW_APPROVED")
-                .module("BORROW")
-                .targetResource("borrowRequestId=" + approvedRequest.getId() + ",accession=" + normalizedAccession)
-                .result("SUCCESS")
-                .reason("Admin approved borrow request for user " + approvedRequest.getUser().getId())
-                .build());
+        try {
+            auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                    .email(approvedRequest.getUser().getEmail())
+                    .attemptedRole(com.example.library.enums.Role.ADMIN)
+                    .actualRole(com.example.library.enums.Role.ADMIN)
+                    .action("BORROW_APPROVED")
+                    .module("BORROW")
+                    .targetResource("borrowRequestId=" + approvedRequest.getId() + ",accession=" + normalizedAccession)
+                    .result("SUCCESS")
+                    .reason("Admin approved borrow request for user " + approvedRequest.getUser().getId())
+                    .build());
+        } catch (Exception e) {
+            System.err.println("[BorrowService] Audit log failed for borrow approval: " + e.getMessage());
+        }
 
         String userEmail = approvedRequest.getUser().getEmail();
         if (userEmail != null && !userEmail.isBlank()) {
@@ -376,15 +382,21 @@ public class BorrowService {
         }
 
         // RULES.md §20 — Audit log: book returned
-        auditLogRepository.save(com.example.library.entity.AuditLog.builder()
-                .email(returnedRequest.getUser().getEmail())
-                .action("BOOK_RETURNED")
-                .module("RETURN")
-                .targetResource("borrowRequestId=" + returnedRequest.getId() + ",accession=" + accessionNumber
-                        + (delayDays > 0 ? ",delayDays=" + delayDays : ""))
-                .result("SUCCESS")
-                .reason("Book returned" + (delayDays > 0 ? " with " + delayDays + " day(s) delay" : " on time"))
-                .build());
+        try {
+            auditLogRepository.save(com.example.library.entity.AuditLog.builder()
+                    .email(returnedRequest.getUser().getEmail())
+                    .attemptedRole(com.example.library.enums.Role.ADMIN)
+                    .actualRole(com.example.library.enums.Role.ADMIN)
+                    .action("BOOK_RETURNED")
+                    .module("RETURN")
+                    .targetResource("borrowRequestId=" + returnedRequest.getId() + ",accession=" + accessionNumber
+                            + (delayDays > 0 ? ",delayDays=" + delayDays : ""))
+                    .result("SUCCESS")
+                    .reason("Book returned" + (delayDays > 0 ? " with " + delayDays + " day(s) delay" : " on time"))
+                    .build());
+        } catch (Exception e) {
+            System.err.println("[BorrowService] Audit log failed for book return: " + e.getMessage());
+        }
 
         String userEmail = returnedRequest.getUser().getEmail();
         if (userEmail != null && !userEmail.isBlank()) {

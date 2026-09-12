@@ -148,7 +148,7 @@ export default function BorrowHistory() {
   const totalRead = borrowRequests.filter(r => r.status === 'RETURNED').length
   const currentReading = borrowRequests.filter(r => r.status === 'APPROVED').length
   const pendingReservations = reservations.filter(r => r.status === 'PENDING').length
-  const pendingFinesAmount = fines.filter(f => f.status === 'PENDING').reduce((sum, f) => sum + (f.totalFine || 0), 0)
+  const pendingFinesAmount = fines.filter(f => f.status === 'PENDING' || f.status === 'UNPAID').reduce((sum, f) => sum + (f.totalFine || 0), 0)
   const userHasFine = hasFine || pendingFinesAmount > 0
 
   return (
