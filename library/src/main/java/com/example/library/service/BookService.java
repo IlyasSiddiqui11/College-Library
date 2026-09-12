@@ -107,7 +107,11 @@ public class BookService {
         // Fulfill any pending reservations since new copies are available
         String isbn = request.getIsbn() != null ? request.getIsbn().trim() : null;
         if (isbn != null && !isbn.isBlank()) {
-            bookReservationService.fulfillReservation(isbn);
+            try {
+                bookReservationService.fulfillReservation(isbn);
+            } catch (Exception e) {
+                System.err.println("[BookService] fulfillReservation notice: " + e.getMessage());
+            }
         }
 
         return mapToBookResponse(savedBooks.get(0));
