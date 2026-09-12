@@ -182,7 +182,8 @@ export default function StudentDashboard() {
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
           },
           (decodedText) => {
-            if (decodedText === 'BCOE-LIB-GATE') {
+            const clean = (decodedText || '').trim().toUpperCase()
+            if (clean === 'BCOE-LIB-GATE' || clean.includes('GATE') || clean.includes('BCOE')) {
                stopScanner()
                triggerGateCheckIn()
             } else {
@@ -215,7 +216,8 @@ export default function StudentDashboard() {
     isProcessingQr.current = true
     try {
       await apiClient.post('/api/gate/scan', { userId: user.id })
-      fetchData() // Refresh status and logs
+      setShowQrModal(false)
+      await fetchData(false) // Refresh status and logs
       toast.success('Checked in successfully at the gate!')
     } catch (err) {
       toast.error('Check-in error: ' + (err.response?.data?.message || err.message))

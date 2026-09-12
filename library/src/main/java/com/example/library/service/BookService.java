@@ -224,18 +224,33 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public BookCatalogResponse getCatalogBookByIsbn(String isbn) {
-        List<Book> list = bookRepository.findByIsbn(isbn);
+        String query = isbn != null ? isbn.trim() : "";
+        List<Book> list = bookRepository.findByIsbn(query);
         if (list.isEmpty()) {
-            throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
+            Optional<Book> byAcc = bookRepository.findByAccessionNumber(query);
+            if (byAcc.isPresent() && byAcc.get().getIsbn() != null) {
+                list = bookRepository.findByIsbn(byAcc.get().getIsbn());
+                query = byAcc.get().getIsbn().trim();
+            }
         }
-        return mapToCatalogResponse(isbn.trim(), list);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Book not found with ISBN: " + query);
+        }
+        return mapToCatalogResponse(query, list);
     }
 
     @Transactional(readOnly = true)
     public BookResponse getBookByIsbn(String isbn) {
-        List<Book> list = bookRepository.findByIsbn(isbn);
+        String query = isbn != null ? isbn.trim() : "";
+        List<Book> list = bookRepository.findByIsbn(query);
         if (list.isEmpty()) {
-            throw new ResourceNotFoundException("Book not found with ISBN: " + isbn);
+            Optional<Book> byAcc = bookRepository.findByAccessionNumber(query);
+            if (byAcc.isPresent() && byAcc.get().getIsbn() != null) {
+                list = bookRepository.findByIsbn(byAcc.get().getIsbn());
+            }
+        }
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Book not found with ISBN or Accession Number: " + query);
         }
 
         Book book = list.stream()
