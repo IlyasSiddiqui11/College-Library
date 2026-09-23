@@ -59,6 +59,29 @@ public class AuditLog {
 
     @PrePersist
     protected void onCreate() {
-        timestamp = LocalDateTime.now();
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
+        }
+        if (attemptedRole == null) {
+            attemptedRole = actualRole != null ? actualRole : Role.ADMIN;
+        }
+        if (actualRole == null) {
+            actualRole = attemptedRole != null ? attemptedRole : Role.ADMIN;
+        }
+        if (email == null || email.isBlank()) {
+            email = "system@library.com";
+        }
+        if (reason == null || reason.isBlank()) {
+            reason = "N/A";
+        }
+        if (action == null || action.isBlank()) {
+            action = "GENERAL_EVENT";
+        }
+        if (module == null || module.isBlank()) {
+            module = "SYSTEM";
+        }
+        if (result == null || result.isBlank()) {
+            result = "SUCCESS";
+        }
     }
 }

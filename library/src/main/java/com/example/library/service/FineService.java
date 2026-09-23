@@ -144,6 +144,8 @@ public class FineService {
         // RULES.md §20 — Audit log: fine payment verified by admin
         auditLogRepository.save(com.example.library.entity.AuditLog.builder()
                 .email(fine.getUser().getEmail())
+                .attemptedRole(com.example.library.enums.Role.ADMIN)
+                .actualRole(com.example.library.enums.Role.ADMIN)
                 .action("FINE_STATUS_UPDATED")
                 .module("FINE")
                 .targetResource("fineId=" + fineId + ",status=" + request.getStatus())

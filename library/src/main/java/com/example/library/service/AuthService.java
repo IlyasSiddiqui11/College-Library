@@ -45,7 +45,7 @@ public class AuthService {
     private final EmailService emailService;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    @Value("${app.frontend-url:http://localhost:5173}")
+    @Value("${app.frontend-url:https://college-library-frontend.onrender.com}")
     private String frontendUrl;
 
     private String generateOtp() {
@@ -175,6 +175,10 @@ public class AuthService {
                     .email(request.getEmail())
                     .attemptedRole(request.getExpectedRole())
                     .actualRole(user.getRole())
+                    .action("LOGIN_ROLE_MISMATCH")
+                    .module("AUTH")
+                    .result("FAILURE")
+                    .targetResource("email=" + request.getEmail())
                     .reason("Role mismatch on login")
                     .build();
             auditLogRepository.save(log);

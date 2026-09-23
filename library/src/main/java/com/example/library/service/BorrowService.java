@@ -200,6 +200,8 @@ public class BorrowService {
         // RULES.md §20 — Audit log: borrow approved
         auditLogRepository.save(com.example.library.entity.AuditLog.builder()
                 .email(approvedRequest.getUser().getEmail())
+                .attemptedRole(com.example.library.enums.Role.ADMIN)
+                .actualRole(com.example.library.enums.Role.ADMIN)
                 .action("BORROW_APPROVED")
                 .module("BORROW")
                 .targetResource("borrowRequestId=" + approvedRequest.getId() + ",accession=" + normalizedAccession)
@@ -378,6 +380,8 @@ public class BorrowService {
         // RULES.md §20 — Audit log: book returned
         auditLogRepository.save(com.example.library.entity.AuditLog.builder()
                 .email(returnedRequest.getUser().getEmail())
+                .attemptedRole(returnedRequest.getUser().getRole() != null ? returnedRequest.getUser().getRole() : com.example.library.enums.Role.STUDENT)
+                .actualRole(returnedRequest.getUser().getRole() != null ? returnedRequest.getUser().getRole() : com.example.library.enums.Role.STUDENT)
                 .action("BOOK_RETURNED")
                 .module("RETURN")
                 .targetResource("borrowRequestId=" + returnedRequest.getId() + ",accession=" + accessionNumber
