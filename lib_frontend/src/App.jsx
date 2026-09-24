@@ -56,7 +56,7 @@ function App() {
           <Route path="/admin/reservations" element={<ProtectedRoute role="ADMIN"><BookReservations /></ProtectedRoute>} />
           <Route path="/admin/replacements" element={<ProtectedRoute role="ADMIN"><ReplacementHistory /></ProtectedRoute>} />
           <Route path="/admin/fines" element={<ProtectedRoute role="ADMIN"><AdminFines /></ProtectedRoute>} />
-          <Route path="/scanner" element={<ProtectedRoute role="ADMIN"><BookScanner /></ProtectedRoute>} />
+          <Route path="/scanner" element={<ProtectedRoute><BookScanner /></ProtectedRoute>} />
           <Route path="/returns" element={<ProtectedRoute role="ADMIN"><ReturnStation /></ProtectedRoute>} />
 
           {/* Student / shared routes */}

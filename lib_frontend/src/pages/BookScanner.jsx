@@ -19,6 +19,11 @@ export default function BookScanner() {
   const scannerRef = useRef(null)
   const isProcessing = useRef(false)
 
+  const handleBackToDashboard = () => {
+    const home = user?.role === 'ADMIN' ? '/admin' : user?.role === 'STAFF' ? '/staff' : '/student'
+    navigate(home)
+  }
+
   useEffect(() => {
     if (!user) navigate('/login')
   }, [user, navigate])
@@ -199,7 +204,7 @@ export default function BookScanner() {
         <div className="flex w-full items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate('/student')}
+            onClick={handleBackToDashboard}
             className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition"
           >
             <ChevronLeft className="size-4" />
@@ -207,7 +212,7 @@ export default function BookScanner() {
           </button>
           
           <span className="text-sm font-bold tracking-wider uppercase text-blue-500">
-            Book Scanner
+            Book Scanner 
           </span>
 
           <div className="size-6 opacity-0" />
@@ -307,7 +312,7 @@ export default function BookScanner() {
             <div className="mt-8 flex flex-col gap-3 w-full">
               <button
                 type="button"
-                onClick={() => navigate('/student')}
+                onClick={handleBackToDashboard}
                 className="w-full rounded-xl glass-panel py-3.5 text-xs font-semibold hover:bg-slate-700 transition"
               >
                 Return to Dashboard
@@ -338,7 +343,7 @@ export default function BookScanner() {
             <div className="mt-8 flex flex-col gap-3 w-full">
               <button
                 type="button"
-                onClick={() => navigate('/student')}
+                onClick={handleBackToDashboard}
                 className="w-full rounded-xl glass-panel py-3.5 text-xs font-semibold hover:bg-slate-700 transition"
               >
                 Return to Dashboard
