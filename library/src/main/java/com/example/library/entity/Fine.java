@@ -68,6 +68,24 @@ public class Fine {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null) {
+            status = FineStatus.PENDING;
+        }
+        if (delayDays == null) {
+            delayDays = 0L;
+        }
+        if (fineRate == null) {
+            fineRate = BigDecimal.ZERO;
+        }
+        if (delayAmount == null) {
+            delayAmount = BigDecimal.ZERO;
+        }
+        if (lostBookAmount == null) {
+            lostBookAmount = BigDecimal.ZERO;
+        }
+        if (totalFine == null) {
+            totalFine = BigDecimal.ZERO;
+        }
     }
 
     @PreUpdate

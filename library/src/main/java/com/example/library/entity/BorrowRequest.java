@@ -71,6 +71,12 @@ public class BorrowRequest {
         if (requestDate == null) {
             requestDate = LocalDateTime.now();
         }
+        if (status == null) {
+            status = BorrowStatus.PENDING;
+        }
+        if (extensionCount == null) {
+            extensionCount = 0;
+        }
     }
 
     @PreUpdate

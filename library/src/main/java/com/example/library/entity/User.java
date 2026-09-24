@@ -88,6 +88,21 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (role == null) {
+            role = Role.STUDENT;
+        }
+        if (isVerified == null) {
+            isVerified = false;
+        }
+        if (requiresPasswordChange == null) {
+            requiresPasswordChange = false;
+        }
+        if (resetOtpAttempts == null) {
+            resetOtpAttempts = 0;
+        }
+        if (resetOtpResendCount == null) {
+            resetOtpResendCount = 0;
+        }
     }
 
     @PreUpdate

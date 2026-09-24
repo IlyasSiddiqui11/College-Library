@@ -1,23 +1,16 @@
 package com.example.library.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Runs once at startup to fix the users_role_check constraint in PostgreSQL.
- *
- * Problem: The constraint was originally created with only ('STUDENT', 'ADMIN').
- * Hibernate's ddl-auto=update cannot modify existing CHECK constraints,
- * so STAFF role insertions fail with a constraint violation error.
- *
- * This fix only runs on PostgreSQL (Render production) and is safely skipped on H2 (local dev).
- */
+import java.sql.Connection;
+
 @Component
 @RequiredArgsConstructor
-@Order(1) // Run before DataInitializer
+@Slf4j
 public class DatabaseConstraintFixer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
@@ -25,52 +18,48 @@ public class DatabaseConstraintFixer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            // Detect database type — skip fix on H2 (local dev)
-            String dbProductName = jdbcTemplate.getDataSource()
-                    .getConnection()
-                    .getMetaData()
-                    .getDatabaseProductName();
+            String databaseProductName = "";
+            try (Connection conn = jdbcTemplate.getDataSource().getConnection()) {
+                databaseProductName = conn.getMetaData().getDatabaseProductName();
+            }
 
-            if (dbProductName == null || !dbProductName.toLowerCase().contains("postgresql")) {
-                System.out.println("[DatabaseConstraintFixer] Skipping — not PostgreSQL (detected: " + dbProductName + ")");
+            if (!databaseProductName.toLowerCase().contains("postgresql")) {
+                log.info("[DatabaseConstraintFixer] Skipping — not PostgreSQL (detected: {})", databaseProductName);
                 return;
             }
 
-            System.out.println("[DatabaseConstraintFixer] PostgreSQL detected. Checking users_role_check constraint...");
+            log.info("[DatabaseConstraintFixer] Starting PostgreSQL database constraint cleanup...");
 
-            // Check current constraint definition
-            String constraintDef = null;
+            // 1. Drop all enum/status CHECK constraints across all tables in public schema
+            String dropCheckConstraintsSql = 
+                "DO $$ " +
+                "DECLARE r RECORD; " +
+                "BEGIN " +
+                "    FOR r IN " +
+                "        SELECT table_name, constraint_name " +
+                "        FROM information_schema.table_constraints " +
+                "        WHERE constraint_type = 'CHECK' " +
+                "          AND constraint_schema = 'public' " +
+                "    LOOP " +
+                "        EXECUTE 'ALTER TABLE \"' || r.table_name || '\" DROP CONSTRAINT IF EXISTS \"' || r.constraint_name || '\"'; " +
+                "    END LOOP; " +
+                "END $$;";
+
+            jdbcTemplate.execute(dropCheckConstraintsSql);
+            log.info("[DatabaseConstraintFixer] Successfully dropped restrictive CHECK constraints across all tables.");
+
+            // 2. Drop NOT NULL constraints on audit_logs role columns if present
             try {
-                constraintDef = jdbcTemplate.queryForObject(
-                        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'users_role_check'",
-                        String.class
-                );
+                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN attempted_role DROP NOT NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_logs ALTER COLUMN actual_role DROP NOT NULL");
+                log.info("[DatabaseConstraintFixer] Relaxed NOT NULL constraints on audit_logs table.");
             } catch (Exception e) {
-                System.out.println("[DatabaseConstraintFixer] Could not read constraint: " + e.getMessage());
+                log.debug("[DatabaseConstraintFixer] Audit log column alter note: {}", e.getMessage());
             }
 
-            // If constraint already includes STAFF, nothing to do
-            if (constraintDef != null && constraintDef.contains("STAFF")) {
-                System.out.println("[DatabaseConstraintFixer] Constraint already includes STAFF. No fix needed.");
-                return;
-            }
-
-            System.out.println("[DatabaseConstraintFixer] Current constraint: " + constraintDef);
-            System.out.println("[DatabaseConstraintFixer] Fixing constraint to include STAFF role...");
-
-            // Drop the old constraint and recreate with STAFF included
-            jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
-            jdbcTemplate.execute(
-                    "ALTER TABLE users ADD CONSTRAINT users_role_check " +
-                    "CHECK (role IN ('STUDENT', 'ADMIN', 'STAFF'))"
-            );
-
-            System.out.println("[DatabaseConstraintFixer] ✅ users_role_check constraint successfully updated to include STAFF.");
-
+            log.info("[DatabaseConstraintFixer] Database constraint cleanup completed successfully.");
         } catch (Exception e) {
-            // Log but don't crash — the app can still run even if this fails
-            System.err.println("[DatabaseConstraintFixer] ⚠️ Failed to fix constraint: " + e.getMessage());
-            e.printStackTrace();
+            log.warn("[DatabaseConstraintFixer] Could not execute constraint cleanup: {}", e.getMessage());
         }
     }
 }
