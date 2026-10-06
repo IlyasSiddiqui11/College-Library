@@ -8,6 +8,13 @@ import {
   GraduationCap, LogOut, History, User, CheckCircle2, AlertCircle, Loader2, Library, FileText, ChevronDown, Bookmark
 } from 'lucide-react'
 
+// IST 5 PM gate closure rule:
+// After 5:00 PM IST students are automatically considered outside
+const isPast5PMIST = () => {
+  const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+  return nowIST.getHours() >= 17
+}
+
 export default function StudentDashboard() {
   const { user, profile, completeProfile, logout, profileLoading } = useAuth()
   const navigate = useNavigate()
@@ -242,22 +249,30 @@ export default function StudentDashboard() {
     .filter(req => req.status === 'RESERVED')
     .sort((a, b) => new Date(a.requestDate).getTime() - new Date(b.requestDate).getTime())
 
-  // Format date helper: 26 May 2026, 10:45 AM
+  // Format date helper: 26 May 2026, 10:45 AM IST — uses IST (Asia/Kolkata) timezone
   const formatDateFull = (dateString) => {
     if (!dateString) return 'N/A'
     const d = new Date(dateString)
-    const day = d.getDate()
+    const istDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+    const day = istDate.getDate()
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[d.getMonth()]
-    const year = d.getFullYear()
+    const month = months[istDate.getMonth()]
+    const year = istDate.getFullYear()
     
-    let hours = d.getHours()
+    let hours = istDate.getHours()
     const ampm = hours >= 12 ? 'PM' : 'AM'
     hours = hours % 12
     hours = hours ? hours : 12
-    const minutes = d.getMinutes().toString().padStart(2, '0')
+    const minutes = istDate.getMinutes().toString().padStart(2, '0')
     
-    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
+    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm} IST`
+  }
+
+  // Apply IST 5 PM gate closure rule:
+  // After 5 PM IST, force the status to OUTSIDE regardless of API response
+  const effectiveAttendanceStatus = {
+    ...attendanceStatus,
+    insideLibrary: attendanceStatus.insideLibrary && !isPast5PMIST()
   }
 
   return (
@@ -311,21 +326,28 @@ export default function StudentDashboard() {
               <h3 className="text-sm font-bold text-white mt-0.5">Library Gate Status</h3>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`size-2.5 rounded-full ${attendanceStatus.insideLibrary ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
-              <span className={`text-xs font-bold ${attendanceStatus.insideLibrary ? 'text-green-600' : 'text-blue-200'}`}>
-                {attendanceStatus.insideLibrary ? 'INSIDE LIBRARY' : 'OUTSIDE'}
+              <span className={`size-2.5 rounded-full ${effectiveAttendanceStatus.insideLibrary ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
+              <span className={`text-xs font-bold ${effectiveAttendanceStatus.insideLibrary ? 'text-green-600' : 'text-blue-200'}`}>
+                {effectiveAttendanceStatus.insideLibrary ? 'INSIDE LIBRARY' : 'OUTSIDE'}
               </span>
             </div>
           </div>
 
-          {attendanceStatus.insideLibrary && attendanceStatus.entryTime && (
+          {effectiveAttendanceStatus.insideLibrary && attendanceStatus.entryTime && (
             <div className="border-t border-white/20 pt-3 text-[11px] text-blue-200 font-medium">
               <span className="text-blue-200">Entered at:</span>
               <p className="font-semibold text-white mt-0.5">{formatDateFull(attendanceStatus.entryTime)}</p>
             </div>
           )}
 
-          {attendanceStatus.insideLibrary && (
+          {isPast5PMIST() && !attendanceStatus.exitTime && attendanceStatus.insideLibrary && (
+            <div className="border-t border-white/20 pt-3 text-[11px] text-amber-400 font-medium flex items-center gap-1.5">
+              <Clock className="size-3.5" />
+              Auto-checked out at 5:00 PM IST. Library is now closed.
+            </div>
+          )}
+
+          {effectiveAttendanceStatus.insideLibrary && (
             <button
               onClick={handleExitLibrary}
               disabled={exiting}

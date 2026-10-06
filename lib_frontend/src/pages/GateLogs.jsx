@@ -21,6 +21,20 @@ import {
   ShieldAlert
 } from 'lucide-react'
 
+// Returns true if the current IST time is past 5:00 PM
+const isPast5PMIST = () => {
+  const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+  return nowIST.getHours() >= 17
+}
+
+// Determine gate status using IST 5 PM rule:
+// After 5 PM IST, students without an exitTime are considered OUTSIDE automatically
+const getGateStatus = (log) => {
+  if (log.exitTime) return 'OUTSIDE'
+  if (isPast5PMIST()) return 'OUTSIDE'
+  return 'INSIDE'
+}
+
 export default function GateLogs() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -49,6 +63,7 @@ export default function GateLogs() {
       const response = await apiClient.get('/api/gate/logs')
       
       // Map sessions into a single row with entry and exit times
+      // Status uses IST 5 PM rule: after 5 PM IST, anyone without exitTime is OUTSIDE
       const sessionLogs = response.data.map((log) => ({
         id: log.id,
         userId: log.userId,
@@ -58,7 +73,7 @@ export default function GateLogs() {
         year: log.year,
         entryTime: log.entryTime,
         exitTime: log.exitTime,
-        status: log.exitTime ? 'OUTSIDE' : 'INSIDE'
+        status: getGateStatus(log)
       }))
       
       // Sort by entryTime descending
@@ -84,32 +99,38 @@ export default function GateLogs() {
   // Calculate statistics
   const totalStudents = new Set(logs.map((l) => l.userId)).size
   
-  // Format Date Helper: 26 May 2026, 10:45 AM
+  // Format Date Helper: 26 May 2026, 10:45 AM — uses IST (Asia/Kolkata) timezone
   const formatDateFull = (dateString) => {
     if (!dateString) return 'N/A'
+    // Parse and display in IST
     const d = new Date(dateString)
+    const istString = d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true })
+    // Parse the IST locale string for consistent formatting
+    const istDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
     
-    const day = d.getDate()
+    const day = istDate.getDate()
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[d.getMonth()]
-    const year = d.getFullYear()
+    const month = months[istDate.getMonth()]
+    const year = istDate.getFullYear()
     
-    let hours = d.getHours()
+    let hours = istDate.getHours()
     const ampm = hours >= 12 ? 'PM' : 'AM'
     hours = hours % 12
     hours = hours ? hours : 12 // the hour '0' should be '12'
-    const minutes = d.getMinutes().toString().padStart(2, '0')
+    const minutes = istDate.getMinutes().toString().padStart(2, '0')
     
-    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
+    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm} IST`
   }
 
-  const todayLogs = logs.filter(
-    (l) =>
-      new Date(l.entryTime).toDateString() === new Date().toDateString()
-  )
+  // Today's logs — compare dates in IST
+  const todayLogs = logs.filter((l) => {
+    const entryIST = new Date(new Date(l.entryTime).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+    const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+    return entryIST.toDateString() === nowIST.toDateString()
+  })
   
-  // Currently inside: number of logs that have status === 'INSIDE'
-  const currentlyInside = logs.filter(l => l.status === 'INSIDE').length
+  // Currently inside: after 5 PM IST everyone is outside
+  const currentlyInside = isPast5PMIST() ? 0 : logs.filter(l => l.status === 'INSIDE').length
 
   const handleExport = () => {
     const headers = ['Student Name', 'Student Email', 'Branch', 'Year', 'Entry Time', 'Exit Time', 'Status']
@@ -298,7 +319,7 @@ export default function GateLogs() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-100">Today's Entries</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{todayLogs.filter(l => l.action === 'ENTRY').length}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{todayLogs.length}</p>
                 </div>
                 <div className="rounded-lg bg-purple-100 p-3 text-purple-600">
                   <Clock className="h-6 w-6" />
