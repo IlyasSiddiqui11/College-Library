@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Clock,
+  Download,
   Library,
   Loader2,
   LogOut,
@@ -171,8 +172,24 @@ export default function LostBooks() {
 
   if (!user) return null
 
-  const formatDt = (dt) => dt ? new Date(dt).toLocaleDateString() : 'N/A'
-  const formatFull = (dt) => dt ? new Date(dt).toLocaleString() : 'N/A'
+  // Format helpers using IST (Asia/Kolkata) timezone
+  const formatDt = (dt) => {
+    if (!dt) return 'N/A'
+    return new Date(dt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' })
+  }
+  const formatFull = (dt) => {
+    if (!dt) return 'N/A'
+    const istDate = new Date(new Date(dt).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+    const day = istDate.getDate()
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    const month = months[istDate.getMonth()]
+    const year = istDate.getFullYear()
+    let hours = istDate.getHours()
+    const ampm = hours >= 12 ? 'PM' : 'AM'
+    hours = hours % 12 || 12
+    const minutes = istDate.getMinutes().toString().padStart(2, '0')
+    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm} IST`
+  }
 
   return (
     <div className="h-screen flex text-white">
@@ -238,8 +255,9 @@ export default function LostBooks() {
               <button
                 onClick={handleExport}
                 disabled={filteredLostBooks.length === 0}
-                className="flex items-center gap-1 rounded-xl border border-white/20 glass-panel px-3 py-2 text-xs font-bold text-green-100 hover:bg-white/10 transition disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-xl border border-white/20 glass-panel px-3 py-2 text-xs font-bold text-green-100 hover:bg-white/10 transition disabled:opacity-60"
               >
+                <Download className="size-3.5" />
                 Export
               </button>
             </div>
